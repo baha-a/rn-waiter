@@ -1,5 +1,7 @@
 {
+  "name": "empty-project-template",
   "main": "node_modules/expo/AppEntry.js",
+  "private": true,
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -7,13 +9,14 @@
     "eject": "expo eject"
   },
   "dependencies": {
-    "expo": "^31.0.2",
-    "react": "16.5.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-31.0.0.tar.gz",
-    "react-native-collapsible": "^1.4.0"
-  },
-  "devDependencies": {
-    "babel-preset-expo": "^5.0.0"
-  },
-  "private": true
+    "accordion-collapse-react-native": "^0.1.7",
+    "expo": "^29.0.0",
+    "native-base": "^2.8.1",
+    "react": "16.3.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-29.0.0.tar.gz",
+    "react-native-fontawesome": "^6.0.1",
+    "react-native-router-flux": "^4.0.5",
+    "react-native-vector-icons": "^6.0.2",
+    "whatwg-fetch": "^2.0.4"
+  }
 }
