@@ -43,7 +43,7 @@ export default class Order extends Component {
           </View>
 
           <View style={{ flex: 3, padding: 10}}>
-            <ItemButton title='test button' color='pink' add remove />
+            <ItemButton title='test button' color='magenta' add remove />
           </View>
         </View>
       </Container>

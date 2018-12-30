@@ -42,7 +42,7 @@ export default class Accordion extends Component {
             <Text style={{ color: '#fff' }}> Not listed ?</Text>
           </Button>
           <Button transparent>
-            <Icon name='ios-bonfire' style={{ color: '#fff' }} />
+            <Text style={{ color: '#fff', fontFamily: 'FontAwesomeBrands', fontSize: 20 }}>&#xf3b1;</Text>
           </Button>
         </View>
       </View>

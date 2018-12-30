@@ -20,6 +20,9 @@ export default class App extends React.Component {
     await Expo.Font.loadAsync({
       Roboto: require("native-base/Fonts/Roboto.ttf"),
       Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
+      FontAwesomeBrands: require('./assets/fa-brands-400.ttf'),
+      FontAwesomeRegular: require('./assets/fa-regular-400.ttf'),
+      FontAwesomeSolid: require('./assets/fa-solid-900.ttf'),
 	  });
     this.setState({ loading: false });
   }
