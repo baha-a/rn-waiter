@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { Left, Icon, Button, View, Text, Right, Container, Separator, ListItem, Accordion as Acc } from 'native-base';
+import { Button, View, Text, Accordion as Acc } from 'native-base';
 import ItemButton from './ItemButton';
-//import { Collapse, CollapseHeader, CollapseBody } from 'accordion-collapse-react-native/src';
-// import FontAwesome, { Icons } from 'react-native-fontawesome';
+import FAIcon from './FAIcon';
 
 const sections = [{
   id: 1, title: 'Main Dish', color: '#546e7a', content:[{ name:'item1',price:24}, {name:'item2', price:991},{name:'item3',price:2}]
@@ -42,7 +41,7 @@ export default class Accordion extends Component {
             <Text style={{ color: '#fff' }}> Not listed ?</Text>
           </Button>
           <Button transparent>
-            <Text style={{ color: '#fff', fontFamily: 'FontAwesomeBrands', fontSize: 20 }}>&#xf3b1;</Text>
+            <FAIcon style={{ color: '#fff', fontSize: 20 }} name='hotjar' />
           </Button>
         </View>
       </View>

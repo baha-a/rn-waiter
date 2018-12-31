@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import { Text, View, TouchableOpacity } from 'react-native'
-import { Icon } from 'native-base';
+import FAIcon from './FAIcon';
 
 export default class Invoice extends Component {
     render() {
-
         let {
             time,
             table,
@@ -19,28 +18,28 @@ export default class Invoice extends Component {
                 <View style={{ flex: 0.8, flexDirection: 'row' }}>
                     <View style={{ flex: 0.3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
                         <Text style={{ color: '#c7c7c7' }}>
-                            <Text style={{ fontFamily: 'FontAwesomeSolid' }}>&#xf017;</Text>
+                            <FAIcon name='clock' />
                             {time}
                         </Text>
                         <Text style={{ color: '#c7c7c7' }}>
-                            <Text style={{ fontFamily: 'FontAwesomeSolid' }}>&#xf292;</Text>
+                            <FAIcon name='hashtag' />
                             {table}
                         </Text>
                         <Text style={{ color: '#c7c7c7' }}>
-                            <Text style={{ fontFamily: 'FontAwesomeSolid' }}>&#xf183;</Text>
+                            <FAIcon name='male' />
                             {waiter}
                         </Text>
                     </View>
                     <View style={{ flex: 0.7, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
                         <Text style={{ color: 'black', fontSize: 40, fontWeight: '600' }}>
-                            <Text style={{ fontFamily: 'FontAwesomeSolid' }}>&#xf2e7;</Text>
+                            <FAIcon name='utensils' />
                             {clients}
                         </Text>
                     </View>
                 </View>
                 <TouchableOpacity style={{ flex: 0.2, flexDirection: 'row' }}>
                     <View style={{ flex: 0.3, backgroundColor: '#545b62', justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ color: '#fff', fontFamily: 'FontAwesomeSolid', fontSize: 20 }}>&#xf571;</Text>
+                        <FAIcon style={{ color: '#fff', fontSize: 20 }} name='file-invoice-dollar' />
                     </View>
                     {
                         nextService != null ?
