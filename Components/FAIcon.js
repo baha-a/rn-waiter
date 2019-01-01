@@ -3,40 +3,23 @@ import { Text, View } from 'react-native'
 
 export default class FAIcon extends Component {
     render() {
-        let icon = this.mapNameWithCode(this.props.name);
-        if (icon == null) {
-            return null;
+        switch (this.props.name) {
+            case 'hotjar':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeBrands' }}>&#xf3b1;</Text>;
+
+            case 'hashtag':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf292;</Text>;
+            case 'clock':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf017;</Text>;
+            case 'male':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf183;</Text>;
+            case 'file-invoice-dollar':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf571;</Text>;
+            case 'utensils':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf2e7;</Text>;
+
+            default:
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf059;</Text>;
         }
-
-        return (
-            <Text style={{...this.props.style , fontFamily: icon.fontFamily }}>{icon.code}</Text>
-        );
-    }
-
-    mapNameWithCode(name) {
-        let icon = icons.find(x => x.name == name);
-        if (icon == null)
-            icon = { name: 'question-circle', code: 'f059', type: 'Solid' };
-
-        return {
-            code:
-            
-            '&#x' + icon.code + ';',
-            fontFamily: 'FontAwesome' + icon.type
-        };
     }
 }
-
-
-
-
-const icons = [
-    { name: 'hashtag', code: 'f292', type: 'Solid' },
-    { name: 'clock  ', code: 'f017', type: 'Solid' },
-    { name: 'utensils', code: 'f2e7', type: 'Solid' },
-    { name: 'male', code: 'f183', type: 'Solid' },
-    { name: 'file-invoice-dollar', code: 'f571', type: 'Solid' },
-    
-
-    { name: 'hotjar', code: 'f3b1', type: 'Brands' },
-];

@@ -16,7 +16,7 @@ export default class Invoice extends Component {
         return (
             <View style={{ margin: 10, flex: 1, flexDirection: 'column', backgroundColor: '#eee', minHeight: 100 }}>
                 <View style={{ flex: 0.8, flexDirection: 'row' }}>
-                    <View style={{ flex: 0.3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
+                    <View style={{ flex: 0.4, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
                         <Text style={{ color: '#c7c7c7' }}>
                             <FAIcon name='clock' />
                             {time}
@@ -30,8 +30,8 @@ export default class Invoice extends Component {
                             {waiter}
                         </Text>
                     </View>
-                    <View style={{ flex: 0.7, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
-                        <Text style={{ color: 'black', fontSize: 40, fontWeight: '600' }}>
+                    <View style={{ flex: 0.6, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
+                        <Text style={{ color: 'black', fontSize: 36, }}>
                             <FAIcon name='utensils' />
                             {clients}
                         </Text>

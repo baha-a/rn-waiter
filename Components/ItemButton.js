@@ -47,7 +47,7 @@ export default class ItemButton extends Component {
                             <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-remove' />
                         </TouchableOpacity>
                     }
-
+ 
                     <TouchableOpacity style={{
                         padding: padding, alignSelf: 'center',
                         justifyContent: 'center',
@@ -56,7 +56,7 @@ export default class ItemButton extends Component {
                     }}>
                         <Text style={{ color: '#fff' }}> {title} </Text>
                     </TouchableOpacity>
-
+  
                     {
                         (add || price ) &&
                         <TouchableOpacity style={{
