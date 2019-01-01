@@ -17,6 +17,8 @@ export default class FAIcon extends Component {
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf571;</Text>;
             case 'utensils':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf2e7;</Text>;
+            case 'check-circle':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf058;</Text>;
 
             default:
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf059;</Text>;

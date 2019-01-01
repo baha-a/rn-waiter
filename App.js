@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, StatusBar} from 'react-native';
+import { ActivityIndicator, StatusBar } from 'react-native';
 import { Router, Stack, Scene } from 'react-native-router-flux';
 import Expo from 'expo';
 
@@ -8,8 +8,8 @@ import Order from './Pages/Order';
 import { Container } from 'native-base';
 
 export default class App extends React.Component {
-  constructor(props){
-    super(props);	
+  constructor(props) {
+    super(props);
     this.state = { loading: true };
 
     Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.LANDSCAPE);
@@ -23,7 +23,7 @@ export default class App extends React.Component {
       FontAwesomeBrands: require('./assets/fa-brands-400.ttf'),
       FontAwesomeRegular: require('./assets/fa-regular-400.ttf'),
       FontAwesomeSolid: require('./assets/fa-solid-900.ttf'),
-	  });
+    });
     this.setState({ loading: false });
   }
 
@@ -37,8 +37,8 @@ export default class App extends React.Component {
         <StatusBar hidden />
         <Router>
           <Stack key="root">
-            <Scene initial key="order" component={Order} hideNavBar/>
-            <Scene key="bill" component={Bill} hideNavBar/>
+            <Scene initial key="order" component={Order} hideNavBar />
+            <Scene key="bill" component={Bill} hideNavBar />
           </Stack>
         </Router>
       </Container>
