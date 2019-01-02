@@ -14,8 +14,9 @@ export default class ItemButton extends Component {
              detials
             } = this.props;
 
-        let padding = 10;
-
+        let padding = 10,
+         radius = 3;
+         
         return (
             <View style={{
                 flexDirection: 'column',
@@ -30,7 +31,7 @@ export default class ItemButton extends Component {
                     flex: 1,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    borderRadius: 6,
+                    borderRadius: radius,
                     minHeight: 40,
                 }}>
 
@@ -41,8 +42,8 @@ export default class ItemButton extends Component {
                             backgroundColor: 'rgba(0,0,0,0.1)',
                             alignContent: 'center',
                             alignSelf: 'center',
-                            borderTopLeftRadius: 6,
-                            borderBottomLeftRadius: 6,
+                            borderTopLeftRadius: radius,
+                            borderBottomLeftRadius: radius,
                         }}>
                             <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-remove' />
                         </TouchableOpacity>
@@ -64,8 +65,8 @@ export default class ItemButton extends Component {
                             backgroundColor: 'rgba(0,0,0,0.1)',
                             alignContent: 'center',
                             alignSelf: 'center',
-                            borderTopRightRadius: 6,
-                            borderBottomRightRadius: 6,
+                            borderTopRightRadius: radius,
+                            borderBottomRightRadius: radius,
                         }}>
                             {
                                 add ? <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />

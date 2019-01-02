@@ -4,8 +4,10 @@ import Navbar from '../Components/Navbar';
 import { Container, Icon } from 'native-base';
 import Accordion from '../Components/Accordion';
 import ItemButton from '../Components/ItemButton';
+import ItemPriceBar from '../Components/ItemPriceBar';
+import Collapsible from '../Components/Collapsible';
 
-clinets = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+clinets = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
 export default class Order extends Component {
   render() {
@@ -13,36 +15,49 @@ export default class Order extends Component {
       <Container>
         <Navbar />
         <View style={{ flex: 1, backgroundColor: '#eee', flexDirection: 'row', }}>
+          <View style={{ flex: 0.75 }} >
+            <ScrollView>
+              <ScrollView
+                horizontal
+                alwaysBounceHorizontal
+                showsHorizontalScrollIndicator={false}
+              >
+                {
+                  clinets.map(x =>
+                    <TouchableOpacity key={x} style={{
+                      backgroundColor: '#323232',
+                      margin: 10,
+                      marginHorizontal: 4,
+                      padding: 10,
+                      borderRadius: 4,
+                      maxHeight: 40
+                    }}>
 
-          <View style={{ flex: 5 }}>
-            <ScrollView
-              horizontal
-              alwaysBounceHorizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ flexGrow: 0.05 }}
-            >
-              {
-                clinets.map(x =>
-                  <TouchableOpacity key={x} style={{
-                    backgroundColor: '#323232',
-                    margin: 10,
-                    marginHorizontal: 4,
-                    padding: 10,
-                    borderRadius: 4,
-                    maxHeight: 40
-                  }}>
-
-                    <Text style={{ color: '#fff' }}> #{x} </Text>
-                  </TouchableOpacity>
-                )
-              }
+                      <Text style={{ color: '#fff' }}> #{x} </Text>
+                    </TouchableOpacity>
+                  )
+                }
+              </ScrollView>
+              <View style={{ marginLeft: 6 }}>
+                <Accordion />
+              </View>
+              <View>
+                <Collapsible title='Custom Dish' style={{
+                  backgroundColor:'#fff',
+                  borderWidth:2,
+                  borderColor:'#ccc',
+                  marginVertical:10,
+                  marginLeft:6,
+                  padding:10
+                  }}
+                >
+                  <ItemPriceBar secandInputTitle='Budget' buttonTitle='Add' />
+                </Collapsible>
+              </View>
             </ScrollView>
-            <View style={{ flex: 0.95 }}>
-              <Accordion />
-            </View>
-          </View>
 
-          <View style={{ flex: 3, padding: 10}}>
+          </View>
+          <View style={{ flex: 0.35, padding: 10 }}>
             <ItemButton title='test button' color='magenta' add remove />
           </View>
         </View>
