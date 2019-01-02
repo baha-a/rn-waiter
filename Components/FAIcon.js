@@ -20,6 +20,17 @@ export default class FAIcon extends Component {
             case 'check-circle':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf058;</Text>;
 
+            case 'bars':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf0c9;</Text>;
+            case 'street-view':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf21d;</Text>;
+            case 'sticky-note':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf249;</Text>;
+            case 'hand-rock':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf255;</Text>;
+            case 'plus':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf067;</Text>;
+
             default:
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf059;</Text>;
         }
