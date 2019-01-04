@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Text, View, TouchableOpacity } from 'react-native'
 import FAIcon from './FAIcon';
+import { Actions } from 'react-native-router-flux';
 
 export default class Invoice extends Component {
     constructor(props) {
@@ -73,18 +74,21 @@ export default class Invoice extends Component {
             overly = 'rgba(0,0,0,0.2)';
 
         return (
-            <TouchableOpacity style={{ flex: 0.2, flexDirection: 'row' }}>
-                <View style={{ flex: 0.3, backgroundColor: '#545b62', justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ flex: 0.2, flexDirection: 'row' }}>
+                <TouchableOpacity style={{ flex: 0.3, backgroundColor: '#545b62', justifyContent: 'center', alignItems: 'center' }}>
                     <FAIcon style={{ color: '#fff', fontSize: 20 }} name='file-invoice-dollar' />
-                </View>
+                </TouchableOpacity>
                 {
                     nextService != null ?
-                        (<View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#bd2130' }}>
+                        (<TouchableOpacity style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#bd2130' }}>
                             <Text style={{ color: '#fff' }} >call service #{nextService}</Text>
-                        </View>)
-                        : (<View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1e7e34' }}>
+                        </TouchableOpacity>)
+                        : (
+                        <TouchableOpacity style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1e7e34' }}
+                        onPress={()=> Actions.billInfo({ id: 1})}
+                        >
                             <Text style={{ color: '#fff' }} >Pay {pays}$</Text>
-                        </View>)
+                        </TouchableOpacity>)
 
                 }
 
@@ -93,6 +97,6 @@ export default class Invoice extends Component {
                     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#fff', opacity: 0.4 }} />
                 }
 
-            </TouchableOpacity>);
+            </View>);
     }
 }

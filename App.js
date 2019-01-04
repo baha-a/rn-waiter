@@ -1,11 +1,12 @@
 import React from 'react';
+import Expo from 'expo';
 import { ActivityIndicator, StatusBar } from 'react-native';
 import { Router, Stack, Scene } from 'react-native-router-flux';
-import Expo from 'expo';
+import { Container } from 'native-base';
 
 import Bill from './Pages/Bill';
 import Order from './Pages/Order';
-import { Container } from 'native-base';
+import BillInfo from './Pages/BillInfo';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -39,6 +40,7 @@ export default class App extends React.Component {
           <Stack key="root">
             <Scene initial key="order" component={Order} hideNavBar />
             <Scene key="bill" component={Bill} hideNavBar />
+            <Scene key="billInfo" component={BillInfo} hideNavBar />
           </Stack>
         </Router>
       </Container>

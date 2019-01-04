@@ -9,9 +9,9 @@ const sections = [
   {
     id: 1, title: 'Main Dish', color: '#546e7a', content:
       [
-        { id: 1, name: 'item1', price: 24 },
-        { id: 2, name: 'item2', price: 991 },
-        { id: 3, name: 'item3', price: 2 }
+        { id: 1, name: 'item1', price: 24, category:1},
+        { id: 2, name: 'item2', price: 991 , category:1}, 
+        { id: 3, name: 'item3', price: 2, category:1 }
       ]
   },
   { id: 2, title: 'Sandwich', color: '#6d4c41', content: [] },
@@ -97,7 +97,7 @@ export default class Accordion extends Component {
         }
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
           {
-            item.content.map(x => <ItemButton key={x.id} title={x.name} color={item.color} price={x.price} />)
+            item.content.map(x => <ItemButton key={x.id} title={x.name} category={x.category} price={x.price} />)
           }
         </View>
       </View>

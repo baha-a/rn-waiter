@@ -7,6 +7,7 @@ import ItemButton from '../Components/ItemButton';
 import ItemPriceBar from '../Components/ItemPriceBar';
 import Collapsible from '../Components/Collapsible';
 import TableMenu from '../Components/TableMenu';
+import Socket from '../Socket';
 
 clinets = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
@@ -16,7 +17,7 @@ export default class Order extends Component {
       <Container>
         <Navbar />
         <View style={{ flex: 1, backgroundColor: '#eee', flexDirection: 'row', }}>
-          <View style={{ flex: 0.65 }} >
+          <View style={{ flex: 0.6 }} >
             <ScrollView>
               <ScrollView
                 horizontal
@@ -56,10 +57,14 @@ export default class Order extends Component {
                   <ItemPriceBar secandInputTitle='Budget' buttonTitle='Add' />
                 </Collapsible>
               </View>
+
+            <View>
+              <Socket />
+            </View>
             </ScrollView>
 
           </View>
-          <View style={{ flex: 0.35, padding: 10 }}>
+          <View style={{ flex: 0.4, padding: 10 }}>
             <TableMenu />
           </View>
         </View>
