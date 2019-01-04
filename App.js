@@ -7,7 +7,8 @@ import Bill from './Pages/Bill';
 import Order from './Pages/Order';
 import { Container } from 'native-base';
 
-export default class App extends React.Component {
+export default class App extends React.Component 
+{
   constructor(props) {
     super(props);
     this.state = { loading: true };
