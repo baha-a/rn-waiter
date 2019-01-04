@@ -8,7 +8,8 @@ import Bill from './Pages/Bill';
 import Order from './Pages/Order';
 import BillInfo from './Pages/BillInfo';
 
-export default class App extends React.Component {
+export default class App extends React.Component 
+{
   constructor(props) {
     super(props);
     this.state = { loading: true };
