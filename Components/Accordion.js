@@ -9,9 +9,9 @@ const sections = [
   {
     id: 1, title: 'Main Dish', color: '#546e7a', content:
       [
-        { id: 1, name: 'item1', price: 24, category:1},
-        { id: 2, name: 'item2', price: 991 , category:1}, 
-        { id: 3, name: 'item3', price: 2, category:1 }
+        { id: 1, name: 'item1', price: 24, category: 1 },
+        { id: 2, name: 'item2', price: 991, category: 1 },
+        { id: 3, name: 'item3', price: 2, category: 1 }
       ]
   },
   { id: 2, title: 'Sandwich', color: '#6d4c41', content: [] },
@@ -32,6 +32,15 @@ export default class Accordion extends Component {
     this._head = this._head.bind(this);
     this.isHotjarEnabled = this.isHotjarEnabled.bind(this);
   }
+
+
+  shouldComponentUpdate(nextProps, nextState) {
+    for (const key in this.state)
+      if (nextState[key] != this.state[key])
+        return true;
+    return false;
+  }
+
 
   _head(item) {
     let radius = item.id == 1 ? 4 : 0;

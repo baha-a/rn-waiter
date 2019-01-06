@@ -7,14 +7,14 @@ import FAIcon from '../Components/FAIcon';
 
 const ButtonInput = ({ icon, text, placeholder, onPress, onChangeText }) => {
     return (
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', }}>
-            <View style={{ borderWidth: 1, borderColor: '#ced4da', backgroundColor: '#e9ecef' }} >
-                <TouchableOpacity onPress={onPress}>
+        <View style={{flex:1, flexDirection: 'row', justifyContent: 'flex-start', }}>
+            <View style={{ flex:0.2, flexDirection: 'row', justifyContent: 'flex-start', borderWidth: 1, borderColor: '#ced4da', backgroundColor: '#e9ecef' }} >
+                <TouchableOpacity onPress={onPress} style={{ flex:1}}>
                     {icon ? <FAIcon name={icon} /> : <Text> {text} </Text>}
                 </TouchableOpacity>
             </View>
-            <View style={{ borderWidth: 1, borderColor: '#ced4da' }}>
-                <TextInput disableFullscreenUI placeholder={placeholder} onChangeText={onChangeText} />
+            <View style={{ flex:0.8, flexDirection: 'row', justifyContent: 'flex-start', borderWidth: 1, borderColor: '#ced4da' }}>
+                <TextInput underlineColorAndroid='#fff' disableFullscreenUI placeholder={placeholder} onChangeText={onChangeText} style={{ flex:1}} />
             </View>
         </View>
     );
@@ -102,14 +102,21 @@ export default class BillInfo extends Component {
                                     <FAIcon name='credit-card' style={this.state.method == 4 ? { color: '#28a745', fontSize: 50 } : { fontSize: 50 }} />
                                 </TouchableOpacity>
                             </View>
-                            <View style={{ flexDirection: 'row', padding: 10, borderTopWidth: 1, borderTopColor: '#eee', marginVertical: 10 }}>
-                                <View stlye={{flex:1, flexDirection: 'column', justifyContent:'flex-start', alignItems:'stretch' }}>
-                                    <ButtonInput text='Cash' placeholder='Amount' />
-                                    <ButtonInput text='Coupon' placeholder='Discount' />
+
+                            <View style={{ flexDirection: 'row',justifyContent:'space-between',alignItems:'center', padding: 10, borderTopWidth: 1, borderTopColor: '#eee', marginVertical: 10 }}>
+                                <View style={{ flex:1, flexDirection:'row', justifyContent:'flex-start'}}>
+                                <View stlye={{flex:1, flexDirection: 'column', justifyContent:'flex-start' }}>
+                                    <Text>123</Text>
+                                    <Text>123</Text>
+                                    {/* <ButtonInput text='Cash' placeholder='Amount' />
+                                    <ButtonInput text='Coupon' placeholder='Discount' /> */}
                                 </View>
-                                <View stlye={{ flex:1, flexDirection: 'column', justifyContent:'flex-start', alignItems:'stretch' }}>
-                                    <ButtonInput text='Debit' placeholder='Amount' />
-                                    <ButtonInput text='Credit' placeholder='Username' />
+                                <View stlye={{ flex:1, flexDirection: 'column', justifyContent:'flex-start' }}>
+                                <Text>123</Text>
+                                    <Text>123</Text>
+                                    {/* <ButtonInput text='Debit' placeholder='Amount' />
+                                    <ButtonInput text='Credit' placeholder='Username' /> */}
+                                </View>
                                 </View>
                             </View>
                         </View>

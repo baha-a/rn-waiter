@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import { Switch, Text, View, TouchableOpacity, ScrollView } from 'react-native'
+import { Switch, Text, View, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import FAIcon from './FAIcon';
 import Selectable from './Selectable';
 import { Input, Item, Radio } from 'native-base';
 import ItemButton from './ItemButton';
+import Order from '../Pages/Order';
 
 export default class TableMenu extends Component {
     constructor(props) {
@@ -57,6 +58,14 @@ export default class TableMenu extends Component {
             }]
         };
     }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        for (const key in this.state)
+            if (nextState[key] != this.state[key])
+                return true;
+        return false;
+    }
+
 
     tab(id, icon) {
         let color = id == this.state.selectedTab ? '#bbb' : '#dae0e5';
@@ -234,11 +243,12 @@ export default class TableMenu extends Component {
         }
     }
 
+
     render() {
         let arrangeItemsColor = this.state.arrangeItems ? '#bbb' : '#dae0e5';
         return (
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
-                <View style={{flex:0.1, flexDirection: 'column', marginTop:1}}>
+                <View style={{ flex: 0.1, flexDirection: 'column', marginTop: 1 }}>
                     {
                         this.state.clientsInMenu.map(x => <Text key={x} style={{ padding: 2, backgroundColor: '#fff' }} >#{x}</Text>)
                     }
@@ -251,11 +261,12 @@ export default class TableMenu extends Component {
                         <FAIcon name='plus' />
                     </TouchableOpacity>
                 </View>
-                <View style={{ flex:0.9, flexDirection: 'column', backgroundColor: '#fff', borderColor: '#eee', borderWidth: 1, borderRadius: 4 }}>
+                <View style={{ flex: 0.9, flexDirection: 'column', backgroundColor: '#fff', borderColor: '#eee', borderWidth: 1, borderRadius: 4 }}>
                     <View style={{ flex: 1, flexDirection: 'column', padding: 6 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
                             <Text style={{ fontSize: 18 }}> Table No#  </Text>
-                            <TouchableOpacity style={{ paddingHorizontal: 10, backgroundColor: '#dae0e5' }}>
+                            <TouchableOpacity style={{ paddingHorizontal: 10, backgroundColor: '#dae0e5' }}
+                                onPress={() => Order.openOverly()}>
                                 <Text> - - </Text>
                             </TouchableOpacity>
                         </View>
