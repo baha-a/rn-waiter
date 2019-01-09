@@ -4,21 +4,8 @@ import { Button, View, Text, Accordion as Acc } from 'native-base';
 import ItemButton from './ItemButton';
 import FAIcon from './FAIcon';
 import ItemPriceBar from './ItemPriceBar';
+import Api from '../api';
 
-const sections = [
-  {
-    id: 1, title: 'Main Dish', color: '#546e7a', content:
-      [
-        { id: 1, name: 'item1', price: 24, category: 1 },
-        { id: 2, name: 'item2', price: 991, category: 1 },
-        { id: 3, name: 'item3', price: 2, category: 1 }
-      ]
-  },
-  { id: 2, title: 'Sandwich', color: '#6d4c41', content: [] },
-  { id: 3, title: 'Salad', color: '#7cb342', content: [] },
-  { id: 4, title: 'Drinks', color: '#fdd835', content: [] },
-  { id: 5, title: 'Sweet', color: '#e53935', content: [] },
-];
 
 export default class Accordion extends Component {
   constructor(props) {
@@ -26,12 +13,36 @@ export default class Accordion extends Component {
     this.state = {
       addNewItem: 0,
       hotjarEnabled: [],
+
+
+      sections: [
+        // {
+        //   id: 1, category_name: 'Main Dish', color: '#546e7a', content:
+        //     [
+        //       { id: 1, en_name: 'item1', price: 24, category: 1 },
+        //       { id: 2, en_name: 'item2', price: 991, category: 1 },
+        //       { id: 3, en_name: 'item3', price: 2, category: 1 }
+        //     ]
+        // },
+        // { id: 2, category_name: 'Sandwich', color: '#6d4c41', content: [] },
+        // { id: 3, category_name: 'Salad', color: '#7cb342', content: [] },
+        // { id: 4, category_name: 'Drinks', color: '#fdd835', content: [] },
+        // { id: 5, category_name: 'Sweet', color: '#e53935', content: [] },
+      ]
     }
 
     this._body = this._body.bind(this);
     this._head = this._head.bind(this);
     this.isHotjarEnabled = this.isHotjarEnabled.bind(this);
   }
+
+
+    componentDidMount(){
+      Api.getCategories()
+      .then(cat => {
+        this.setState({ sections: cat});
+      });
+    }
 
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -47,7 +58,7 @@ export default class Accordion extends Component {
     let hotjarColor = this.isHotjarEnabled(item.id) ? '#fff' : 'rgba(0,0,0,0.2)';
     return (
       <View style={{
-        backgroundColor: item.color,
+        backgroundColor: Api.mapCategoryWithColors(item.id),
         borderTopLeftRadius: radius,
         borderTopRightRadius: radius,
         padding: 10,
@@ -55,7 +66,7 @@ export default class Accordion extends Component {
         justifyContent: 'space-between'
       }}>
         <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}>
-          <Text style={{ color: '#fff' }}>{item.title}</Text>
+          <Text style={{ color: '#fff' }}>{item.category_name}</Text>
         </View>
         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
           <TouchableOpacity transparent style={{ backgroundColor: 'rgba(0,0,0,0.1)', padding: 2 }}
@@ -90,10 +101,16 @@ export default class Accordion extends Component {
   }
 
   _body(item) {
+    if(item.sub_categories && item.sub_categories.length > 0){
+      return <View style={{ padding:10,}}>
+          <Acc dataArray={item.sub_categories} renderHeader={this._head} renderContent={this._body} />
+      </View>;
+    }
+
     return (
       <View style={{
         padding: 10,
-        borderColor: item.color,
+        borderColor: Api.mapCategoryWithColors(item.id),
         borderWidth: 1,
         backgroundColor: '#fff',
         flex: 1,
@@ -104,9 +121,10 @@ export default class Accordion extends Component {
         {
           this.state.addNewItem == item.id && <ItemPriceBar />
         }
+
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
           {
-            item.content.map(x => <ItemButton key={x.id} title={x.name} category={x.category} price={x.price} />)
+            item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price} />)
           }
         </View>
       </View>
@@ -114,6 +132,6 @@ export default class Accordion extends Component {
   }
 
   render() {
-    return <Acc dataArray={sections} renderHeader={this._head} renderContent={this._body} />;
+    return <Acc dataArray={this.state.sections} renderHeader={this._head} renderContent={this._body} />;
   }
 }

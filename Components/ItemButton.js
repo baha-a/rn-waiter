@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { Text, View, TouchableOpacity } from 'react-native';
 import { Icon } from 'native-base';
+import Api from '../api';
+
 
 export default class ItemButton extends Component {
     constructor(props) {
@@ -12,16 +14,6 @@ export default class ItemButton extends Component {
 
         this.removeUser = this.removeUser.bind(this);
         this.addUser = this.addUser.bind(this);
-    }
-
-    mapCategoryWithColors(cat) {
-        switch (cat) {
-            case 1: return '#546e7a';
-            case 2: return '#6d4c41';
-            case 3: return '#7cb342';
-            case 4: return '#fdd835';
-            case 5: return '#e53935';
-        }
     }
 
     removeUser() {
@@ -53,7 +45,7 @@ export default class ItemButton extends Component {
 
         let padding = 6, radius = 3;
 
-        let color = this.mapCategoryWithColors(category);
+        let color = Api.mapCategoryWithColors(category);
 
         return (
             <View style={{ flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }}>
