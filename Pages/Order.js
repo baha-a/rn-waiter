@@ -29,6 +29,7 @@ export default class Order extends Component {
       Order.openOverlyEvt();
   }
 
+
   render() {
     return (
       <Container>
@@ -78,7 +79,7 @@ export default class Order extends Component {
 
           </View>
           <View style={{ flex: 0.4, padding: 10 }}>
-            <TableMenu />
+            <TableMenu id={this.props.id}/>
           </View>
         </View>
         {

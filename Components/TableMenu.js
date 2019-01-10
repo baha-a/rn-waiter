@@ -5,11 +5,14 @@ import Selectable from './Selectable';
 import { Input, Item, Radio } from 'native-base';
 import ItemButton from './ItemButton';
 import Order from '../Pages/Order';
+import Api from '../api';
+import Loader from './Loader';
 
 export default class TableMenu extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            ready: false,
             arrangeItems: false,
             selectedTab: 1,
 
@@ -20,6 +23,7 @@ export default class TableMenu extends Component {
 
             clientsInMenu: [],
             nextClientInMenu: 1,
+            tableNumber: 0,
 
             barItems: [{ id: 2, name: 'item2', price: 991, category: 5 },
             { id: 3, name: 'item3', price: 2, category: 1 },
@@ -29,15 +33,14 @@ export default class TableMenu extends Component {
             doneServices: [],
 
             services: [{
-                id: 1,
-                items: [{ id: 2, name: 'item2', price: 991, category: 5 },
+                service_number: 1,
+                product: [{ id: 2, name: 'item2', price: 991, category: 5 },
                 { id: 3, name: 'item3', price: 2, category: 1 },
                 { id: 23, name: 'itemD', price: 991, category: 2 },
                 { id: 43, name: 'item33', price: 2, category: 3 }]
             },
-            { id: 2, items: [] },
             {
-                id: 3, items: [{ id: 2, name: 'item2', price: 991, category: 5 },
+                service_number: 3, product: [{ id: 2, name: 'item2', price: 991, category: 5 },
                 { id: 3, name: 'item3', price: 2, category: 1 },
                 { id: 23, name: 'itemD', price: 991, category: 2 },
                 { id: 43, name: 'item33', price: 2, category: 3 }]
@@ -45,14 +48,14 @@ export default class TableMenu extends Component {
             ],
 
             clients: [{
-                id: 1,
-                items: [{ id: 2, name: 'item2', price: 991, category: 5 },
+                client_number: 1,
+                products: [{ id: 2, name: 'item2', price: 991, category: 5 },
                 { id: 3, name: 'item3', price: 2, category: 1 },
                 { id: 23, name: 'itemD', price: 991, category: 2 },
                 { id: 43, name: 'item33', price: 2, category: 3 }]
             },
             {
-                id: 2,
+                client_number: 2,
                 items: [{ id: 2, name: 'item2', price: 991, category: 4 },
                 { id: 3, name: 'item3', price: 2, category: 5 }]
             }]
@@ -60,12 +63,40 @@ export default class TableMenu extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.id != this.props.id)
+            return true;
+
         for (const key in this.state)
             if (nextState[key] != this.state[key])
                 return true;
         return false;
     }
 
+    componentDidMount() {
+        if(!this.props.id)
+            return;
+        Api.getOrder(this.props.id)
+            .then(x => {
+                let clients = [];
+                x.services.forEach(s => {
+                    s.products.forEach(p=>{
+                        let f = clients.find(x=>x.client_number == p.client_number);
+                        if(f!=null){
+                            f.products.push(p);
+                        } else {
+                            clients.push({ client_number: p.client_number, products:[p] });
+                        }
+                    });
+                });
+
+                this.setState({
+                    ready: true,
+                    tableNumber: x.table_number,
+                    services: x.services,
+                    clients: clients
+                });
+            });
+    }
 
     tab(id, icon) {
         let color = id == this.state.selectedTab ? '#bbb' : '#dae0e5';
@@ -100,21 +131,21 @@ export default class TableMenu extends Component {
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                     {
                         this.state.services.map(x =>
-                            <View key={x.id} style={{ flexDirection: 'row', flexWrap: 'nowrap' }}>
-                                <Switch value={this.state.doneServices.findIndex(y => y == x.id) != -1} trackColor={{ false: '#dee2e6', true: '#08d' }}
+                            <View key={x.service_number} style={{ flexDirection: 'row', flexWrap: 'nowrap' }}>
+                                <Switch value={this.state.doneServices.findIndex(y => y == x.service_number) != -1} trackColor={{ false: '#dee2e6', true: '#08d' }}
                                     onValueChange={(v) => {
                                         let done = null;
                                         if (v) {
                                             done = this.state.doneServices.slice();
-                                            done.push(x.id);
+                                            done.push(x.service_number);
                                         }
                                         else {
-                                            done = this.state.doneServices.filter(y => y != x.id);
+                                            done = this.state.doneServices.filter(y => y != x.service_number);
                                         }
                                         this.setState({ doneServices: done });
                                     }
                                     } />
-                                <Text>Service #{x.id}</Text>
+                                <Text>Service #{x.service_number}</Text>
                             </View>
                         )
                     }
@@ -167,11 +198,11 @@ export default class TableMenu extends Component {
                 {
                     this.state.clients.map(client => {
                         return (
-                            <View key={client.id}>
-                                <Text style={{ fontWeight: 'bold' }}>Client #{client.id}</Text>
+                            <View key={client.client_number}>
+                                <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                     {
-                                        client.items.map(x => <ItemButton key={x.id} title={x.name} add remove category={x.category} />)
+                                        client.products.map(x => <ItemButton key={x.id} title={x.en_name} add remove details={x.product_customizes} color={x.category_color} />)
                                     }
                                 </View>
                             </View>
@@ -203,15 +234,15 @@ export default class TableMenu extends Component {
                             {
                                 this.state.services.map(s => {
                                     return (
-                                        <View key={s.id} style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
+                                        <View key={s.service_number} style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
 
                                             <View style={{ backgroundColor: '#f5f5f5', padding: 8, margin: 6, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                                                <Text style={{ fontWeight: 'bold', }}>Service #{s.id}</Text>
+                                                <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
                                             </View>
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                                 {
-                                                    s.items.map(x => <ItemButton key={x.id} title={x.name} add remove category={x.category} />)
+                                                    s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} add remove color={x.category_color} />)
                                                 }
                                             </View>
                                         </View>
@@ -245,6 +276,10 @@ export default class TableMenu extends Component {
 
 
     render() {
+
+        if (this.state.ready == false)
+            return <Loader />
+
         let arrangeItemsColor = this.state.arrangeItems ? '#bbb' : '#dae0e5';
         return (
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
@@ -264,10 +299,10 @@ export default class TableMenu extends Component {
                 <View style={{ flex: 0.9, flexDirection: 'column', backgroundColor: '#fff', borderColor: '#eee', borderWidth: 1, borderRadius: 4 }}>
                     <View style={{ flex: 1, flexDirection: 'column', padding: 6 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
-                            <Text style={{ fontSize: 18 }}> Table No#  </Text>
+                            <Text style={{ fontSize: 18 }}> Table No# </Text>
                             <TouchableOpacity style={{ paddingHorizontal: 10, backgroundColor: '#dae0e5' }}
                                 onPress={() => Order.openOverly()}>
-                                <Text> - - </Text>
+                                <Text> {this.state.tableNumber} </Text>
                             </TouchableOpacity>
                         </View>
 

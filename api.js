@@ -46,8 +46,6 @@ export default class Api {
         '#7cb342',
         '#fdd835',
         '#e53935',
-        '#f509f5',
-        '#e55905',
     ];
     static nextColorIndex = 0;
 

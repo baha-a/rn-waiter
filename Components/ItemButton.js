@@ -31,21 +31,19 @@ export default class ItemButton extends Component {
     render() {
         let {
             category,
+            color,
             title,
             add,
             remove,
             price,
 
-            detials,
+            details,
         } = this.props;
-
-        if (title == 'itemD') {
-            detials = ['No onion', 'No oil', 'Well done'];
-        }
 
         let padding = 6, radius = 3;
 
-        let color = Api.mapCategoryWithColors(category);
+        if(!color)
+            color = Api.mapCategoryWithColors(category);
 
         return (
             <View style={{ flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }}>
@@ -116,7 +114,7 @@ export default class ItemButton extends Component {
                 </View>
 
                 {
-                    detials &&
+                    details &&
                     <View style={{
                         flexDirection: 'column',
                         justifyContent: 'flex-start',
@@ -126,7 +124,7 @@ export default class ItemButton extends Component {
                         paddingLeft: 4,
                     }}
                     >
-                        {detials.map(x => <Text key={x} style={{ color: '#fff', marginVertical: 2, }}>-{x}</Text>)}
+                        {details.map(x => <Text key={x} style={{ color: '#fff', marginVertical: 2, }}>-{x}</Text>)}
                     </View>
                 }
             </View>

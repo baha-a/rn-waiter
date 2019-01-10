@@ -4,6 +4,8 @@ import { Container, Input } from 'native-base';
 import Navbar from '../Components/Navbar';
 import Invoice from '../Components/Invoice';
 import FAIcon from '../Components/FAIcon';
+import Api from "../api";
+import Loader from '../Components/Loader';
 
 const Row = ({ children }) => {
   return (<View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
@@ -37,18 +39,16 @@ export default class Bill extends Component {
 
     this.state = {
       combining: false,
-      invoiceData: [
-        { id: 1, time: '309', table: '15', waiter: 'user1', clients: '6', pays: '1120', nextService: null, },
-        { id: 2, time: '409', table: '13', waiter: 'user2', clients: '7', pays: null, nextService: '2', },
-        { id: 3, time: '409', table: '13', waiter: 'user2', clients: '7', pays: null, nextService: '2', },
-        { id: 4, time: '409', table: '13', waiter: 'user2', clients: '7', pays: null, nextService: '2', },
-        { id: 5, time: '409', table: '13', waiter: 'user2', clients: '7', pays: null, nextService: '2', },
-        { id: 6, time: '409', table: '13', waiter: 'user2', clients: '7', pays: null, nextService: '2', },
-        { id: 7, time: '409', table: '13', waiter: 'user2', clients: '7', pays: null, nextService: '2', },
-      ],
+      invoiceData: [],
+      selectedInvoices: [],
 
-      selectedInvoices: []
+      ready: false,
     }
+  }
+
+  componentDidMount() {
+    Api.getOrders()
+      .then(orders => this.setState({ invoiceData: orders, ready: true }));
   }
 
 
@@ -56,16 +56,20 @@ export default class Bill extends Component {
     return (
       <Container>
         <Navbar />
+        {
+          this.state.ready == false ?
+            <Loader />
+            :
+            <ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}>
+              <CardView>
+                {this.renderSearchAndCombinBar()}
+              </CardView>
 
-        <ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}>
-          <CardView>
-            {this.renderSearchAndCombinBar()}
-          </CardView>
-
-          <CardView>
-            {this.renderInvoices()}
-          </CardView>
-        </ScrollView>
+              <CardView>
+                {this.renderInvoices()}
+              </CardView>
+            </ScrollView>
+        }
       </Container>
     )
   }
@@ -140,16 +144,17 @@ export default class Bill extends Component {
       let items = [];
       for (let j = 0; j + i < bills.length && j < 4; j++) {
         const e = bills[j + i];
-        items.push(<Invoice isSelectionEnabeld={this.state.combining}
-          onSelected={(isOn) => {
-            let list = this.state.selectedInvoices.slice();
-            if (isOn) list.push(e.id);
-            else list = list.filter(x => x != e.id);
+        items.push(
+          <Invoice isSelectionEnabeld={this.state.combining}
+            onSelected={(isOn) => {
+              let list = this.state.selectedInvoices.slice();
+              if (isOn) list.push(e.id);
+              else list = list.filter(x => x != e.id);
 
-            this.setState({ selectedInvoices: list });
-          }}
-          isSelected={this.state.selectedInvoices.findIndex(x => x == e.id) != -1}
-          style={{ flex: 1, margin: 10, }} key={e.id} {...e} />)
+              this.setState({ selectedInvoices: list });
+            }}
+            isSelected={this.state.selectedInvoices.findIndex(x => x == e.id) != -1}
+            style={{ flex: 1, margin: 10, }} key={e.id} info={e} />)
       }
 
       if (items.length == 0) {

@@ -3,10 +3,19 @@ import { Text, View, TouchableOpacity } from 'react-native'
 import FAIcon from './FAIcon';
 import { Actions } from 'react-native-router-flux';
 
+function parseDate(date){
+    date = String(date).split(' ');
+  //var days = String(date[0]).split('-');
+  var hours = String(date[1]).split(':');
+  return hours[0]+':'+hours[1];
+  //return [parseInt(days[0]), parseInt(days[1])-1, parseInt(days[2]), parseInt(hours[0]), parseInt(hours[1]), parseInt(hours[2])];
+}
+
 export default class Invoice extends Component {
     constructor(props) {
         super(props);
     }
+
     render() {
         return (
             <TouchableOpacity activeOpacity={1} onPress={() => this.toggleSelected()}
@@ -22,24 +31,29 @@ export default class Invoice extends Component {
             this.props.onSelected(!this.props.isSelected);
     }
 
+    openOrder(id) {
+        Actions.order({ id: id });
+    }
+
     renderUpperPartOfInvoice() {
         let {
-            time,
-            table,
+            id,
+            created_at,
+            table_number,
             waiter,
-            clients,
             isSelectionEnabeld
-        } = this.props;
+        } = this.props.info;
 
-        return (<View style={{ flex: 0.8, flexDirection: 'row' }}>
+        return (<TouchableOpacity style={{ flex: 0.8, flexDirection: 'row' }}
+            onPress={() => this.openOrder(id)}>
             <View style={{ flex: 0.4, flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', paddingLeft: 6, }}>
                 <Text style={{ color: '#c7c7c7' }}>
                     <FAIcon name='clock' />
-                    {time}
+                    {parseDate(created_at.date)}
                 </Text>
                 <Text style={{ color: '#c7c7c7' }}>
                     <FAIcon name='hashtag' />
-                    {table}
+                    {table_number}
                 </Text>
                 <Text style={{ color: '#c7c7c7' }}>
                     <FAIcon name='male' />
@@ -49,7 +63,7 @@ export default class Invoice extends Component {
             <View style={{ flex: 0.6, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
                 <Text style={{ color: 'black', fontSize: 36, }}>
                     <FAIcon name='utensils' />
-                    {clients}
+                    {table_number}
                 </Text>
             </View>
 
@@ -58,16 +72,30 @@ export default class Invoice extends Component {
                     <FAIcon name='check-circle' style={{ position: 'absolute', top: 4, right: 4, color: '#28a745' }} />
                     : null
             }
-        </View>
+        </TouchableOpacity>
         );
+    }
+
+    callService(serviceNumber) {
+        // call the service 'serviceNumber'
     }
 
     renderLowerPartOfInvoice() {
         let {
             pays,
-            nextService,
-            isSelectionEnabeld
-        } = this.props;
+            services,
+            isSelectionEnabeld,
+        } = this.props.info;
+
+        let nextService = null;
+        if (services) {
+            services.forEach(s => {
+                if (s.service_status == 'ToBeCall') {
+                    nextService = s;
+                    return;
+                }
+            });
+        }
 
         let overly = null;
         if (isSelectionEnabeld)
@@ -80,15 +108,17 @@ export default class Invoice extends Component {
                 </TouchableOpacity>
                 {
                     nextService != null ?
-                        (<TouchableOpacity style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#bd2130' }}>
-                            <Text style={{ color: '#fff' }} >call service #{nextService}</Text>
+                        (<TouchableOpacity style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#bd2130' }}
+                            onPress={() => this.callService(nextService.service_number)}
+                        >
+                            <Text style={{ color: '#fff' }} >call service #{nextService.service_number}</Text>
                         </TouchableOpacity>)
                         : (
-                        <TouchableOpacity style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1e7e34' }}
-                        onPress={()=> Actions.billInfo({ id: 1})}
-                        >
-                            <Text style={{ color: '#fff' }} >Pay {pays}$</Text>
-                        </TouchableOpacity>)
+                            <TouchableOpacity style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1e7e34' }}
+                                onPress={() => Actions.billInfo({ id: 1 })}
+                            >
+                                <Text style={{ color: '#fff' }} >Pay {pays}$</Text>
+                            </TouchableOpacity>)
 
                 }
 

@@ -5,6 +5,7 @@ import ItemButton from './ItemButton';
 import FAIcon from './FAIcon';
 import ItemPriceBar from './ItemPriceBar';
 import Api from '../api';
+import Loader from './Loader';
 
 
 export default class Accordion extends Component {
@@ -28,7 +29,9 @@ export default class Accordion extends Component {
         // { id: 3, category_name: 'Salad', color: '#7cb342', content: [] },
         // { id: 4, category_name: 'Drinks', color: '#fdd835', content: [] },
         // { id: 5, category_name: 'Sweet', color: '#e53935', content: [] },
-      ]
+      ],
+      ready:false,
+
     }
 
     this._body = this._body.bind(this);
@@ -40,7 +43,7 @@ export default class Accordion extends Component {
     componentDidMount(){
       Api.getCategories()
       .then(cat => {
-        this.setState({ sections: cat});
+        this.setState({ sections: cat, ready:true});
       });
     }
 
@@ -132,6 +135,8 @@ export default class Accordion extends Component {
   }
 
   render() {
+    if(this.state.ready == false)
+      return <Loader/>
     return <Acc dataArray={this.state.sections} renderHeader={this._head} renderContent={this._body} />;
   }
 }
