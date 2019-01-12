@@ -83,8 +83,12 @@ export default class TableMenu extends Component {
             }
             else if (this.state.selectedTab == 1 && this.state.selectedSubTab == 1) {
                 let s = this.state.services.slice();
+                if(s.length != 0){
+                    //s = [{ service_number:1, products:[]}];
+                
                 s[s.length - 1].products.push(x);
                 this.setState({ services: s });
+                }
             }
         };
 
@@ -286,13 +290,26 @@ export default class TableMenu extends Component {
         }
     }
 
-    postOrder(){
+    postOrder() {
         Api.postOrder({
             table_number: this.state.tableNumber,
-            services: this.state.services.slice(),
-            bar: this.state.barItems.slice(),
+            status: 'active',
+
+            services: this.state.services.map(x=>({
+                service_number: x.service_number,
+                service_status: 'ToBeCall',
+                service_type: 'prepaid',
+                products:x.products.map(p=> ({
+                    product_id: p.id,
+                    client_number:1,
+                    dish_number:1,
+                    product_customizes:[]
+                }))
+            })),
+            
+            //bar: this.state.barItems.slice(),
         })
-        .then(x=> alert('order', 'successfully saved'));
+            .then(x => alert('order successfully saved'));
     }
 
     render() {
@@ -358,10 +375,10 @@ export default class TableMenu extends Component {
                         </View>
                     </View>
 
-                    <View style={{ margin:4}}>
-                    <TouchableOpacity style={{ backgroundColor:'lightgray',padding:4 }} onPress={()=> this.postOrder()}>
-                        <Text> Save </Text>
-                    </TouchableOpacity>
+                    <View style={{ margin: 4 }}>
+                        <TouchableOpacity style={{ backgroundColor: 'lightgray', padding: 4 }} onPress={() => this.postOrder()}>
+                            <Text> Save </Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
