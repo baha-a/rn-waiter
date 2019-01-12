@@ -60,7 +60,7 @@ export default class Order extends Component {
                 }
               </ScrollView>
               <View style={{ marginLeft: 6 }}>
-                <Accordion />
+                <Accordion onItemPress={this.onItemPress} />
               </View>
               <View>
                 <Collapsible title='Custom Dish' style={{

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Switch, Text, View, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import FAIcon from './FAIcon';
 import Selectable from './Selectable';
-import { Input, Item, Radio } from 'native-base';
+import { Input, Item, Radio, Tab } from 'native-base';
 import ItemButton from './ItemButton';
 import Order from '../Pages/Order';
 import Api from '../api';
@@ -21,28 +21,19 @@ export default class TableMenu extends Component {
             invoiceHoldLimitedTime: true,
             invoiceHoldUnlimited: false,
 
-            clientsInMenu: [],
-            nextClientInMenu: 1,
             tableNumber: 0,
 
-            barItems: [{ id: 2, name: 'item2', price: 991, category: 5 },
-            { id: 3, name: 'item3', price: 2, category: 1 },
-            { id: 23, name: 'itemD', price: 991, category: 2 },
-            { id: 43, name: 'item33', price: 2, category: 3 }],
+            barItems: [],
 
             doneServices: [],
 
             services: [{
                 service_number: 1,
-                product: [{ id: 2, name: 'item2', price: 991, category: 5 },
-                { id: 3, name: 'item3', price: 2, category: 1 },
-                { id: 23, name: 'itemD', price: 991, category: 2 },
+                products: [{ id: 2, name: 'item2', price: 991, category: 5 },
                 { id: 43, name: 'item33', price: 2, category: 3 }]
             },
             {
-                service_number: 3, product: [{ id: 2, name: 'item2', price: 991, category: 5 },
-                { id: 3, name: 'item3', price: 2, category: 1 },
-                { id: 23, name: 'itemD', price: 991, category: 2 },
+                service_number: 3, products: [{ id: 2, name: 'item2', price: 991, category: 5 },
                 { id: 43, name: 'item33', price: 2, category: 3 }]
             },
             ],
@@ -50,9 +41,7 @@ export default class TableMenu extends Component {
             clients: [{
                 client_number: 1,
                 products: [{ id: 2, name: 'item2', price: 991, category: 5 },
-                { id: 3, name: 'item3', price: 2, category: 1 },
-                { id: 23, name: 'itemD', price: 991, category: 2 },
-                { id: 43, name: 'item33', price: 2, category: 3 }]
+                { id: 3, name: 'item3', price: 2, category: 1 },]
             },
             {
                 client_number: 2,
@@ -60,6 +49,12 @@ export default class TableMenu extends Component {
                 { id: 3, name: 'item3', price: 2, category: 5 }]
             }]
         };
+    }
+
+    static adddItemEvt = null;
+    static adddItem(x) {
+        if (TableMenu.adddItemEvt)
+            TableMenu.adddItemEvt(x);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -72,19 +67,37 @@ export default class TableMenu extends Component {
         return false;
     }
 
+    componentWillUnmount() {
+        TableMenu.adddItemEvt = null;
+    }
+
     componentDidMount() {
-        if(!this.props.id)
+        if (!this.props.id)
             return;
+
+        TableMenu.adddItemEvt = (x) => {
+            if (this.state.selectedTab == 1 && this.state.selectedSubTab == 2) {
+                let bar = this.state.barItems.slice();
+                bar.push(x);
+                this.setState({ barItems: bar });
+            }
+            else if (this.state.selectedTab == 1 && this.state.selectedSubTab == 1) {
+                let s = this.state.services.slice();
+                s[s.length - 1].products.push(x);
+                this.setState({ services: s });
+            }
+        };
+
         Api.getOrder(this.props.id)
             .then(x => {
                 let clients = [];
                 x.services.forEach(s => {
-                    s.products.forEach(p=>{
-                        let f = clients.find(x=>x.client_number == p.client_number);
-                        if(f!=null){
+                    s.products.forEach(p => {
+                        let f = clients.find(x => x.client_number == p.client_number);
+                        if (f != null) {
                             f.products.push(p);
                         } else {
-                            clients.push({ client_number: p.client_number, products:[p] });
+                            clients.push({ client_number: p.client_number, products: [p] });
                         }
                     });
                 });
@@ -194,7 +207,6 @@ export default class TableMenu extends Component {
     renderViewByClient() {
         return (
             <View style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
-
                 {
                     this.state.clients.map(client => {
                         return (
@@ -253,7 +265,7 @@ export default class TableMenu extends Component {
                         :
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                             {
-                                this.state.barItems.map(x => <ItemButton key={x.id} title={x.name} add remove category={x.category} />)
+                                this.state.barItems.map(x => <ItemButton key={x.id} title={x.en_name} add remove category={x.category} />)
                             }
                         </View>
                 }
@@ -274,6 +286,14 @@ export default class TableMenu extends Component {
         }
     }
 
+    postOrder(){
+        Api.postOrder({
+            table_number: this.state.tableNumber,
+            services: this.state.services.slice(),
+            bar: this.state.barItems.slice(),
+        })
+        .then(x=> alert('order', 'successfully saved'));
+    }
 
     render() {
 
@@ -285,13 +305,13 @@ export default class TableMenu extends Component {
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
                 <View style={{ flex: 0.1, flexDirection: 'column', marginTop: 1 }}>
                     {
-                        this.state.clientsInMenu.map(x => <Text key={x} style={{ padding: 2, backgroundColor: '#fff' }} >#{x}</Text>)
+                        this.state.services.map(x => <Text key={x.service_number} style={{ padding: 2, backgroundColor: '#fff' }} >#{x.service_number}</Text>)
                     }
                     <TouchableOpacity style={{ padding: 2, backgroundColor: '#fff' }}
                         onPress={() => {
-                            let d = this.state.clientsInMenu.slice();
-                            d.push(this.state.nextClientInMenu);
-                            this.setState({ clientsInMenu: d, nextClientInMenu: this.state.nextClientInMenu + 1 });
+                            let s = this.state.services.slice();
+                            s.push({ service_number: s.length + 1, products: [] });
+                            this.setState({ services: s });
                         }}>
                         <FAIcon name='plus' />
                     </TouchableOpacity>
@@ -336,6 +356,12 @@ export default class TableMenu extends Component {
                         <View>
                             <Text>Total: 350$</Text>
                         </View>
+                    </View>
+
+                    <View style={{ margin:4}}>
+                    <TouchableOpacity style={{ backgroundColor:'lightgray',padding:4 }} onPress={()=> this.postOrder()}>
+                        <Text> Save </Text>
+                    </TouchableOpacity>
                     </View>
                 </View>
             </View>

@@ -6,6 +6,7 @@ import FAIcon from './FAIcon';
 import ItemPriceBar from './ItemPriceBar';
 import Api from '../api';
 import Loader from './Loader';
+import TableMenu from './TableMenu';
 
 
 export default class Accordion extends Component {
@@ -37,6 +38,7 @@ export default class Accordion extends Component {
     this._body = this._body.bind(this);
     this._head = this._head.bind(this);
     this.isHotjarEnabled = this.isHotjarEnabled.bind(this);
+    this.addItemToMenu = this.addItemToMenu.bind(this);
   }
 
 
@@ -127,11 +129,16 @@ export default class Accordion extends Component {
 
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
           {
-            item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price} />)
+            item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price}
+               onPressMid={()=> this.addItemToMenu(x)} />)
           }
         </View>
       </View>
     );
+  }
+  
+  addItemToMenu(x){
+    TableMenu.adddItem(x);
   }
 
   render() {

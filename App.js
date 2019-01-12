@@ -39,8 +39,8 @@ export default class App extends React.Component
         <StatusBar hidden />
         <Router>
           <Stack key="root">
-            <Scene initial key="order" component={Order} hideNavBar />
-            <Scene key="bill" component={Bill} hideNavBar />
+            <Scene key="order" component={Order} hideNavBar />
+            <Scene initial key="bill" component={Bill} hideNavBar />
             <Scene key="billInfo" component={BillInfo} hideNavBar />
           </Stack>
         </Router>

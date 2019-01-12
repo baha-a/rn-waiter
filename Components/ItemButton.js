@@ -14,6 +14,13 @@ export default class ItemButton extends Component {
 
         this.removeUser = this.removeUser.bind(this);
         this.addUser = this.addUser.bind(this);
+
+        this.pressMid = this.pressMid.bind(this);
+    }
+
+    pressMid() {
+        if (this.props.onPressMid)
+            this.props.onPressMid();
     }
 
     removeUser() {
@@ -42,7 +49,7 @@ export default class ItemButton extends Component {
 
         let padding = 6, radius = 3;
 
-        if(!color)
+        if (!color)
             color = Api.mapCategoryWithColors(category);
 
         return (
@@ -67,7 +74,9 @@ export default class ItemButton extends Component {
                         padding: padding,
                         justifyContent: 'center',
                         alignItems: 'center',
-                    }}>
+                    }}
+                        onPress={this.pressMid}
+                    >
                         <Text style={{ color: '#fff' }}> {title} </Text>
                     </TouchableOpacity>
 
