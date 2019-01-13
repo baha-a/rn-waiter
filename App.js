@@ -7,6 +7,7 @@ import { Container } from 'native-base';
 import Bill from './Pages/Bill';
 import Order from './Pages/Order';
 import BillInfo from './Pages/BillInfo';
+import CustomizeItem from './Pages/customizeItem';
 
 export default class App extends React.Component 
 {
@@ -42,6 +43,7 @@ export default class App extends React.Component
             <Scene key="order" component={Order} hideNavBar />
             <Scene initial key="bill" component={Bill} hideNavBar />
             <Scene key="billInfo" component={BillInfo} hideNavBar />
+            <Scene key="customizeItem" component={CustomizeItem} hideNavBar />
           </Stack>
         </Router>
       </Container>

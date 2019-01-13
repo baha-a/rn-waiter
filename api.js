@@ -20,6 +20,12 @@ export default class Api {
             .catch(Api.onError);
     }
 
+    static getCustomizes(id){
+        return fetch(baseUrl + 'items/customizes/' + id)
+            .then(r => r.json())
+            .catch(Api.onError);
+    }
+    
     static postOrder(order) {
         return fetch(
             baseUrl + 'orders',

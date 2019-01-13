@@ -7,6 +7,7 @@ import ItemButton from './ItemButton';
 import Order from '../Pages/Order';
 import Api from '../api';
 import Loader from './Loader';
+import { Actions } from 'react-native-router-flux';
 
 export default class TableMenu extends Component {
     constructor(props) {
@@ -257,7 +258,8 @@ export default class TableMenu extends Component {
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                                 {
-                                                    s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} add remove color={x.category_color} />)
+                                                    s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} add remove color={x.category_color}
+                                                        onPressMid={()=> Actions.customizeItem({id : x.id, item: x})} />)
                                                 }
                                             </View>
                                         </View>
