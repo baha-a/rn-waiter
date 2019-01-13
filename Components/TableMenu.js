@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Switch, Text, View, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { Switch, Text, View, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import FAIcon from './FAIcon';
 import Selectable from './Selectable';
 import { Input, Item, Radio, Tab } from 'native-base';
@@ -341,10 +341,10 @@ export default class TableMenu extends Component {
                     <View style={{ flex: 1, flexDirection: 'column', padding: 6 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
                             <Text style={{ fontSize: 18 }}> Table No# </Text>
-                            <Input style={{ paddingHorizontal: 10, backgroundColor: '#dae0e5' }}
+                            <TextInput keyboardType='numeric' style={{ backgroundColor: '#dae0e5' }}
                                 onChangeText={(v) => this.setState({tableNumber: v})} 
-                                value={this.state.tableNumber}>
-                            </Input>
+                                value={this.state.tableNumber +''}>
+                            </TextInput>
                         </View>
 
                         <View style={{ flexDirection: 'row', marginVertical: 4, }}>
