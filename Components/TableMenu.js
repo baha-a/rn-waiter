@@ -26,6 +26,7 @@ export default class TableMenu extends Component {
             barItems: [],
 
             doneServices: [],
+            selectedService:1,
 
             services: [{
                 service_number: 1,
@@ -82,12 +83,10 @@ export default class TableMenu extends Component {
                 this.setState({ barItems: bar });
             }
             else if (this.state.selectedTab == 1 && this.state.selectedSubTab == 1) {
-                let s = this.state.services.slice();
-                if(s.length != 0){
-                    //s = [{ service_number:1, products:[]}];
-                
-                s[s.length - 1].products.push(x);
-                this.setState({ services: s });
+                let services = this.state.services.slice();
+                if(services.length != 0){
+                    services.find(x => x.service_number == this.state.selectedService).products.push(x);
+                    this.setState({ services: services });
                 }
             }
         };
@@ -322,7 +321,12 @@ export default class TableMenu extends Component {
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
                 <View style={{ flex: 0.1, flexDirection: 'column', marginTop: 1 }}>
                     {
-                        this.state.services.map(x => <Text key={x.service_number} style={{ padding: 2, backgroundColor: '#fff' }} >#{x.service_number}</Text>)
+                        this.state.services.map(x => <Text key={x.service_number} 
+                            onPress={()=>this.setState({selectedService: x.service_number })}
+                            style={{ 
+                                padding: 2, 
+                                backgroundColor: x.service_number == this.state.selectedService? '#ddd' : '#fff' 
+                            }} >#{x.service_number}</Text>)
                     }
                     <TouchableOpacity style={{ padding: 2, backgroundColor: '#fff' }}
                         onPress={() => {
@@ -337,10 +341,10 @@ export default class TableMenu extends Component {
                     <View style={{ flex: 1, flexDirection: 'column', padding: 6 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
                             <Text style={{ fontSize: 18 }}> Table No# </Text>
-                            <TouchableOpacity style={{ paddingHorizontal: 10, backgroundColor: '#dae0e5' }}
-                                onPress={() => Order.openOverly()}>
-                                <Text> {this.state.tableNumber} </Text>
-                            </TouchableOpacity>
+                            <Input style={{ paddingHorizontal: 10, backgroundColor: '#dae0e5' }}
+                                onChangeText={(v) => this.setState({tableNumber: v})} 
+                                value={this.state.tableNumber}>
+                            </Input>
                         </View>
 
                         <View style={{ flexDirection: 'row', marginVertical: 4, }}>

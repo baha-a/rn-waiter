@@ -7,19 +7,26 @@ import ItemPriceBar from '../Components/ItemPriceBar';
 import Collapsible from '../Components/Collapsible';
 import TableMenu from '../Components/TableMenu';
 
-clinets = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
 export default class Order extends Component {
   constructor(props) {
     super(props);
+
+    let clients =[];
+    for (let i = 1; i <= 100; i++) {
+      clients.push(i);
+    }
+
     this.state = {
       openOverly: false,
 
-      tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 11]
+      clients: clients,
+
+      selectedClient:1,
     };
 
     Order.openOverlyEvt = () => {
-      this.setState({ openOverly: true });
+      //this.setState({ openOverly: true });
     };
   }
 
@@ -43,21 +50,21 @@ export default class Order extends Component {
                 showsHorizontalScrollIndicator={false}
               >
                 {
-                  clinets.map(x =>
-                    <TouchableOpacity key={x} style={{
-                      backgroundColor: '#323232',
+                  this.state.clients.map(x => <TouchableOpacity key={x} style={{
+                      backgroundColor: x == this.state.selectedClient ?'#929292':'#323232',
                       margin: 10,
                       marginHorizontal: 4,
                       padding: 10,
                       paddingHorizontal: 20,
                       borderRadius: 4,
                       maxHeight: 40
-                    }}>
+                    }}
+                    onPress={e => this.setState({ selectedClient: x})}>
 
                       <Text style={{ color: '#fff' }}> #{x} </Text>
                     </TouchableOpacity>
-                  )
-                }
+                )
+              }
               </ScrollView>
               <View style={{ marginLeft: 6 }}>
                 <Accordion onItemPress={this.onItemPress} />
@@ -104,7 +111,7 @@ export default class Order extends Component {
               <Text></Text>
             </View>
 
-            <View style={{
+            {/* <View style={{
               backgroundColor: '#fff', flex: 1,
               width: Dimensions.get('window').width,
               flexDirection: 'column',
@@ -116,13 +123,11 @@ export default class Order extends Component {
                 justifyContent: 'flex-start',
                 flexWrap: 'wrap'
               }}>
-                {
-                  this.state.tables.map(t => <TouchableOpacity key={t} style={{ backgroundColor: '#f5f5f5', padding: 14, margin: 6, }}>
+                  <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 14, margin: 6, }}>
                     <Text style={{ fontSize: 14 }}>#{t}</Text>
-                  </TouchableOpacity>)
-                }
+                  </TouchableOpacity>
               </View>
-            </View>
+            </View> */}
           </View>
         }
       </Container>
