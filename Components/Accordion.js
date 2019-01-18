@@ -31,7 +31,7 @@ export default class Accordion extends Component {
         // { id: 4, category_name: 'Drinks', color: '#fdd835', content: [] },
         // { id: 5, category_name: 'Sweet', color: '#e53935', content: [] },
       ],
-      ready:false,
+      ready: false,
 
     }
 
@@ -42,12 +42,12 @@ export default class Accordion extends Component {
   }
 
 
-    componentDidMount(){
-      Api.getCategories()
+  componentDidMount() {
+    Api.getCategories()
       .then(cat => {
-        this.setState({ sections: cat, ready:true});
+        this.setState({ sections: cat, ready: true });
       });
-    }
+  }
 
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -106,9 +106,9 @@ export default class Accordion extends Component {
   }
 
   _body(item) {
-    if(item.sub_categories && item.sub_categories.length > 0){
-      return <View style={{ padding:10,}}>
-          <Acc dataArray={item.sub_categories} renderHeader={this._head} renderContent={this._body} />
+    if (item.sub_categories && item.sub_categories.length > 0) {
+      return <View style={{ padding: 10, }}>
+        <Acc dataArray={item.sub_categories} renderHeader={this._head} renderContent={this._body} />
       </View>;
     }
 
@@ -130,20 +130,20 @@ export default class Accordion extends Component {
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
           {
             item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price}
-               onPressMid={()=> this.addItemToMenu(x)} />)
+              onPressMid={() => this.addItemToMenu(x)} />)
           }
         </View>
       </View>
     );
   }
-  
-  addItemToMenu(x){
+
+  addItemToMenu(x) {
     TableMenu.adddItem(x);
   }
 
   render() {
-    if(this.state.ready == false)
-      return <Loader/>
+    if (this.state.ready == false)
+      return <Loader />
     return <Acc dataArray={this.state.sections} renderHeader={this._head} renderContent={this._body} />;
   }
 }

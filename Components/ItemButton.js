@@ -8,14 +8,18 @@ export default class ItemButton extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            users: [],
-            nextId: 1,
+            count: 1,
         }
 
-        this.removeUser = this.removeUser.bind(this);
-        this.addUser = this.addUser.bind(this);
+        this.removeItem = this.removeItem.bind(this);
+        this.addItem = this.addItem.bind(this);
 
         this.pressMid = this.pressMid.bind(this);
+    }
+
+
+    componentDidMount() {
+        this.setState({ count: this.props.count ? this.props.count : 1 });
     }
 
     pressMid() {
@@ -23,16 +27,19 @@ export default class ItemButton extends Component {
             this.props.onPressMid();
     }
 
-    removeUser() {
-        let users = this.state.users.slice();
-        users.pop();
-        this.setState({ users: users, nextId: this.state.nextId - 1 });
+    removeItem() {
+        if (this.state.count > 1) {
+            this.setState({ count: this.state.count - 1 });
+        }
+        else{
+            if(this.props.onDelete){
+                this.props.onDelete();
+            }
+        }
     }
 
-    addUser() {
-        let users = this.state.users.slice();
-        users.push(this.state.nextId);
-        this.setState({ users: users, nextId: this.state.nextId + 1 });
+    addItem() {
+        this.setState({ count: this.state.count + 1 });
     }
 
     render() {
@@ -40,12 +47,18 @@ export default class ItemButton extends Component {
             category,
             color,
             title,
-            add,
-            remove,
+
+            addAndRemove,
+
             price,
 
             details,
+
+            users
         } = this.props;
+
+        if(!users)
+            users=[];
 
         let padding = 6, radius = 3;
 
@@ -56,7 +69,7 @@ export default class ItemButton extends Component {
             <View style={{ flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }}>
                 <View style={{ flexDirection: 'row' }}>
                     {
-                        remove &&
+                        addAndRemove &&
                         <TouchableOpacity style={{
                             padding: padding,
                             backgroundColor: 'rgba(0,0,0,0.1)',
@@ -64,7 +77,7 @@ export default class ItemButton extends Component {
                             borderTopLeftRadius: radius,
                             borderBottomLeftRadius: radius,
                         }}
-                            onPress={this.removeUser}
+                            onPress={this.removeItem}
                         >
                             <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-remove' />
                         </TouchableOpacity>
@@ -72,11 +85,14 @@ export default class ItemButton extends Component {
 
                     <TouchableOpacity style={{
                         padding: padding,
+                        flexDirection:'row',
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
                         onPress={this.pressMid}
                     >
+                        { addAndRemove && <Text style={{ color: '#fff', fontWeight: 'bold' }}> {this.state.count} </Text> }
+
                         <Text style={{ color: '#fff' }}> {title} </Text>
                     </TouchableOpacity>
 
@@ -95,7 +111,7 @@ export default class ItemButton extends Component {
                     }
 
                     {
-                        add &&
+                        addAndRemove &&
                         <TouchableOpacity style={{
                             padding: padding,
                             backgroundColor: 'rgba(0,0,0,0.1)',
@@ -103,7 +119,7 @@ export default class ItemButton extends Component {
                             borderTopRightRadius: radius,
                             borderBottomRightRadius: radius,
                         }}
-                            onPress={this.addUser}
+                            onPress={this.addItem}
                         >
                             <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />
                         </TouchableOpacity>
@@ -119,7 +135,7 @@ export default class ItemButton extends Component {
                     borderTopColor: 'rgba(0,0,0,0.1)',
                     borderTopWidth: 1,
                 }}>
-                    {this.state.users.map(x => <Text style={{ marginHorizontal: 2, padding: 2, color: '#fff', backgroundColor: '#3e3e3e' }} key={x}>{x}</Text>)}
+                    {users.map(x => <Text style={{ marginHorizontal: 2, padding: 2, color: '#fff', backgroundColor: '#3e3e3e' }} key={x}>{x}</Text>)}
                 </View>
 
                 {

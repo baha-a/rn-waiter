@@ -10,6 +10,12 @@ export default class Selectable extends Component {
         this.toggleSelection = this.toggleSelection.bind(this);
     }
 
+    componentDidMount() {
+        if (this.props.initialSelected) {
+            this.setState({ selected: true });
+        }
+    }
+
     toggleSelection() {
         let newSeleted = !this.state.selected;
         this.setState({ selected: newSeleted });

@@ -27,7 +27,7 @@ export default class TableMenu extends Component {
             barItems: [],
 
             doneServices: [],
-            selectedService:1,
+            selectedService: 1,
 
             services: [{
                 service_number: 1,
@@ -85,7 +85,7 @@ export default class TableMenu extends Component {
             }
             else if (this.state.selectedTab == 1 && this.state.selectedSubTab == 1) {
                 let services = this.state.services.slice();
-                if(services.length != 0){
+                if (services.length != 0) {
                     services.find(x => x.service_number == this.state.selectedService).products.push(x);
                     this.setState({ services: services });
                 }
@@ -218,7 +218,9 @@ export default class TableMenu extends Component {
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                     {
-                                        client.products.map(x => <ItemButton key={x.id} title={x.en_name} add remove details={x.product_customizes} color={x.category_color} />)
+                                        client.products.map(x => <ItemButton key={x.id} title={x.en_name} 
+                                            addAndRemove onDelete={()=> alert('item removed')}
+                                            details={x.product_customizes} color={x.category_color} />)
                                     }
                                 </View>
                             </View>
@@ -252,14 +254,17 @@ export default class TableMenu extends Component {
                                     return (
                                         <View key={s.service_number} style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
 
-                                            <View style={{ backgroundColor: '#f5f5f5', padding: 8, margin: 6, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                            <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 8, margin: 6, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
+                                                onPress={() => this.setState({ selectedService: s.service_number })}>
                                                 <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
-                                            </View>
+                                            </TouchableOpacity>
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                                 {
-                                                    s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} add remove color={x.category_color}
-                                                        onPressMid={()=> Actions.customizeItem({id : x.id, item: x})} />)
+                                                    s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} addAndRemove color={x.category_color}
+                                                        onDelete={()=> alert('item will remove')}
+                                                        onPressMid={() => Actions.customize({ id: x.id, item: x })} 
+                                                        />)
                                                 }
                                             </View>
                                         </View>
@@ -270,7 +275,7 @@ export default class TableMenu extends Component {
                         :
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                             {
-                                this.state.barItems.map(x => <ItemButton key={x.id} title={x.en_name} add remove category={x.category} />)
+                                this.state.barItems.map(x => <ItemButton key={x.id} title={x.en_name} addAndRemove category={x.category} />)
                             }
                         </View>
                 }
@@ -296,18 +301,18 @@ export default class TableMenu extends Component {
             table_number: this.state.tableNumber,
             status: 'active',
 
-            services: this.state.services.map(x=>({
+            services: this.state.services.map(x => ({
                 service_number: x.service_number,
                 service_status: 'ToBeCall',
                 service_type: 'prepaid',
-                products:x.products.map(p=> ({
+                products: x.products.map(p => ({
                     product_id: p.id,
-                    client_number:1,
-                    dish_number:1,
-                    product_customizes:[]
+                    client_number: 1,
+                    dish_number: 1,
+                    product_customizes: []
                 }))
             })),
-            
+
             //bar: this.state.barItems.slice(),
         })
             .then(x => alert('order successfully saved'));
@@ -323,11 +328,11 @@ export default class TableMenu extends Component {
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
                 <View style={{ flex: 0.1, flexDirection: 'column', marginTop: 1 }}>
                     {
-                        this.state.services.map(x => <Text key={x.service_number} 
-                            onPress={()=>this.setState({selectedService: x.service_number })}
-                            style={{ 
-                                padding: 2, 
-                                backgroundColor: x.service_number == this.state.selectedService? '#ddd' : '#fff' 
+                        this.state.services.map(x => <Text key={x.service_number}
+                            onPress={() => this.setState({ selectedService: x.service_number })}
+                            style={{
+                                padding: 2,
+                                backgroundColor: x.service_number == this.state.selectedService ? '#ddd' : '#fff'
                             }} >#{x.service_number}</Text>)
                     }
                     <TouchableOpacity style={{ padding: 2, backgroundColor: '#fff' }}
@@ -344,8 +349,8 @@ export default class TableMenu extends Component {
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
                             <Text style={{ fontSize: 18 }}> Table No# </Text>
                             <TextInput keyboardType='numeric' style={{ backgroundColor: '#dae0e5' }}
-                                onChangeText={(v) => this.setState({tableNumber: v})} 
-                                value={this.state.tableNumber +''}>
+                                onChangeText={(v) => this.setState({ tableNumber: v })}
+                                value={this.state.tableNumber + ''}>
                             </TextInput>
                         </View>
 

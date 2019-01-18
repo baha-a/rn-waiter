@@ -41,6 +41,16 @@ export default class FAIcon extends Component {
             case 'credit-card':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf09d;</Text>;
 
+            case 'redo':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf01e;</Text>;
+            case 'undo':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf0e2;</Text>;
+            case 'share-alt':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf1e0;</Text>;
+                
+            case 'percent':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf295;</Text>;
+
             default:
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf059;</Text>;
         }
