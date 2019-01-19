@@ -46,6 +46,7 @@ export default class Accordion extends Component {
     Api.getCategories()
       .then(cat => {
         this.addIsBarProperty(cat);
+        this.addCategoryNumberToProducts(cat);
         this.setState({ sections: cat, ready: true });
       });
   }
@@ -59,6 +60,15 @@ export default class Accordion extends Component {
         c.sub_categories.forEach(p => p.isBar = true);
         this.addIsBarProperty(c.sub_categories);
       }
+    });
+  }
+
+  addCategoryNumberToProducts(cats){
+    if(cats == null)
+      return;
+    cats.forEach(c => {
+        c.products.forEach(p => p.category_id = c.id);
+        this.addCategoryNumberToProducts(c.sub_categories);
     });
   }
 

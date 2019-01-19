@@ -260,10 +260,15 @@ export default class TableMenu extends Component {
         );
     }
 
-    renderProduct(x){
-        return <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} addAndRemove color={x.category_color}
-        onDelete={() => alert('item will remove')}
-        onPressMid={() => Actions.customize({ id: x.id, item: x, })}
+    renderProduct(x) {
+        return <ItemButton
+            key={x.id}
+            title={x.en_name}
+            details={x.product_customizes}
+            addAndRemove
+            color={Api.mapCategoryWithColors(x.category_id)}
+            onDelete={() => alert('item will remove')}
+            onPressMid={() => Actions.customize({ id: x.id, item: x, })}
         />;
     }
 
