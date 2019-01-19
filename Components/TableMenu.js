@@ -40,16 +40,16 @@ export default class TableMenu extends Component {
             },
             ],
 
-            clients: [{
-                client_number: 1,
-                products: [{ id: 2, name: 'item2', price: 991, category: 5 },
-                { id: 3, name: 'item3', price: 2, category: 1 },]
-            },
-            {
-                client_number: 2,
-                items: [{ id: 2, name: 'item2', price: 991, category: 4 },
-                { id: 3, name: 'item3', price: 2, category: 5 }]
-            }]
+            // clients: [{
+            //     client_number: 1,
+            //     products: [{ id: 2, name: 'item2', price: 991, category: 5 },
+            //     { id: 3, name: 'item3', price: 2, category: 1 },]
+            // },
+            // {
+            //     client_number: 2,
+            //     items: [{ id: 2, name: 'item2', price: 991, category: 4 },
+            //     { id: 3, name: 'item3', price: 2, category: 5 }]
+            // }]
         };
 
         this.postOrder = this.postOrder.bind(this);
@@ -64,7 +64,7 @@ export default class TableMenu extends Component {
     static postOrderEvt = null;
     static PostTheOrder() {
         if (TableMenu.postOrderEvt) {
-            TableMenu.postOrderEvt();
+            return TableMenu.postOrderEvt();
         }
     }
 
@@ -111,23 +111,13 @@ export default class TableMenu extends Component {
         if (this.props.id && this.props.id != 0) {
             Api.getOrder(this.props.id)
                 .then(x => {
-                    let clients = [];
-                    x.services.forEach(s => {
-                        s.products.forEach(p => {
-                            let f = clients.find(x => x.client_number == p.client_number);
-                            if (f != null) {
-                                f.products.push(p);
-                            } else {
-                                clients.push({ client_number: p.client_number, products: [p] });
-                            }
-                        });
-                    });
+                    //let clients = this.extractClient(x.services);
 
                     this.setState({
                         ready: true,
                         tableNumber: x.table_number,
                         services: x.services,
-                        clients: clients
+                        //clients: clients
                     });
                 });
         }
@@ -136,9 +126,24 @@ export default class TableMenu extends Component {
                 ready: true,
                 tableNumber: '',
                 services: [],
-                clients: []
+                //clients: []
             });
         }
+    }
+
+    extractClient(services) {
+        let clients = [];
+        services.forEach(s => {
+            s.products.forEach(p => {
+                let f = clients.find(x => x.client_number == p.client_number);
+                if (f != null) {
+                    f.products.push(p);
+                } else {
+                    clients.push({ client_number: p.client_number, products: [p] });
+                }
+            });
+        });
+        return clients;
     }
 
     tab(id, icon) {
@@ -238,7 +243,7 @@ export default class TableMenu extends Component {
         return (
             <View style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
                 {
-                    this.state.clients.map(client => {
+                    this.extractClient(this.state.services).map(client => {
                         return (
                             <View key={client.client_number}>
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
