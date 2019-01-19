@@ -45,10 +45,22 @@ export default class Accordion extends Component {
   componentDidMount() {
     Api.getCategories()
       .then(cat => {
+        this.addIsBarProperty(cat);
         this.setState({ sections: cat, ready: true });
       });
   }
 
+  addIsBarProperty(cats){
+    if(cats == null)
+      return;
+    cats.forEach(c => {
+      if(c.isBar || c.category_name.toLowerCase() == 'bar'){
+        c.products.forEach(p => p.isBar = true);
+        c.sub_categories.forEach(p => p.isBar = true);
+        this.addIsBarProperty(c.sub_categories);
+      }
+    });
+  }
 
   shouldComponentUpdate(nextProps, nextState) {
     for (const key in this.state)
@@ -124,7 +136,12 @@ export default class Accordion extends Component {
       }}>
 
         {
-          this.state.addNewItem == item.id && <ItemPriceBar />
+          this.state.addNewItem == item.id && <ItemPriceBar onAdd={(name,price)=>{
+            let sections = this.state.sections.slice();
+            let section = sections.find(x=>x.id == item.id);
+            section.products.push({en_name:name, price:price, isBar: section.isBar});
+            this.setState({ addNewItem: 0, sections: sections });
+          }} />
         }
 
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
@@ -138,7 +155,7 @@ export default class Accordion extends Component {
   }
 
   addItemToMenu(x) {
-    TableMenu.adddItem(x);
+    TableMenu.addItem(x);
   }
 
   render() {

@@ -53,10 +53,10 @@ export default class Customize extends Component {
     }
 
 
-    cancel(){
+    cancel() {
         Actions.pop();
     }
-    save(){
+    save() {
 
         Actions.pop();
     }
@@ -116,13 +116,13 @@ export default class Customize extends Component {
 
                     </View>
                 </View>
-                
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding:10, margin:10 }}>
-                    <TouchableOpacity style={{ backgroundColor: 'green', flex:1, justifyContent:'center', alignItems:'center', padding: 10, }} onPress={this.save}>
-                        <Text style={{color:'#fff' }}>Save</Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10, margin: 10 }}>
+                    <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.cancel}>
+                        <Text style={{ color: '#fff' }}>Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ backgroundColor: 'red', flex:1, justifyContent:'center', alignItems:'center', padding: 10, }} onPress={this.cancel}>
-                        <Text style={{color:'#fff'}}>Cancel</Text>
+                    <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.save}>
+                        <Text style={{ color: '#fff' }}>Save</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

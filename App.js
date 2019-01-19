@@ -13,9 +13,12 @@ export default class App extends React.Component
 {
   constructor(props) {
     super(props);
-    this.state = { loading: true };
+    this.state = { 
+      loading: true 
+    };
 
-   Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.ALL);
+    //Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.LANDSCAPE);
+    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.ALL);
   }
 
   async componentWillMount() {
@@ -40,8 +43,8 @@ export default class App extends React.Component
         <StatusBar hidden />
         <Router>
           <Stack key="root">
-            <Scene key="order" component={Order} hideNavBar />
-            <Scene initial key="bill" component={Bill} hideNavBar />
+            <Scene initial key="order" component={Order} hideNavBar />
+            <Scene key="bill" component={Bill} hideNavBar />
             <Scene key="billInfo" component={BillInfo} hideNavBar />
             <Scene key="customize" component={Customize} hideNavBar />
           </Stack>

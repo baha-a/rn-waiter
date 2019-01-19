@@ -53,15 +53,16 @@ export default class TableMenu extends Component {
         };
     }
 
-    static adddItemEvt = null;
-    static adddItem(x) {
-        if (TableMenu.adddItemEvt)
-            TableMenu.adddItemEvt(x);
+    static addItemEvt = null;
+    static addItem(x) {
+        if (TableMenu.addItemEvt)
+            TableMenu.addItemEvt(x);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.id != this.props.id)
-            return true;
+        for (const key in this.props)
+            if (key != 'selectedClient' && nextProps[key] != this.props[key])
+                return true;
 
         for (const key in this.state)
             if (nextState[key] != this.state[key])
@@ -70,49 +71,62 @@ export default class TableMenu extends Component {
     }
 
     componentWillUnmount() {
-        TableMenu.adddItemEvt = null;
+        TableMenu.addItemEvt = null;
     }
 
     componentDidMount() {
-        if (!this.props.id)
-            return;
+        // if (!this.props.id)
+        //     return;
 
-        TableMenu.adddItemEvt = (x) => {
-            if (this.state.selectedTab == 1 && this.state.selectedSubTab == 2) {
+        TableMenu.addItemEvt = (x) => {
+            x = {...x ,client_number: this.props.selectedClient};
+            if (x.isBar) {
                 let bar = this.state.barItems.slice();
                 bar.push(x);
-                this.setState({ barItems: bar });
+                this.setState({ barItems: bar, selectedTab: 1, selectedSubTab: 2 });
             }
-            else if (this.state.selectedTab == 1 && this.state.selectedSubTab == 1) {
+            else {
                 let services = this.state.services.slice();
-                if (services.length != 0) {
+                if (!services || services.length == 0)
+                    services = [{service_number:1,products:[x]}];
+                else
                     services.find(x => x.service_number == this.state.selectedService).products.push(x);
-                    this.setState({ services: services });
-                }
+
+                this.setState({ services: services, selectedTab: 1, selectedSubTab: 1 });
             }
         };
 
-        Api.getOrder(this.props.id)
-            .then(x => {
-                let clients = [];
-                x.services.forEach(s => {
-                    s.products.forEach(p => {
-                        let f = clients.find(x => x.client_number == p.client_number);
-                        if (f != null) {
-                            f.products.push(p);
-                        } else {
-                            clients.push({ client_number: p.client_number, products: [p] });
-                        }
+        if (this.props.id && this.props.id != 0) {
+            Api.getOrder(this.props.id)
+                .then(x => {
+                    let clients = [];
+                    x.services.forEach(s => {
+                        s.products.forEach(p => {
+                            let f = clients.find(x => x.client_number == p.client_number);
+                            if (f != null) {
+                                f.products.push(p);
+                            } else {
+                                clients.push({ client_number: p.client_number, products: [p] });
+                            }
+                        });
+                    });
+
+                    this.setState({
+                        ready: true,
+                        tableNumber: x.table_number,
+                        services: x.services,
+                        clients: clients
                     });
                 });
-
-                this.setState({
-                    ready: true,
-                    tableNumber: x.table_number,
-                    services: x.services,
-                    clients: clients
-                });
+        }
+        else {
+            this.setState({
+                ready: true,
+                tableNumber: '',
+                services: [],
+                clients: []
             });
+        }
     }
 
     tab(id, icon) {
@@ -218,8 +232,8 @@ export default class TableMenu extends Component {
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                     {
-                                        client.products.map(x => <ItemButton key={x.id} title={x.en_name} 
-                                            addAndRemove onDelete={()=> alert('item removed')}
+                                        client.products.map(x => <ItemButton key={x.id} title={x.en_name}
+                                            addAndRemove onDelete={() => alert('item removed')}
                                             details={x.product_customizes} color={x.category_color} />)
                                     }
                                 </View>
@@ -262,9 +276,9 @@ export default class TableMenu extends Component {
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                                 {
                                                     s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} addAndRemove color={x.category_color}
-                                                        onDelete={()=> alert('item will remove')}
-                                                        onPressMid={() => Actions.customize({ id: x.id, item: x })} 
-                                                        />)
+                                                        onDelete={() => alert('item will remove')}
+                                                        onPressMid={() => Actions.customize({ id: x.id, item: x })}
+                                                    />)
                                                 }
                                             </View>
                                         </View>
@@ -384,12 +398,6 @@ export default class TableMenu extends Component {
                         <View>
                             <Text>Total: 350$</Text>
                         </View>
-                    </View>
-
-                    <View style={{ margin: 4 }}>
-                        <TouchableOpacity style={{ backgroundColor: 'lightgray', padding: 4 }} onPress={() => this.postOrder()}>
-                            <Text> Save </Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
