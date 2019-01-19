@@ -18,7 +18,7 @@ export default class ItemPriceBar extends Component {
             onAdd = null
         } = this.props;
 
-        <View style={{ margin: 6, flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'stretch' }}>
+        return(<View style={{ margin: 6, flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'stretch' }}>
             <TextInput style={style} disableFullscreenUI underlineColorAndroid='#fff' placeholder={firstInputTitle}
                 onChangeText={value => this.setState({ text1: value })}
                 value={this.state.text1}
@@ -31,7 +31,7 @@ export default class ItemPriceBar extends Component {
                 onPress={() => onAdd && onAdd(this.state.text1, this.state.text2)}>
                 <Text> {buttonTitle} </Text>
             </TouchableOpacity>
-        </View>
+        </View>);
     }
 }
 

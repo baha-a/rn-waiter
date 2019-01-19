@@ -79,7 +79,7 @@ export default class TableMenu extends Component {
         //     return;
 
         TableMenu.addItemEvt = (x) => {
-            x = {...x ,client_number: this.props.selectedClient};
+            x = { ...x, client_number: this.props.selectedClient };
             if (x.isBar) {
                 let bar = this.state.barItems.slice();
                 bar.push(x);
@@ -88,7 +88,7 @@ export default class TableMenu extends Component {
             else {
                 let services = this.state.services.slice();
                 if (!services || services.length == 0)
-                    services = [{service_number:1,products:[x]}];
+                    services = [{ service_number: 1, products: [x] }];
                 else
                     services.find(x => x.service_number == this.state.selectedService).products.push(x);
 
