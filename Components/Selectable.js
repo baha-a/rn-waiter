@@ -11,7 +11,7 @@ export default class Selectable extends Component {
     }
 
     componentDidMount() {
-        if (this.props.initialSelected) {
+        if (this.props.selected) {
             this.setState({ selected: true });
         }
     }

@@ -54,11 +54,8 @@ export default class ItemButton extends Component {
 
             details,
 
-            users
+            clients = []
         } = this.props;
-
-        if(!users)
-            users=[];
 
         let padding = 6, radius = 3;
 
@@ -135,7 +132,7 @@ export default class ItemButton extends Component {
                     borderTopColor: 'rgba(0,0,0,0.1)',
                     borderTopWidth: 1,
                 }}>
-                    {users.map(x => <Text style={{ marginHorizontal: 2, padding: 2, color: '#fff', backgroundColor: '#3e3e3e' }} key={x}>{x}</Text>)}
+                    {clients.map(x => <Text style={{ marginHorizontal: 2, padding: 2, color: '#fff', backgroundColor: '#3e3e3e' }} key={x}>{x}</Text>)}
                 </View>
 
                 {

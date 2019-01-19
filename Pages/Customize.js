@@ -10,9 +10,12 @@ export default class Customize extends Component {
         super(props);
         this.state = {
             selectedOptions: [],
-            selectedClient: [3, 7],
-            clients: [1, 2, 3, 4, 5, 6, 7, 8],
-            options: []
+            selectedClient: [],
+            clients: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            options: [],
+
+            discount: 0,
+            discountType: '$',
         };
 
         this.toggleSelectForOption = this.toggleSelectForOption.bind(this);
@@ -26,11 +29,21 @@ export default class Customize extends Component {
     }
 
     componentDidMount() {
-        Api.getCustomizes(this.props.id)
-            .then(x => {
-                if (x)
-                    this.setState({ options: x });
-            });
+        let {
+            clients = [],
+            product_customizes = [],
+            discount = 0,
+            discountType = '$',
+        } = this.props.item;
+
+        this.setState({
+            discount: discount,
+            discountType: discountType,
+            selectedClient: clients.slice(),
+            selectedOptions: product_customizes.slice()
+        });
+
+        Api.getCustomizes(this.props.id).then(result => { if (result) this.setState({ options: result });});
     }
 
     toggleSelectForOption(id, value) {
@@ -39,25 +52,36 @@ export default class Customize extends Component {
                 return;
             }
             let options = this.state.selectedOptions.slice();
-            options.push(id);
+            options.push(this.state.options.find(x => x.id == id));
             this.setState({ selectedOptions: options });
         }
         else {
-            let options = this.state.selectedOptions.filter(x => x != id);
+            let options = this.state.selectedOptions.filter(x => x.id != id);
             this.setState({ selectedOptions: options });
         }
     }
 
     isSelectedForOption(id) {
-        return this.state.selectedOptions.findIndex(x => x == id) != -1;
+        return this.state.selectedOptions.findIndex(x => x.id == id) != -1;
     }
 
 
     cancel() {
         Actions.pop();
     }
-    save() {
 
+    save() {
+        if (this.props.onSave) {
+            this.props.onSave({
+                id: this.props.id,
+                options: this.state.selectedOptions.slice(),
+                clients: this.state.selectedClient.slice(),
+                discountType: this.state.discountType,
+                discount: this.state.discount,
+
+                item: this.props.item,
+            });
+        }
         Actions.pop();
     }
 
@@ -95,13 +119,19 @@ export default class Customize extends Component {
                             this.state.options.map(x => <Selectable key={x.id}
                                 title={x.custom_name}
                                 onSelect={(value) => this.toggleSelectForOption(x.id, value)}
-                                initialSelected={this.isSelectedForOption(x.id)}
+                                selected={this.isSelectedForOption(x.id)}
                             />)
                         }
                     </View>
                     <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', padding: 10, }}>
                         <Text> discount </Text>
-                        <DiscountInput placeholder='discount value' />
+                        <DiscountInput
+                            placeholder='discount value'
+                            value={this.state.discount}
+                            type={this.state.discountType}
+                            onTypeChange={(type) => this.setState({ discountType: type })}
+                            onValueChange={(value) => this.setState({ discount: value })}
+                        />
 
                         <Text> clients </Text>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
@@ -109,7 +139,7 @@ export default class Customize extends Component {
                                 this.state.clients.map(x => <Selectable key={x}
                                     title={'client #' + x}
                                     onSelect={(value) => this.toggleSelectForClient(x, value)}
-                                    initialSelected={this.isSelectedForClient(x)}
+                                    selected={this.isSelectedForClient(x)}
                                 />)
                             }
                         </View>

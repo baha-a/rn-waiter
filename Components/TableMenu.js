@@ -91,7 +91,7 @@ export default class TableMenu extends Component {
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
         TableMenu.addItemEvt = (x) => {
-            x = { ...x, client_number: this.props.selectedClient };
+            x.clients = [this.props.selectedClient];
             if (x.isBar) {
                 let bar = this.state.barItems.slice();
                 bar.push(x);
@@ -135,12 +135,14 @@ export default class TableMenu extends Component {
         let clients = [];
         services.forEach(s => {
             s.products.forEach(p => {
-                let f = clients.find(x => x.client_number == p.client_number);
-                if (f != null) {
-                    f.products.push(p);
-                } else {
-                    clients.push({ client_number: p.client_number, products: [p] });
-                }
+                p.clients.forEach(c => {
+                    let f = clients.find(x => x.client_number == c);
+                    if (f != null) {
+                        f.products.push(p);
+                    } else {
+                        clients.push({ client_number: c, products: [p] });
+                    }
+                });
             });
         });
         return clients;
@@ -249,7 +251,7 @@ export default class TableMenu extends Component {
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                     {
-                                        client.products.map(x => this.renderProduct(x))
+                                        client.products.map(x => this.renderProduct(x, 'client', client.client_number))
                                     }
                                 </View>
                             </View>
@@ -260,15 +262,54 @@ export default class TableMenu extends Component {
         );
     }
 
-    renderProduct(x) {
+    customizeItem(item, type, parentId) {
+        let { id, options, clients, discount, discountType } = item;
+        //alert(JSON.stringify({id, options, clients}));
+
+        if (type == 'bar') {
+            let bar = this.state.barItems.slice();
+            let newItem = bar.find(x => x.id == id);
+            newItem.clients = clients.slice();
+            newItem.product_customizes = options.slice();
+            newItem.discount = discount;
+            newItem.discountType = discountType;
+
+            this.setState({ barItems: bar });
+        }
+        else if (type == 'service') {
+            let services = this.state.services.slice();
+            let newItem = services.find(x => x.service_number == parentId).products.find(x => x.id == id);
+            newItem.clients = clients.slice();
+            newItem.product_customizes = options.slice();
+            newItem.discount = discount;
+            newItem.discountType = discountType;
+
+            this.setState({ services: services });
+        } else if (type == 'client') {
+
+        }
+    }
+
+    renderProduct(x, type, parentId) {
+        let details = [];
+        if (x.discount && x.discount > 0) {
+            details.push(x.discountType + '' + x.discount + ' off');
+        }
+        if (x.product_customizes) {
+            x.product_customizes.forEach(x => {
+                details.push(x.custom_name);
+            });
+        }
+
         return <ItemButton
             key={x.id}
             title={x.en_name}
-            details={x.product_customizes}
+            details={details}
+            clients={x.clients}
             addAndRemove
             color={Api.mapCategoryWithColors(x.category_id)}
             onDelete={() => alert('item will remove')}
-            onPressMid={() => Actions.customize({ id: x.id, item: x, })}
+            onPressMid={() => Actions.customize({ id: x.id, item: x, onSave: (item) => this.customizeItem(item, type, parentId) })}
         />;
     }
 
@@ -302,7 +343,7 @@ export default class TableMenu extends Component {
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                                 {
-                                                    s.products.map(x => this.renderProduct(x))
+                                                    s.products.map(x => this.renderProduct(x, 'service', s.service_number))
                                                 }
                                             </View>
                                         </View>
@@ -313,7 +354,7 @@ export default class TableMenu extends Component {
                         :
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                             {
-                                this.state.barItems.map(x => this.renderProduct(x))
+                                this.state.barItems.map(x => this.renderProduct(x, 'bar'))
                             }
                         </View>
                 }
@@ -345,9 +386,9 @@ export default class TableMenu extends Component {
                 service_type: 'prepaid',
                 products: x.products.map(p => ({
                     product_id: p.id,
-                    client_number: 1,
+                    clients: p.clients.slice(),
                     dish_number: 1,
-                    product_customizes: []
+                    product_customizes: p.product_customizes.slice(),
                 }))
             })),
 
@@ -406,25 +447,42 @@ export default class TableMenu extends Component {
                             {this.renderTabContent()}
                         </ScrollView>
                     </View>
-
-                    <View style={{
-                        backgroundColor: 'rgba(0,0,0,.03)', borderColor: 'rgba(0,0,0,.125)', borderWidth: 1,
-                        padding: 10, flexDirection: 'column'
-                    }}>
-                        <View style={{ flexDirection: 'row' }}>
-                            <View style={{ flex: 1, }}>
-                                <Text style={{ fontSize: 12, color: '#6c757d' }}> Subtotal: 400$ </Text>
-                            </View>
-                            <View style={{ flex: 1, }}>
-                                <Text style={{ fontSize: 12, color: '#6c757d' }}> Taxes: 50$ </Text>
-                            </View>
-                        </View>
-                        <View>
-                            <Text>Total: 350$</Text>
-                        </View>
-                    </View>
+                    {this.renderTotal()}
                 </View>
             </View>
         )
+    }
+
+    renderTotal() {
+        let subtotal = 0,
+            taxes = 0,
+            total = 0;
+
+        this.state.services.forEach(s => {
+            s.products.forEach(p => {
+                subtotal += parseInt(p.price);
+            });
+        });
+        this.state.barItems.forEach(p => {
+            subtotal += parseInt(p.price);
+        });
+
+        return (<View style={{
+            backgroundColor: 'rgba(0,0,0,.03)', borderColor: 'rgba(0,0,0,.125)', borderWidth: 1,
+            padding: 10, flexDirection: 'column'
+        }}>
+            <View style={{ flexDirection: 'row' }}>
+                <View style={{ flex: 1, }}>
+                    <Text style={{ fontSize: 12, color: '#6c757d' }}> Subtotal: {subtotal}$ </Text>
+                </View>
+                <View style={{ flex: 1, }}>
+                    <Text style={{ fontSize: 12, color: '#6c757d' }}> Taxes: {taxes}$ </Text>
+                </View>
+            </View>
+            <View>
+                <Text>Total: {subtotal + taxes}$</Text>
+            </View>
+        </View>
+        );
     }
 }
