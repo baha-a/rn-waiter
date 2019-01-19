@@ -51,12 +51,21 @@ export default class TableMenu extends Component {
                 { id: 3, name: 'item3', price: 2, category: 5 }]
             }]
         };
+
+        this.postOrder = this.postOrder.bind(this);
     }
 
     static addItemEvt = null;
     static addItem(x) {
         if (TableMenu.addItemEvt)
             TableMenu.addItemEvt(x);
+    }
+
+    static postOrderEvt = null;
+    static PostTheOrder() {
+        if (TableMenu.postOrderEvt) {
+            TableMenu.postOrderEvt();
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -72,11 +81,14 @@ export default class TableMenu extends Component {
 
     componentWillUnmount() {
         TableMenu.addItemEvt = null;
+        TableMenu.postOrderEvt = null;
     }
 
     componentDidMount() {
         // if (!this.props.id)
         //     return;
+
+        TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
         TableMenu.addItemEvt = (x) => {
             x = { ...x, client_number: this.props.selectedClient };
@@ -277,7 +289,7 @@ export default class TableMenu extends Component {
                                                 {
                                                     s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} addAndRemove color={x.category_color}
                                                         onDelete={() => alert('item will remove')}
-                                                        onPressMid={() => Actions.customize({ id: x.id, item: x })}
+                                                        onPressMid={() => Actions.customize({ id: x.id, item: x, })}
                                                     />)
                                                 }
                                             </View>
@@ -311,7 +323,7 @@ export default class TableMenu extends Component {
     }
 
     postOrder() {
-        Api.postOrder({
+        return Api.postOrder({
             table_number: this.state.tableNumber,
             status: 'active',
 

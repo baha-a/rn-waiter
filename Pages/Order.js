@@ -103,6 +103,7 @@ export default class Order extends Component {
     );
   }
 
+
   render() {
     return (
       <Container>
@@ -144,8 +145,9 @@ export default class Order extends Component {
             </TouchableOpacity>
             <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
               onPress={() => {
-                
-                Actions.replace('bill');
+                TableMenu.PostTheOrder()
+                .then(x => Actions.replace('bill'));
+                //.then(x=>Actions.replace('bill'));
               }}>
               <Text style={{ color: '#fff' }}>Save</Text>
             </TouchableOpacity>
