@@ -249,9 +249,7 @@ export default class TableMenu extends Component {
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                     {
-                                        client.products.map(x => <ItemButton key={x.id} title={x.en_name}
-                                            addAndRemove onDelete={() => alert('item removed')}
-                                            details={x.product_customizes} color={x.category_color} />)
+                                        client.products.map(x => this.renderProduct(x))
                                     }
                                 </View>
                             </View>
@@ -260,6 +258,13 @@ export default class TableMenu extends Component {
                 }
             </View>
         );
+    }
+
+    renderProduct(x){
+        return <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} addAndRemove color={x.category_color}
+        onDelete={() => alert('item will remove')}
+        onPressMid={() => Actions.customize({ id: x.id, item: x, })}
+        />;
     }
 
     renderMenuItems() {
@@ -292,10 +297,7 @@ export default class TableMenu extends Component {
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                                 {
-                                                    s.products.map(x => <ItemButton key={x.id} title={x.en_name} details={x.product_customizes} addAndRemove color={x.category_color}
-                                                        onDelete={() => alert('item will remove')}
-                                                        onPressMid={() => Actions.customize({ id: x.id, item: x, })}
-                                                    />)
+                                                    s.products.map(x => this.renderProduct(x))
                                                 }
                                             </View>
                                         </View>
@@ -306,7 +308,7 @@ export default class TableMenu extends Component {
                         :
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                             {
-                                this.state.barItems.map(x => <ItemButton key={x.id} title={x.en_name} addAndRemove category={x.category} />)
+                                this.state.barItems.map(x => this.renderProduct(x))
                             }
                         </View>
                 }
