@@ -15,7 +15,7 @@ export default class App extends React.Component
     super(props);
     this.state = { loading: true };
 
-    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.LANDSCAPE);
+   Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.ALL);
   }
 
   async componentWillMount() {
