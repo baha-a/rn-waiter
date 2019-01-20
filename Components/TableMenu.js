@@ -249,7 +249,7 @@ export default class TableMenu extends Component {
                         return (
                             <View key={client.client_number}>
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent:'flex-start' }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent: 'flex-start' }}>
                                     {
                                         client.products.map(x => this.renderProduct(x, 'client', client.client_number))
                                     }
@@ -341,7 +341,7 @@ export default class TableMenu extends Component {
                                                 <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
                                             </TouchableOpacity>
 
-                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent:'flex-start' }}>
+                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent: 'flex-start' }}>
                                                 {
                                                     s.products.map(x => this.renderProduct(x, 'service', s.service_number))
                                                 }
@@ -352,7 +352,7 @@ export default class TableMenu extends Component {
                             }
                         </View>
                         :
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent:'flex-start' }}>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
                             {
                                 this.state.barItems.map(x => this.renderProduct(x, 'bar'))
                             }
@@ -384,18 +384,33 @@ export default class TableMenu extends Component {
                 service_number: x.service_number,
                 service_status: 'ToBeCall',
                 service_type: 'prepaid',
-                products: x.products.map(p => ({
-                    product_id: p.id,
-                    clients: p.clients && p.clients.slice(),
-                    dish_number: 1,
-                    product_customizes: p.product_customizes && p.product_customizes.slice(),
-                }))
+                products: buildProducts(x.products)
             })),
 
             //bar: this.state.barItems.slice(),
         })
             .then(x => alert('order successfully saved'));
     }
+    buildProducts(products) {
+        let dishnumber = 0;
+        let result = [];
+
+        products.forEach(p => {
+            if (p.clients) {
+                p.clients.forEach(c => {
+                    result.push({
+                        product_id: p.id,
+                        client_number: c,
+                        dish_number: ++dishnumber,
+                        product_customizes: p.product_customizes && p.product_customizes.slice(),
+                    });
+                });
+            }
+        });
+
+        return result;
+    }
+
 
     render() {
 
