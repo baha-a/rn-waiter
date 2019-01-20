@@ -8,14 +8,22 @@ import { Actions } from 'react-native-router-flux';
 export default class Customize extends Component {
     constructor(props) {
         super(props);
+        
+        let {
+            clients = [],
+            product_customizes = [],
+            discount = 0,
+            discountType = '$',
+        } = props.item;
+
         this.state = {
-            selectedOptions: [],
-            selectedClient: [],
+            selectedOptions: product_customizes.slice(),
+            selectedClient: clients.slice(),
             clients: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             options: [],
 
-            discount: 0,
-            discountType: '$',
+            discount: discount,
+            discountType: discountType,
         };
 
         this.toggleSelectForOption = this.toggleSelectForOption.bind(this);
@@ -29,20 +37,6 @@ export default class Customize extends Component {
     }
 
     componentDidMount() {
-        let {
-            clients = [],
-            product_customizes = [],
-            discount = 0,
-            discountType = '$',
-        } = this.props.item;
-
-        this.setState({
-            discount: discount,
-            discountType: discountType,
-            selectedClient: clients.slice(),
-            selectedOptions: product_customizes.slice()
-        });
-
         Api.getCustomizes(this.props.id).then(result => { if (result) this.setState({ options: result });});
     }
 

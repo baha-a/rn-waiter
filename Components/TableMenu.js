@@ -249,7 +249,7 @@ export default class TableMenu extends Component {
                         return (
                             <View key={client.client_number}>
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent:'flex-start' }}>
                                     {
                                         client.products.map(x => this.renderProduct(x, 'client', client.client_number))
                                     }
@@ -341,7 +341,7 @@ export default class TableMenu extends Component {
                                                 <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
                                             </TouchableOpacity>
 
-                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent:'flex-start' }}>
                                                 {
                                                     s.products.map(x => this.renderProduct(x, 'service', s.service_number))
                                                 }
@@ -352,7 +352,7 @@ export default class TableMenu extends Component {
                             }
                         </View>
                         :
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent:'flex-start' }}>
                             {
                                 this.state.barItems.map(x => this.renderProduct(x, 'bar'))
                             }
