@@ -91,6 +91,30 @@ export default class TableMenu extends Component {
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
         TableMenu.addItemEvt = (x) => {
+
+            if(x.isTasting){
+                let services = this.state.services.slice();
+                if (!services || services.length == 0)
+                    services = [];
+
+                x.services.forEach(s => {
+                    let service = services.find(y => y.service_number == s.service_number);
+                    if(!service) {
+                        service = { service_number:s.service_number, products:[]};
+                        services.push(service);
+                    }
+                    s.forEach(p => {
+                        p.isTasting = true;
+                        p.color = x.color;
+                        service.products.push(p);
+                    });
+                });
+
+                this.setState({ services: services, selectedTab: 1, selectedSubTab: 1 });
+
+                return;
+            }
+
             x.clients = [this.props.selectedClient];
             if (x.isBar) {
                 let bar = this.state.barItems.slice();
@@ -102,7 +126,7 @@ export default class TableMenu extends Component {
                 if (!services || services.length == 0)
                     services = [{ service_number: 1, products: [x] }];
                 else
-                    services.find(x => x.service_number == this.state.selectedService).products.push(x);
+                    services.find(y => y.service_number == this.state.selectedService).products.push(x);
 
                 this.setState({ services: services, selectedTab: 1, selectedSubTab: 1 });
             }
@@ -299,6 +323,14 @@ export default class TableMenu extends Component {
             x.product_customizes.forEach(x => {
                 details.push(x.custom_name);
             });
+        }
+
+        if(x.isTasting){
+            return <ItemButton
+                key={x.id} 
+                title={x.tasting_name}
+                color={x.color}
+            />;
         }
 
         return <ItemButton

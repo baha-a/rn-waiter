@@ -16,23 +16,9 @@ export default class Accordion extends Component {
       addNewItem: 0,
       hotjarEnabled: [],
 
+      sections: [],
 
-      sections: [
-        // {
-        //   id: 1, category_name: 'Main Dish', color: '#546e7a', content:
-        //     [
-        //       { id: 1, en_name: 'item1', price: 24, category: 1 },
-        //       { id: 2, en_name: 'item2', price: 991, category: 1 },
-        //       { id: 3, en_name: 'item3', price: 2, category: 1 }
-        //     ]
-        // },
-        // { id: 2, category_name: 'Sandwich', color: '#6d4c41', content: [] },
-        // { id: 3, category_name: 'Salad', color: '#7cb342', content: [] },
-        // { id: 4, category_name: 'Drinks', color: '#fdd835', content: [] },
-        // { id: 5, category_name: 'Sweet', color: '#e53935', content: [] },
-      ],
       ready: false,
-
     }
 
     this._body = this._body.bind(this);
@@ -48,14 +34,31 @@ export default class Accordion extends Component {
         this.addIsBarProperty(cat);
         this.addCategoryNumberToProducts(cat);
         this.setState({ sections: cat, ready: true });
+      }).then(() => {
+
+        Api.getTasting()
+          .then(tast =>
+            this.setState({
+              sections: [
+                ...this.state.sections,
+                { id: -1, category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }
+              ]
+            })
+          );
+
       });
   }
 
-  addIsBarProperty(cats){
-    if(cats == null)
+  addIsTastingProperty(tasts) {
+    tasts.forEach(t => t.isTasting = true);
+    return tasts;
+  }
+
+  addIsBarProperty(cats) {
+    if (cats == null)
       return;
     cats.forEach(c => {
-      if(c.isBar || c.category_name.toLowerCase() == 'bar'){
+      if (c.isBar || c.category_name.toLowerCase() == 'bar') {
         c.products.forEach(p => p.isBar = true);
         c.sub_categories.forEach(p => p.isBar = true);
         this.addIsBarProperty(c.sub_categories);
@@ -63,12 +66,12 @@ export default class Accordion extends Component {
     });
   }
 
-  addCategoryNumberToProducts(cats){
-    if(cats == null)
+  addCategoryNumberToProducts(cats) {
+    if (cats == null)
       return;
     cats.forEach(c => {
-        c.products.forEach(p => p.category_id = c.id);
-        this.addCategoryNumberToProducts(c.sub_categories);
+      c.products.forEach(p => p.category_id = c.id);
+      this.addCategoryNumberToProducts(c.sub_categories);
     });
   }
 
@@ -146,22 +149,26 @@ export default class Accordion extends Component {
       }}>
 
         {
-          this.state.addNewItem == item.id && <ItemPriceBar onAdd={(name,price)=>{
+          this.state.addNewItem == item.id && <ItemPriceBar onAdd={(name, price) => {
             let sections = this.state.sections.slice();
-            let section = sections.find(x=>x.id == item.id);
-            section.products.push({id: Api.guid() ,en_name:name, price:price, isBar: section.isBar});
+            let section = sections.find(x => x.id == item.id);
+            section.products.push({ id: Api.guid(), en_name: name, price: price, isBar: section.isBar });
             this.setState({ addNewItem: 0, sections: sections });
           }} />
         }
 
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
-          {
-            item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price}
-              onPressMid={() => this.addItemToMenu(x)} />)
-          }
+          {this.renderProductsOfCategory(item)}
         </View>
       </View>
     );
+  }
+
+  renderProductsOfCategory(item) {
+    if (item.isTasting)
+      return item.products.map(x => <ItemButton key={x.id} title={x.tasting_name} color={item.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+
+    return item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
   }
 
   addItemToMenu(x) {

@@ -20,12 +20,18 @@ export default class Api {
             .catch(Api.onError);
     }
 
-    static getCustomizes(id){
+    static getCustomizes(id) {
         return fetch(baseUrl + 'items/customizes/' + id)
             .then(r => r.json())
             .catch(Api.onError);
     }
-    
+
+    static getTasting() {
+        return fetch(baseUrl + 'tasting')
+            .then(r => r.json())
+            .catch(Api.onError);
+    }
+
     static postOrder(order) {
         return fetch(
             baseUrl + 'orders',
@@ -60,7 +66,7 @@ export default class Api {
         if (Api.colorMaps.findIndex(x => x.id == id) == -1) {
             Api.colorMaps.push({ id: id, color: Api.colorStack[Api.nextColorIndex++ % Api.colorStack.length] });
         }
-        
+
         return Api.colorMaps.find(x => x.id == id).color;
     }
 
@@ -72,13 +78,13 @@ export default class Api {
         /// <param name="separator" type="String" optional="true">
         /// The optional separator for grouping the generated segmants: default "-".    
         /// </param>
-    
+
         var delim = separator || "-";
-    
+
         function S4() {
             return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
         }
-    
+
         return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
     };
 }
