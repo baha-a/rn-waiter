@@ -386,9 +386,9 @@ export default class TableMenu extends Component {
                 service_type: 'prepaid',
                 products: x.products.map(p => ({
                     product_id: p.id,
-                    clients: p.clients.slice(),
+                    clients: p.clients && p.clients.slice(),
                     dish_number: 1,
-                    product_customizes: p.product_customizes.slice(),
+                    product_customizes: p.product_customizes && p.product_customizes.slice(),
                 }))
             })),
 
