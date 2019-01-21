@@ -29,27 +29,9 @@ export default class TableMenu extends Component {
             doneServices: [],
             selectedService: 1,
 
-            services: [{
-                service_number: 1,
-                products: [{ id: 2, name: 'item2', price: 991, category: 5 },
-                { id: 43, name: 'item33', price: 2, category: 3 }]
-            },
-            {
-                service_number: 3, products: [{ id: 2, name: 'item2', price: 991, category: 5 },
-                { id: 43, name: 'item33', price: 2, category: 3 }]
-            },
+            services: [
+                //{ service_number: 1, products: [{ id: 2, name: 'item2', price: 991, category: 5 }] }
             ],
-
-            // clients: [{
-            //     client_number: 1,
-            //     products: [{ id: 2, name: 'item2', price: 991, category: 5 },
-            //     { id: 3, name: 'item3', price: 2, category: 1 },]
-            // },
-            // {
-            //     client_number: 2,
-            //     items: [{ id: 2, name: 'item2', price: 991, category: 4 },
-            //     { id: 3, name: 'item3', price: 2, category: 5 }]
-            // }]
         };
 
         this.postOrder = this.postOrder.bind(this);
@@ -91,14 +73,11 @@ export default class TableMenu extends Component {
 
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
-        TableMenu.addItemEvt = (x) => {
-
-            x.dish_number = TableMenu.dish_number++;
-
+        TableMenu.addItemEvt = (x) => {            
             if (x.isTasting) {
                 let services = this.state.services.slice();
                 if (!services || services.length == 0)
-                    services = [];
+                services = [];
 
                 x.services.forEach(s => {
                     let service = services.find(y => y.service_number == s.service_number);
@@ -109,6 +88,7 @@ export default class TableMenu extends Component {
                     s.products.forEach(p => {
                         p.isTasting = true;
                         p.color = x.color;
+                        p.dish_number = TableMenu.dish_number++;
                         service.products.push(p);
                     });
                 });
@@ -117,6 +97,8 @@ export default class TableMenu extends Component {
 
                 return;
             }
+
+            x.dish_number = TableMenu.dish_number++;
 
             x.clients = [this.props.selectedClient];
             if (x.isBar) {
@@ -278,7 +260,7 @@ export default class TableMenu extends Component {
                         return (
                             <View key={client.client_number}>
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent: 'flex-start' }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems:'flex-start', alignContent: 'flex-start' }}>
                                     {
                                         client.products.map(x => this.renderProduct(x, 'client'))
                                     }
@@ -385,7 +367,7 @@ export default class TableMenu extends Component {
                                                 <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
                                             </TouchableOpacity>
 
-                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent: 'flex-start' }}>
+                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems:'flex-start', alignContent: 'flex-start' }}>
                                                 {
                                                     s.products.map(x => this.renderProduct(x, 'service'))
                                                 }
