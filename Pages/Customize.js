@@ -37,7 +37,7 @@ export default class Customize extends Component {
     }
 
     componentDidMount() {
-        Api.getCustomizes(this.props.id).then(result => { if (result) this.setState({ options: result });});
+        Api.getCustomizes(this.props.item.id).then(result => { if (result) this.setState({ options: result });});
     }
 
     toggleSelectForOption(id, value) {
@@ -67,7 +67,6 @@ export default class Customize extends Component {
     save() {
         if (this.props.onSave) {
             this.props.onSave({
-                id: this.props.id,
                 options: this.state.selectedOptions.slice(),
                 clients: this.state.selectedClient.slice(),
                 discountType: this.state.discountType,

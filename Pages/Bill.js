@@ -6,6 +6,8 @@ import Invoice from '../Components/Invoice';
 import FAIcon from '../Components/FAIcon';
 import Api from "../api";
 import Loader from '../Components/Loader';
+import { Actions } from 'react-native-router-flux';
+import { ReloadBtn } from '../Components/ReloadBtn';
 
 const Row = ({ children }) => {
   return (<View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
@@ -139,6 +141,9 @@ export default class Bill extends Component {
   renderInvoices() {
     let res = [],
       bills = this.state.invoiceData;
+    if (!bills) {
+      return <ReloadBtn newProps={this.props}/>;
+    }
 
     for (let i = 0; i < bills.length; i += 4) {
       let items = [];

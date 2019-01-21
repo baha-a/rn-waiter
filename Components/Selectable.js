@@ -30,7 +30,7 @@ export default class Selectable extends Component {
         let backgroundColor = this.state.selected ? '#007bff' : '#fff';
 
         return (
-            <TouchableOpacity style={{ padding: 10, borderWidth: 1, borderColor: borderColor, backgroundColor: backgroundColor }}
+            <TouchableOpacity style={{ margin:4, padding: 10, borderWidth: 1, borderColor: borderColor, backgroundColor: backgroundColor }}
                 onPress={this.toggleSelection}>
                 <Text style={{ color: titleColor }}> {this.props.title} </Text>
             </TouchableOpacity>

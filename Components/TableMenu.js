@@ -56,6 +56,7 @@ export default class TableMenu extends Component {
     }
 
     static addItemEvt = null;
+    static dish_number = 1;
     static addItem(x) {
         if (TableMenu.addItemEvt)
             TableMenu.addItemEvt(x);
@@ -91,6 +92,8 @@ export default class TableMenu extends Component {
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
         TableMenu.addItemEvt = (x) => {
+
+            x.dish_number = TableMenu.dish_number++;
 
             if (x.isTasting) {
                 let services = this.state.services.slice();
@@ -277,7 +280,7 @@ export default class TableMenu extends Component {
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent: 'flex-start' }}>
                                     {
-                                        client.products.map(x => this.renderProduct(x, 'client', client.client_number))
+                                        client.products.map(x => this.renderProduct(x, 'client'))
                                     }
                                 </View>
                             </View>
@@ -288,35 +291,42 @@ export default class TableMenu extends Component {
         );
     }
 
-    customizeItem(item, type, parentId) {
-        let { id, options, clients, discount, discountType } = item;
-        //alert(JSON.stringify({id, options, clients}));
+    customizeItem(item, type) {
+        let { dish_number } = item.item;
 
         if (type == 'bar') {
             let bar = this.state.barItems.slice();
-            let newItem = bar.find(x => x.id == id);
-            newItem.clients = clients.slice();
-            newItem.product_customizes = options.slice();
-            newItem.discount = discount;
-            newItem.discountType = discountType;
+            let newItem = bar.find(x => x.dish_number == dish_number);
 
+            this.fillNewItemProperty(newItem, item);
             this.setState({ barItems: bar });
         }
-        else if (type == 'service') {
+        else if (type == 'service' || type == 'client') {
             let services = this.state.services.slice();
-            let newItem = services.find(x => x.service_number == parentId).products.find(x => x.id == id);
-            newItem.clients = clients.slice();
-            newItem.product_customizes = options.slice();
-            newItem.discount = discount;
-            newItem.discountType = discountType;
+            let newItem = null;
+            services.forEach(s => {
+                newItem = s.products.find(x => x.dish_number == dish_number);
+                if (newItem) {
+                    return;
+                }
+            });
 
-            this.setState({ services: services });
-        } else if (type == 'client') {
-
+            if (newItem) {
+                this.fillNewItemProperty(newItem, item);
+                this.setState({ services: services });
+            }
         }
     }
 
-    renderProduct(x, type, parentId) {
+    fillNewItemProperty(newItem, oldItem) {
+        let { options, clients, discount, discountType } = oldItem;
+        newItem.clients = !clients ? [] : clients.slice();
+        newItem.product_customizes = !options ? [] : options.slice();
+        newItem.discount = discount;
+        newItem.discountType = discountType;
+    }
+
+    renderProduct(x, type) {
         let details = [];
         if (x.discount && x.discount > 0) {
             details.push(x.discountType + '' + x.discount + ' off');
@@ -329,21 +339,21 @@ export default class TableMenu extends Component {
 
         if (x.isTasting) {
             return <ItemButton
-                key={x.id}
+                key={x.dish_number}
                 title={x.tasting_name}
                 color={x.color}
             />;
         }
 
         return <ItemButton
-            key={x.id}
+            key={x.dish_number}
             title={x.en_name}
             details={details}
             clients={x.clients}
             addAndRemove
             color={Api.mapCategoryWithColors(x.category_id)}
             onDelete={() => alert('item will remove')}
-            onPressMid={() => Actions.customize({ id: x.id, item: x, onSave: (item) => this.customizeItem(item, type, parentId) })}
+            onPressMid={() => Actions.customize({ item: x, onSave: (item) => this.customizeItem(item, type) })}
         />;
     }
 
@@ -377,7 +387,7 @@ export default class TableMenu extends Component {
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignContent: 'flex-start' }}>
                                                 {
-                                                    s.products.map(x => this.renderProduct(x, 'service', s.service_number))
+                                                    s.products.map(x => this.renderProduct(x, 'service'))
                                                 }
                                             </View>
                                         </View>
@@ -426,7 +436,6 @@ export default class TableMenu extends Component {
             .then(x => alert('order successfully saved'));
     }
     buildProducts(products) {
-        let dishnumber = 0;
         let result = [];
 
         products.forEach(p => {
@@ -435,9 +444,13 @@ export default class TableMenu extends Component {
                     result.push({
                         product_id: p.id,
                         client_number: c,
-                        dish_number: ++dishnumber,
                         product_customizes: p.product_customizes && p.product_customizes.slice(),
                     });
+                });
+            } else {
+                result.push({
+                    product_id: p.id,
+                    product_customizes: p.product_customizes && p.product_customizes.slice(),
                 });
             }
         });
