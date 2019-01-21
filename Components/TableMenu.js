@@ -29,9 +29,7 @@ export default class TableMenu extends Component {
             doneServices: [],
             selectedService: 1,
 
-            services: [
-                //{ service_number: 1, products: [{ id: 2, name: 'item2', price: 991, category: 5 }] }
-            ],
+            services: [/*{ service_number: 1, products: [{ id: 2, name: 'item2', price: 991, category: 5 }] }*/],
         };
 
         this.postOrder = this.postOrder.bind(this);
@@ -89,6 +87,7 @@ export default class TableMenu extends Component {
                         p.isTasting = true;
                         p.color = x.color;
                         p.dish_number = TableMenu.dish_number++;
+                        p.clients = [this.props.selectedClient];
                         service.products.push(p);
                     });
                 });
@@ -99,7 +98,6 @@ export default class TableMenu extends Component {
             }
 
             x.dish_number = TableMenu.dish_number++;
-
             x.clients = [this.props.selectedClient];
             if (x.isBar) {
                 let bar = this.state.barItems.slice();
@@ -420,19 +418,22 @@ export default class TableMenu extends Component {
     buildProducts(products) {
         let result = [];
 
+        let dish_number = 1;
         products.forEach(p => {
             if (p.clients) {
                 p.clients.forEach(c => {
                     result.push({
                         product_id: p.id,
                         client_number: c,
-                        product_customizes: p.product_customizes && p.product_customizes.slice(),
+                        dish_number: dish_number++,
+                        product_customizes: p.product_customizes && p.product_customizes.map(x => x.id),
                     });
                 });
             } else {
                 result.push({
                     product_id: p.id,
-                    product_customizes: p.product_customizes && p.product_customizes.slice(),
+                    dish_number: dish_number++,
+                    product_customizes: p.product_customizes && p.product_customizes.map(x => x.id),
                 });
             }
         });
