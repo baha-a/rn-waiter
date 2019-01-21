@@ -11,7 +11,7 @@ export default class Navbar extends Component {
         <Content contentContainerStyle={{flex: 1, flexDirection: 'row', justifyContent:'center', alignItems:'center'}}>
 
           <Left>
-            <Button onPress={() => Actions.order()} transparent>
+            <Button onPress={() => Actions.replace('order')} transparent>
               <Text style={{ color: '#fff' }}> Order </Text>
             </Button>
           </Left>
@@ -22,7 +22,7 @@ export default class Navbar extends Component {
           </Body> */}
 
           <Right>
-            <Button onPress={() => Actions.bill()} transparent>
+            <Button onPress={() => Actions.replace('bill')} transparent>
               <Text style={{ color: '#fff' }}> Bill </Text>
             </Button>
           </Right>

@@ -92,18 +92,18 @@ export default class TableMenu extends Component {
 
         TableMenu.addItemEvt = (x) => {
 
-            if(x.isTasting){
+            if (x.isTasting) {
                 let services = this.state.services.slice();
                 if (!services || services.length == 0)
                     services = [];
 
                 x.services.forEach(s => {
                     let service = services.find(y => y.service_number == s.service_number);
-                    if(!service) {
-                        service = { service_number:s.service_number, products:[]};
+                    if (!service) {
+                        service = { service_number: s.service_number, products: [] };
                         services.push(service);
                     }
-                    s.forEach(p => {
+                    s.products.forEach(p => {
                         p.isTasting = true;
                         p.color = x.color;
                         service.products.push(p);
@@ -159,14 +159,16 @@ export default class TableMenu extends Component {
         let clients = [];
         services.forEach(s => {
             s.products.forEach(p => {
-                p.clients.forEach(c => {
-                    let f = clients.find(x => x.client_number == c);
-                    if (f != null) {
-                        f.products.push(p);
-                    } else {
-                        clients.push({ client_number: c, products: [p] });
-                    }
-                });
+                if (p.clients) {
+                    p.clients.forEach(c => {
+                        let f = clients.find(x => x.client_number == c);
+                        if (f != null) {
+                            f.products.push(p);
+                        } else {
+                            clients.push({ client_number: c, products: [p] });
+                        }
+                    });
+                }
             });
         });
         return clients;
@@ -325,9 +327,9 @@ export default class TableMenu extends Component {
             });
         }
 
-        if(x.isTasting){
+        if (x.isTasting) {
             return <ItemButton
-                key={x.id} 
+                key={x.id}
                 title={x.tasting_name}
                 color={x.color}
             />;
@@ -416,7 +418,7 @@ export default class TableMenu extends Component {
                 service_number: x.service_number,
                 service_status: 'ToBeCall',
                 service_type: 'prepaid',
-                products: buildProducts(x.products)
+                products: this.buildProducts(x.products)
             })),
 
             //bar: this.state.barItems.slice(),
@@ -476,6 +478,8 @@ export default class TableMenu extends Component {
                             <Text style={{ fontSize: 18 }}> Table No# </Text>
                             <TextInput keyboardType='numeric' style={{ backgroundColor: '#dae0e5' }}
                                 onChangeText={(v) => this.setState({ tableNumber: v })}
+                                underlineColorAndroid='rgba(0,0,0,0)'
+                                disableFullscreenUI
                                 value={this.state.tableNumber + ''}>
                             </TextInput>
                         </View>

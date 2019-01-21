@@ -165,9 +165,9 @@ export default class Accordion extends Component {
   }
 
   renderProductsOfCategory(item) {
-    if (item.isTasting)
-      return item.products.map(x => <ItemButton key={x.id} title={x.tasting_name} color={item.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
-
+    if (item.isTasting){
+      return item.products.map(x => <ItemButton key={x.id} title={x.tasting_name} color={x.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+    }
     return item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
   }
 
