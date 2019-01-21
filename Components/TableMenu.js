@@ -71,7 +71,8 @@ export default class TableMenu extends Component {
 
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
-        TableMenu.addItemEvt = (x) => {            
+        TableMenu.addItemEvt = (item) => {
+            let x = {...item};
             if (x.isTasting) {
                 let services = this.state.services.slice();
                 if (!services || services.length == 0)
