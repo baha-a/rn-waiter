@@ -84,7 +84,8 @@ export default class TableMenu extends Component {
                         service = { service_number: s.service_number, products: [] };
                         services.push(service);
                     }
-                    s.products.forEach(p => {
+                    s.products.forEach(prodcut => {
+                        let p = {...prodcut};
                         p.isTasting = true;
                         p.color = x.color;
                         p.dish_number = TableMenu.dish_number++;

@@ -54,7 +54,9 @@ export default class ItemButton extends Component {
 
             details,
 
-            clients = []
+            clients = [],
+
+            style={}
         } = this.props;
 
         let padding = 6, radius = 3;
@@ -63,14 +65,13 @@ export default class ItemButton extends Component {
             color = Api.mapCategoryWithColors(category);
 
         return (
-            <View style={{ flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }}>
-                <View style={{ flexDirection: 'row' }}>
+            <View style={[style, { flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }]}>
+                <View style={{ flexDirection: 'row', justifyContent:'space-between' }}>
                     {
                         addAndRemove &&
                         <TouchableOpacity style={{
                             padding: padding,
                             backgroundColor: 'rgba(0,0,0,0.1)',
-                            alignSelf: 'flex-start',
                             borderTopLeftRadius: radius,
                             borderBottomLeftRadius: radius,
                         }}
@@ -90,7 +91,7 @@ export default class ItemButton extends Component {
                     >
                         { addAndRemove && <Text style={{ color: '#fff', fontWeight: 'bold' }}> {this.state.count} </Text> }
 
-                        <Text style={{ color: '#fff' }}> {title} </Text>
+                        <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
                     </TouchableOpacity>
 
                     {
@@ -98,7 +99,6 @@ export default class ItemButton extends Component {
                         <TouchableOpacity style={{
                             padding: padding,
                             backgroundColor: 'rgba(0,0,0,0.1)',
-                            alignSelf: 'flex-end',
                             borderTopRightRadius: radius,
                             borderBottomRightRadius: radius,
                         }}
@@ -112,7 +112,6 @@ export default class ItemButton extends Component {
                         <TouchableOpacity style={{
                             padding: padding,
                             backgroundColor: 'rgba(0,0,0,0.1)',
-                            alignSelf: 'flex-end',
                             borderTopRightRadius: radius,
                             borderBottomRightRadius: radius,
                         }}

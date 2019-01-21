@@ -55,13 +55,21 @@ export default class Accordion extends Component {
   }
 
   addIsBarProperty(cats) {
-    if (cats == null)
+    if (cats == null){
       return;
+    }
+
     cats.forEach(c => {
       if (c.isBar || c.category_name.toLowerCase() == 'bar') {
+        let products = [];
+        c.sub_categories.forEach(s => {
+          s.isBar = true;
+          products = [...products, ...s.products];
+        });
+        c.sub_categories = [];
+        c.products = products;
         c.products.forEach(p => p.isBar = true);
-        c.sub_categories.forEach(p => p.isBar = true);
-        this.addIsBarProperty(c.sub_categories);
+        //this.addIsBarProperty(c.sub_categories);
       }
     });
   }
@@ -166,9 +174,12 @@ export default class Accordion extends Component {
 
   renderProductsOfCategory(item) {
     if (item.isTasting){
-      return item.products.map(x => <ItemButton key={x.id} title={x.tasting_name} color={x.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+      return item.products.map(x => <ItemButton style={{width:'42%'}} key={x.id} title={x.tasting_name} color={x.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
     }
-    return item.products.map(x => <ItemButton key={x.id} title={x.en_name} category={item.id} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+    if(item.isBar){
+      return item.products.map(x => <ItemButton style={{width:'42%'}} key={x.id} title={x.en_name} category={item.id} onPressMid={() => this.addItemToMenu(x)} />);
+    }
+    return item.products.map(x => <ItemButton style={{width:'42%'}} key={x.id} title={x.en_name} category={item.id} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
   }
 
   addItemToMenu(x) {
