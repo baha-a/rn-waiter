@@ -7,7 +7,7 @@ import ItemPriceBar from './ItemPriceBar';
 import Api from '../api';
 import Loader from './Loader';
 import TableMenu from './TableMenu';
-
+import ReloadBtn from './ReloadBtn';
 
 export default class Accordion extends Component {
   constructor(props) {
@@ -19,6 +19,7 @@ export default class Accordion extends Component {
       sections: [],
 
       ready: false,
+      error:false,
     }
 
     this._body = this._body.bind(this);
@@ -29,24 +30,28 @@ export default class Accordion extends Component {
 
 
   componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData(){
     Api.getCategories()
-      .then(cat => {
-        this.addIsBarProperty(cat);
-        this.addCategoryNumberToProducts(cat);
-        this.setState({ sections: cat, ready: true });
-      }).then(() => {
+    .then(cat => {
+      this.addIsBarProperty(cat);
+      this.addCategoryNumberToProducts(cat);
+      this.setState({ sections: cat, ready: true, error: false });
+    }).then(() => {
 
-        Api.getTasting()
-          .then(tast =>
-            this.setState({
-              sections: [
-                ...this.state.sections,
-                { id: -1, category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }
-              ]
-            })
-          );
-
-      });
+      Api.getTasting()
+        .then(tast =>
+          this.setState({
+            sections: [
+              ...this.state.sections,
+              { id: -1, category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }
+            ]
+          })
+        );
+    })
+    .catch(x=> this.setState({ ready:true, error:true}));
   }
 
   addIsTastingProperty(tasts) {
@@ -189,6 +194,8 @@ export default class Accordion extends Component {
   render() {
     if (this.state.ready == false)
       return <Loader />
+    if(this.state.error)
+      return <ReloadBtn onReload={()=> { this.setState({ ready:false}); this.fetchData();}} />
     return <Acc dataArray={this.state.sections} renderHeader={this._head} renderContent={this._body} />;
   }
 }

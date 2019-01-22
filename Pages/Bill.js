@@ -7,7 +7,7 @@ import FAIcon from '../Components/FAIcon';
 import Api from "../api";
 import Loader from '../Components/Loader';
 import { Actions } from 'react-native-router-flux';
-import { ReloadBtn } from '../Components/ReloadBtn';
+import ReloadBtn from '../Components/ReloadBtn';
 
 const Row = ({ children }) => {
   return (<View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
@@ -45,33 +45,42 @@ export default class Bill extends Component {
       selectedInvoices: [],
 
       ready: false,
+      error: false,
     }
   }
 
   componentDidMount() {
+    this.fetchData();
+  }
+  fetchData() {
     Api.getOrders()
-      .then(orders => this.setState({ invoiceData: orders, ready: true }));
+      .then(orders => this.setState({ invoiceData: orders, ready: true, error: false }))
+      .catch(x => this.setState({ ready: true, error: true }));
   }
 
-
   render() {
+    let content = null;
+    if (this.state.ready == false) {
+      content = <Loader />;
+    } else if (this.state.error) {
+      content = <ReloadBtn onReload={() => { this.setState({ ready: false }); this.fetchData(); }} />;
+    } else {
+      content = (<ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}>
+        <CardView>
+          {this.renderSearchAndCombinBar()}
+        </CardView>
+
+        <CardView>
+          {this.renderInvoices()}
+        </CardView>
+      </ScrollView>);
+    }
+
+
     return (
       <Container>
         <Navbar />
-        {
-          this.state.ready == false ?
-            <Loader />
-            :
-            <ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}>
-              <CardView>
-                {this.renderSearchAndCombinBar()}
-              </CardView>
-
-              <CardView>
-                {this.renderInvoices()}
-              </CardView>
-            </ScrollView>
-        }
+        {content}
       </Container>
     )
   }
@@ -142,7 +151,7 @@ export default class Bill extends Component {
     let res = [],
       bills = this.state.invoiceData;
     if (!bills) {
-      return <ReloadBtn newProps={this.props}/>;
+      return <Text> no bills </Text>
     }
 
     for (let i = 0; i < bills.length; i += 4) {

@@ -335,7 +335,7 @@ export default class TableMenu extends Component {
             addAndRemove
             color={Api.mapCategoryWithColors(x.category_id)}
             onDelete={() => alert('item will remove')}
-            onPressMid={() => Actions.customize({ item: x, onSave: (item) => this.customizeItem(item, type) })}
+            onPressMid={() => Actions.customize({ item: x, services:[1,2,3,4,5], selectedService:2, onSave: (item) => this.customizeItem(item, type) })}
         />;
     }
 
