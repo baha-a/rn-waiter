@@ -1,40 +1,41 @@
 const baseUrl = 'http://damas55.upos.ca/public/api/';
 
+const fetchData = (url, config = null) => {
+    return fetch(baseUrl + url, config)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            else throw new Error('server returned bad response.');
+        }).catch(Api.onError);
+};
+
 export default class Api {
 
+
     static getCategories() {
-        return fetch(baseUrl + 'categories')
-            .then(r => r.json())
-            .catch(Api.onError);
+        return fetchData('categories');
     }
 
     static getOrder(id) {
-        return fetch(baseUrl + 'orders/' + id)
-            .then(r => r.json())
-            .catch(Api.onError);
+        return fetchData('orders/' + id);
     }
 
     static getOrders() {
-        return fetch(baseUrl + 'orders')
-            .then(r => r.json())
-            .catch(Api.onError);
+        return fetchData('orders');
     }
 
     static getCustomizes(id) {
-        return fetch(baseUrl + 'items/customizes/' + id)
-            .then(r => r.json())
-            .catch(Api.onError);
+        return fetchData('items/customizes/' + id);
     }
 
     static getTasting() {
-        return fetch(baseUrl + 'tasting')
-            .then(r => r.json())
-            .catch(Api.onError);
+        return fetchData('tasting');
     }
 
     static postOrder(order) {
-        return fetch(
-            baseUrl + 'orders',
+        return fetchData(
+            'orders',
             {
                 method: 'POST',
                 headers: {
@@ -48,7 +49,7 @@ export default class Api {
     }
 
     static onError(e) {
-        console.log('network connection error');
+        console.log(e);
     }
 
     static guid(separator) {

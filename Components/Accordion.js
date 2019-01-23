@@ -19,7 +19,7 @@ export default class Accordion extends Component {
       sections: [],
 
       ready: false,
-      error:false,
+      error: false,
     }
 
     this._body = this._body.bind(this);
@@ -33,25 +33,23 @@ export default class Accordion extends Component {
     this.fetchData();
   }
 
-  fetchData(){
+  fetchData() {
     Api.getCategories()
-    .then(cat => {
-      this.addIsBarProperty(cat);
-      this.addCategoryNumberToProducts(cat);
-      this.setState({ sections: cat, ready: true, error: false });
-    }).then(() => {
+      .then(cat => {
+        this.addIsBarProperty(cat);
+        this.addCategoryNumberToProducts(cat);
+        this.setState({ sections: cat, ready: true, error: false });
+      }).then(() => {
 
-      Api.getTasting()
-        .then(tast =>
-          this.setState({
-            sections: [
-              ...this.state.sections,
-              { id: -1, category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }
-            ]
-          })
-        );
-    })
-    .catch(x=> this.setState({ ready: true, error: true }));
+        Api.getTasting()
+          .then(tast =>
+            this.setState(state => {
+              if (state == null) { return { sections: [{ id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }] } }
+              return { sections: [...state.sections, { id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }] }
+            }
+            )).catch(x => { });
+      })
+      .catch(x => this.setState({ ready: true, error: true }));
   }
 
   addIsTastingProperty(tasts) {
@@ -60,7 +58,7 @@ export default class Accordion extends Component {
   }
 
   addIsBarProperty(cats) {
-    if (cats == null){
+    if (cats == null) {
       return;
     }
 
@@ -83,7 +81,7 @@ export default class Accordion extends Component {
     if (cats == null)
       return;
     cats.forEach(c => {
-      c.products.forEach(p =>{
+      c.products.forEach(p => {
         p.category_color = c.category_color;
       });
       this.addCategoryNumberToProducts(c.sub_categories);
@@ -180,13 +178,13 @@ export default class Accordion extends Component {
   }
 
   renderProductsOfCategory(item) {
-    if (item.isTasting){
-      return item.products.map(x => <ItemButton style={{width:'42%'}} key={x.id} title={x.tasting_name} color={x.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+    if (item.isTasting) {
+      return item.products.map(x => <ItemButton style={{ width: '42%' }} key={x.id} title={x.tasting_name} color={x.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
     }
-    if(item.isBar){
-      return item.products.map(x => <ItemButton style={{width:'42%'}} key={x.id} title={x.en_name} color={x.category_color}  onPressMid={() => this.addItemToMenu(x)} />);
+    if (item.isBar) {
+      return item.products.map(x => <ItemButton style={{ width: '42%' }} key={x.id} title={x.en_name} color={x.category_color} onPressMid={() => this.addItemToMenu(x)} />);
     }
-    return item.products.map(x => <ItemButton style={{width:'42%'}} key={x.id} title={x.en_name} color={x.category_color}  price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+    return item.products.map(x => <ItemButton style={{ width: '42%' }} key={x.id} title={x.en_name} color={x.category_color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
   }
 
   addItemToMenu(x) {
@@ -194,12 +192,16 @@ export default class Accordion extends Component {
   }
 
   render() {
-    if (this.state.ready == false){
+    if (this.state.ready == false) {
       return <Loader />;
     }
-    
-    if(this.state.error){
-      return <ReloadBtn onReload={()=> { this.setState({ ready:false, error:false}); this.fetchData();}} />;
+
+    if (this.state.error) {
+      return <ReloadBtn onReload={() => { this.setState({ ready: false, error: false }); this.fetchData(); }} />;
+    }
+
+    if (!this.state.sections || this.state.sections.length == 0) {
+      return <Text>no categories</Text>;
     }
 
     return <Acc dataArray={this.state.sections} renderHeader={this._head} renderContent={this._body} />;

@@ -250,14 +250,15 @@ export default class Customize extends Component {
         </View>)
     }
 
-    tabBtn({ name }) {
-        return (<TouchableOpacity style={{
+    tabBtn(name) {
+        return (
+        <TouchableOpacity style={{
             padding: 6,
             paddingHorizontal: 12,
             backgroundColor: this.state.selectedTab == name ? '#aaa' : '#fff'
         }}
             onPress={() => this.setState({ selectedTab: name })}>
             <Text>{name}</Text>
-        </TouchableOpacity>)
+        </TouchableOpacity>);
     }
 }

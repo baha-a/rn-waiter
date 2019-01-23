@@ -35,6 +35,7 @@ export default class TableMenu extends Component {
         };
 
         this.postOrder = this.postOrder.bind(this);
+        this.customizeItem = this.customizeItem.bind(this);
     }
 
     static addItemEvt = null;
@@ -184,7 +185,7 @@ export default class TableMenu extends Component {
                     borderColor: '#ddd', borderWidth: 1, textAlignVertical: 'top'
                 }}
                     disableFullscreenUI multiline numberOfLines={5} placeholder='Other Notes'
-                    onValueChange={value => this.setState({ note: value })}
+                    onChangeText={value => this.setState({ note: value })}
                     value={this.state.note}
                 />
             </View>
@@ -283,34 +284,35 @@ export default class TableMenu extends Component {
 
         if (type == 'bar') {
             let bar = this.state.barItems.slice();
-            let newItem = bar.find(x => x.dish_number == dish_number);
+            let oldItem = bar.find(x => x.dish_number == dish_number);
 
-            this.fillNewItemProperty(newItem, item);
+            this.fillNewItemProperty(oldItem, item);
             this.setState({ barItems: bar });
         }
         else if (type == 'service' || type == 'client') {
             let services = this.state.services.slice();
             let oldItem = null;
-            let service = null;
-            services.forEach(s => {
+            let oldService = null;
+
+            for (const s of services) {
                 oldItem = s.products.find(x => x.dish_number == dish_number);
                 if (oldItem) {
-                    service = s;
-                    return;
+                    oldService = s;
+                    break;
                 }
-            });
+            }
 
             if (oldItem) {
                 this.fillNewItemProperty(oldItem, item);
-                this.moveItemToSerivce(oldItem, newItem.service, service, services);
+                this.moveItemToSerivce(oldItem, item.service, oldService, services);
                 this.setState({ services: services });
             }
         }
     }
     moveItemToSerivce(oldItem, newServiceNumber, oldService, servicesList) {
         if (oldService.service_number != newServiceNumber) {
-            oldService.products = oldService.filter(x => x.dish_number != newServiceNumber);
             servicesList.find(x => x.service_number == newServiceNumber).products.push(oldItem);
+            oldService.products = oldService.products.filter(x => x.dish_number != newServiceNumber);
         }
     }
 
@@ -351,7 +353,7 @@ export default class TableMenu extends Component {
             color={x.color || x.category_color}
             onDelete={() => this.deleteItem(x.dish_number)}
             onPressMid={() => Actions.customize({
-                item: x,
+                item: { ...x },
                 services: this.state.services.map(x => x.service_number),
                 selectedService: this.getServiceNumberOfProduct(x.dish_number),
                 onSave: (item) => this.customizeItem(item, type)
@@ -368,7 +370,7 @@ export default class TableMenu extends Component {
     deleteItem(dish_number) {
         let services = this.state.services.slice();
         services.forEach(s => {
-            s.products = s.products.slice().filter(x => x.dish_number != dish_number);
+            s.products = s.products.filter(x => x.dish_number != dish_number);
         });
         this.setState({ services });
     }
@@ -448,7 +450,7 @@ export default class TableMenu extends Component {
                 products: this.buildProducts(x.products)
             })),
 
-            //bar: this.state.barItems.slice(),
+            bar: this.state.barItems.slice(),
         })
             .then(x => alert('order successfully saved'));
     }
@@ -478,7 +480,6 @@ export default class TableMenu extends Component {
         return result;
     }
 
-
     render() {
 
         if (this.state.ready == false)
@@ -498,9 +499,10 @@ export default class TableMenu extends Component {
                     }
                     <TouchableOpacity style={{ padding: 2, backgroundColor: '#fff' }}
                         onPress={() => {
-                            let s = this.state.services.slice();
-                            s.push({ service_number: s.length + 1, products: [] });
-                            this.setState({ services: s });
+                            this.setState(state => ({
+                                services: [...state.services, { service_number: state.services.length + 1, products: [] }],
+                                selectedService: state.services.length + 1,
+                            }));
                         }}>
                         <FAIcon name='plus' />
                     </TouchableOpacity>
