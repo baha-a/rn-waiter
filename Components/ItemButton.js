@@ -44,7 +44,6 @@ export default class ItemButton extends Component {
 
     render() {
         let {
-            category,
             color,
             title,
 
@@ -60,9 +59,6 @@ export default class ItemButton extends Component {
         } = this.props;
 
         let padding = 6, radius = 3;
-
-        if (!color)
-            color = Api.mapCategoryWithColors(category);
 
         return (
             <View style={[style, { flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }]}>

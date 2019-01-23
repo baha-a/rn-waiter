@@ -51,26 +51,6 @@ export default class Api {
         console.log('network connection error');
     }
 
-
-    static colorStack = [
-        '#546e7a',
-        '#6d4c41',
-        '#7cb342',
-        '#fdd835',
-        '#e53935',
-    ];
-    static nextColorIndex = 0;
-
-    static colorMaps = [];
-    static mapCategoryWithColors(id) {
-        if (Api.colorMaps.findIndex(x => x.id == id) == -1) {
-            Api.colorMaps.push({ id: id, color: Api.colorStack[Api.nextColorIndex++ % Api.colorStack.length] });
-        }
-
-        return Api.colorMaps.find(x => x.id == id).color;
-    }
-
-
     static guid(separator) {
         /// <summary>
         ///    Creates a unique id for identification purposes.

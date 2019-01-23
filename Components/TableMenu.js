@@ -86,8 +86,8 @@ export default class TableMenu extends Component {
                         service = { service_number: s.service_number, products: [] };
                         services.push(service);
                     }
-                    s.products.forEach(p => {
-                        let p = { ...p };
+                    s.products.forEach(pr => {
+                        let p = { ...pr };
                         p.isTasting = true;
                         p.color = x.color;
                         p.dish_number = TableMenu.dish_number++;
@@ -309,7 +309,7 @@ export default class TableMenu extends Component {
     }
     moveItemToSerivce(oldItem, newServiceNumber, oldService, servicesList) {
         if (oldService.service_number != newServiceNumber) {
-            oldService.products = oldService.filter(x => x.dish_number != oldItem.dish_number);
+            oldService.products = oldService.filter(x => x.dish_number != newServiceNumber);
             servicesList.find(x => x.service_number == newServiceNumber).products.push(oldItem);
         }
     }
@@ -338,7 +338,7 @@ export default class TableMenu extends Component {
             return <ItemButton
                 key={x.dish_number}
                 title={x.tasting_name}
-                color={x.color}
+                color={x.color || x.category_color}
             />;
         }
 
@@ -348,7 +348,7 @@ export default class TableMenu extends Component {
             details={details}
             clients={x.clients}
             addAndRemove
-            color={Api.mapCategoryWithColors(x.category_id)}
+            color={x.color || x.category_color}
             onDelete={() => this.deleteItem(x.dish_number)}
             onPressMid={() => Actions.customize({
                 item: x,
