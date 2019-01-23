@@ -4,6 +4,8 @@ import Api from '../api';
 import Selectable from '../Components/Selectable';
 import DiscountInput from '../Components/DiscountInput';
 import { Actions } from 'react-native-router-flux';
+import Loader from '../Components/Loader';
+import ReloadBtn from '../Components/ReloadBtn';
 
 export default class Customize extends Component {
     constructor(props) {
@@ -33,7 +35,12 @@ export default class Customize extends Component {
 
             otherOptions: ['option 1', 'option 2', 'option 3', 'option 4', 'option 5', 'option 6', 'option 7',],
             selectedOtherOption: 'option 1',
-            notes: '',
+            note: '',
+
+            selectedTab: 'component',
+
+            ready: false,
+            error: false,
         };
 
         this.toggleSelectForOption = this.toggleSelectForOption.bind(this);
@@ -47,7 +54,12 @@ export default class Customize extends Component {
     }
 
     componentDidMount() {
-        Api.getCustomizes(this.props.item.id).then(result => { if (result) this.setState({ options: result }); });
+        Api.getCustomizes(this.props.item.id)
+            .then(result => {
+                if (result)
+                    this.setState({ options: result, ready: true, error: false });
+            })
+            .catch(x => this.setState({ ready: true, error: true }));
     }
 
     toggleSelectForOption(id, value) {
@@ -83,6 +95,7 @@ export default class Customize extends Component {
                 discount: this.state.discount,
 
                 service: this.state.selectedService,
+                note: this.state.note,
 
                 item: this.props.item,
             });
@@ -110,28 +123,83 @@ export default class Customize extends Component {
         return this.state.selectedClient.findIndex(x => x == id) != -1;
     }
 
+
+    renderTitleBar() {
+        return (<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', margin: 2, padding: 4, }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{this.props.item.en_name} Customize</Text>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', }}>
+                <Picker
+                    selectedValue={this.state.selectedService}
+                    mode='dropdown'
+                    style={{ width: 130, backgroundColor: '#6c757d', }}
+                    onValueChange={(value, index) => this.setState({ selectedService: value })}>
+                    {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
+                </Picker>
+
+                <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 6, margin: 4 }}
+                    onPress={() => this.setState({ selectedTab: 'clients' })}>
+                    <Text style={{ color: '#fff' }}>Clients</Text>
+                </TouchableOpacity>
+            </View>
+        </View>);
+    }
+
     render() {
         return (
             <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start' }}>
-                <View style={{ backgroundColor: 'rgba(0,0,0,0.1)', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', margin: 2, padding: 4, }}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{this.props.item.en_name} Customize</Text>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', }}>
-                        <Picker
-                            selectedValue={this.state.selectedService}
-                            mode='dropdown'
-                            style={{ width: 130, backgroundColor: '#6c757d', }}
-                            onValueChange={(value, index) => this.setState({ selectedService: value })}>
-                            {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
-                        </Picker>
-
-                        <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 6, margin: 4 }}>
-                            <Text style={{ color: '#fff' }}>Clients</Text>
-                        </TouchableOpacity>
-                    </View>
+                {this.renderTitleBar()}
+                {this.renderContent()}
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10 }}>
+                    <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.cancel}>
+                        <Text style={{ color: '#fff' }}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.save}>
+                        <Text style={{ color: '#fff' }}>Save</Text>
+                    </TouchableOpacity>
                 </View>
-                <ScrollView>
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingHorizontal: 10, }}>
+            </View>
+        )
+    }
+
+    renderContent() {
+        let content = null;
+        switch (this.state.selectedTab) {
+            case 'clients':
+                content = (<View
+                    style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                    {
+                        this.state.clients.map(x => <Selectable key={x}
+                            title={'client #' + x}
+                            onSelect={(value) => this.toggleSelectForClient(x, value)}
+                            selected={this.isSelectedForClient(x)}
+                        />)
+                    }
+                </View>);
+                break;
+            case 'discount':
+                content = (<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', padding: 10, }}>
+                    <Text> discount </Text>
+                    <DiscountInput
+                        placeholder='discount value'
+                        value={this.state.discount}
+                        type={this.state.discountType}
+                        onTypeChange={(type) => this.setState({ discountType: type })}
+                        onValueChange={(value) => this.setState({ discount: value })}
+                    />
+                </View>
+                )
+                break;
+            case 'weight':
+                content = <Text> weight </Text>;
+                break;
+            case 'component':
+                if (this.state.ready == false) {
+                    content = <Loader />
+                } else if (this.state.error) {
+                    content = <ReloadBtn onReload={() => { this.setState({ ready: false, error: false }); this.fetchData(); }} />
+                } else {
+                    content = (<View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingHorizontal: 10, }}>
                         <View style={{ flex: 0.3, flexDirection: 'column', padding: 10, }}>
                             <Picker
                                 selectedValue={this.state.selectedOtherOption}
@@ -143,12 +211,12 @@ export default class Customize extends Component {
                             <TextInput
                                 disableFullscreenUI
                                 underlineColorAndroid='rgba(0,0,0,0)'
-                                style={{ backgroundColor:'#fff', borderColor: '#999', borderWidth: 1, margin: 6, borderRadius:4, padding:6,textAlignVertical:'top'}}
+                                style={{ backgroundColor: '#fff', borderColor: '#999', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
                                 multiline
                                 numberOfLines={6}
                                 placeholder='Notes'
                                 onChangeText={(text) => this.setState({ notes: text })}
-                                value={this.state.notes} />
+                                value={this.state.note} />
                             <Text> clients </Text>
                         </View>
                         <View style={{ width: 1, backgroundColor: '#999' }}>
@@ -166,39 +234,30 @@ export default class Customize extends Component {
                                 }
                             </View>
                         </View>
-                    </View>
-
-                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', padding: 10, }}>
-                        <Text> discount </Text>
-                        <DiscountInput
-                            placeholder='discount value'
-                            value={this.state.discount}
-                            type={this.state.discountType}
-                            onTypeChange={(type) => this.setState({ discountType: type })}
-                            onValueChange={(value) => this.setState({ discount: value })}
-                        />
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                            {
-                                this.state.clients.map(x => <Selectable key={x}
-                                    title={'client #' + x}
-                                    onSelect={(value) => this.toggleSelectForClient(x, value)}
-                                    selected={this.isSelectedForClient(x)}
-                                />)
-                            }
-                        </View>
-
-                    </View>
-                </ScrollView>
-                <View style={{ backgroundColor: 'rgba(0,0,0,0.1)', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10 }}>
-                    <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.cancel}>
-                        <Text style={{ color: '#fff' }}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.save}>
-                        <Text style={{ color: '#fff' }}>Save</Text>
-                    </TouchableOpacity>
-                </View>
+                    </View>);
+                }
+                break;
+        }
+        return (<View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                {this.tabBtn('component')}
+                {this.tabBtn('weight')}
+                {this.tabBtn('discount')}
             </View>
-        )
+            <ScrollView>
+                {content}
+            </ScrollView>
+        </View>)
+    }
+
+    tabBtn({ name }) {
+        return (<TouchableOpacity style={{
+            padding: 6,
+            paddingHorizontal: 12,
+            backgroundColor: this.state.selectedTab == name ? '#aaa' : '#fff'
+        }}
+            onPress={() => this.setState({ selectedTab: name })}>
+            <Text>{name}</Text>
+        </TouchableOpacity>)
     }
 }

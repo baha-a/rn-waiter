@@ -30,6 +30,8 @@ export default class TableMenu extends Component {
             selectedService: 1,
 
             services: [/*{ service_number: 1, products: [{ id: 2, name: 'item2', price: 991, category: 5 }] }*/],
+
+            note: '',
         };
 
         this.postOrder = this.postOrder.bind(this);
@@ -72,11 +74,11 @@ export default class TableMenu extends Component {
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
         TableMenu.addItemEvt = (item) => {
-            let x = {...item};
+            let x = { ...item };
             if (x.isTasting) {
                 let services = this.state.services.slice();
                 if (!services || services.length == 0)
-                services = [];
+                    services = [];
 
                 x.services.forEach(s => {
                     let service = services.find(y => y.service_number == s.service_number);
@@ -84,8 +86,8 @@ export default class TableMenu extends Component {
                         service = { service_number: s.service_number, products: [] };
                         services.push(service);
                     }
-                    s.products.forEach(prodcut => {
-                        let p = {...prodcut};
+                    s.products.forEach(p => {
+                        let p = { ...p };
                         p.isTasting = true;
                         p.color = x.color;
                         p.dish_number = TableMenu.dish_number++;
@@ -181,7 +183,10 @@ export default class TableMenu extends Component {
                     marginVertical: 8, padding: 6, justifyContent: 'flex-start', borderRadius: 4,
                     borderColor: '#ddd', borderWidth: 1, textAlignVertical: 'top'
                 }}
-                    disableFullscreenUI multiline numberOfLines={5} placeholder='Other Notes' />
+                    disableFullscreenUI multiline numberOfLines={5} placeholder='Other Notes'
+                    onValueChange={value => this.setState({ note: value })}
+                    value={this.state.note}
+                />
             </View>
         );
     }
@@ -260,7 +265,7 @@ export default class TableMenu extends Component {
                         return (
                             <View key={client.client_number}>
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems:'flex-start', alignContent: 'flex-start' }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
                                     {
                                         client.products.map(x => this.renderProduct(x, 'client'))
                                     }
@@ -285,27 +290,37 @@ export default class TableMenu extends Component {
         }
         else if (type == 'service' || type == 'client') {
             let services = this.state.services.slice();
-            let newItem = null;
+            let oldItem = null;
+            let service = null;
             services.forEach(s => {
-                newItem = s.products.find(x => x.dish_number == dish_number);
-                if (newItem) {
+                oldItem = s.products.find(x => x.dish_number == dish_number);
+                if (oldItem) {
+                    service = s;
                     return;
                 }
             });
 
-            if (newItem) {
-                this.fillNewItemProperty(newItem, item);
+            if (oldItem) {
+                this.fillNewItemProperty(oldItem, item);
+                this.moveItemToSerivce(oldItem, newItem.service, service, services);
                 this.setState({ services: services });
             }
         }
     }
+    moveItemToSerivce(oldItem, newServiceNumber, oldService, servicesList) {
+        if (oldService.service_number != newServiceNumber) {
+            oldService.products = oldService.filter(x => x.dish_number != oldItem.dish_number);
+            servicesList.find(x => x.service_number == newServiceNumber).products.push(oldItem);
+        }
+    }
 
-    fillNewItemProperty(newItem, oldItem) {
-        let { options, clients, discount, discountType } = oldItem;
-        newItem.clients = !clients ? [] : clients.slice();
-        newItem.product_customizes = !options ? [] : options.slice();
-        newItem.discount = discount;
-        newItem.discountType = discountType;
+    fillNewItemProperty(oldItem, newItem) {
+        let { options, clients, discount, discountType, note } = newItem;
+        oldItem.clients = !clients ? [] : clients.slice();
+        oldItem.product_customizes = !options ? [] : options.slice();
+        oldItem.discount = discount;
+        oldItem.discountType = discountType;
+        oldItem.note = note;
     }
 
     renderProduct(x, type) {
@@ -334,11 +349,29 @@ export default class TableMenu extends Component {
             clients={x.clients}
             addAndRemove
             color={Api.mapCategoryWithColors(x.category_id)}
-            onDelete={() => alert('item will remove')}
-            onPressMid={() => Actions.customize({ item: x, services:[1,2,3,4,5], selectedService:2, onSave: (item) => this.customizeItem(item, type) })}
+            onDelete={() => this.deleteItem(x.dish_number)}
+            onPressMid={() => Actions.customize({
+                item: x,
+                services: this.state.services.map(x => x.service_number),
+                selectedService: this.getServiceNumberOfProduct(x.dish_number),
+                onSave: (item) => this.customizeItem(item, type)
+            })}
         />;
     }
 
+    getServiceNumberOfProduct(dish_number) {
+        return this.state.services
+            .find(s => s.products.findIndex(y => y.dish_number == dish_number) != -1)
+            .service_number;
+    }
+
+    deleteItem(dish_number) {
+        let services = this.state.services.slice();
+        services.forEach(s => {
+            s.products = s.products.slice().filter(x => x.dish_number != dish_number);
+        });
+        this.setState({ services });
+    }
     renderMenuItems() {
         let color1 = 1 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
         let color2 = 2 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
@@ -367,7 +400,7 @@ export default class TableMenu extends Component {
                                                 <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
                                             </TouchableOpacity>
 
-                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems:'flex-start', alignContent: 'flex-start' }}>
+                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
                                                 {
                                                     s.products.map(x => this.renderProduct(x, 'service'))
                                                 }
@@ -405,6 +438,8 @@ export default class TableMenu extends Component {
         return Api.postOrder({
             table_number: this.state.tableNumber,
             status: 'active',
+
+            note: this.state.note,
 
             services: this.state.services.map(x => ({
                 service_number: x.service_number,

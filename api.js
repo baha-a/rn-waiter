@@ -48,7 +48,7 @@ export default class Api {
     }
 
     static onError(e) {
-        alert('network connection error');
+        console.log('network connection error');
     }
 
 
