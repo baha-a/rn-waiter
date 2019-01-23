@@ -332,7 +332,7 @@ export default class TableMenu extends Component {
         }
         if (x.product_customizes) {
             x.product_customizes.forEach(x => {
-                details.push(x.custom_name);
+                details.push(x.custom_name || x);
             });
         }
 

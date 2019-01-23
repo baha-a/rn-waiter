@@ -56,8 +56,23 @@ export default class Customize extends Component {
     componentDidMount() {
         Api.getCustomizes(this.props.item.id)
             .then(result => {
-                if (result)
+                if (result) {
+                    //if()
+                    if (this.state.selectedOptions && this.state.selectedOptions.length > 0) {
+                        let ops = [];
+                        this.state.selectedOptions.forEach(x => {
+                            if (!x.custom_name) {
+                                let t = result.find(y => y.custom_name == x);
+                                if (t) {
+                                    ops.push(t.id);
+                                }
+                            }
+                        });
+                        this.setState({ selectedOptions: ops });
+                    }
+
                     this.setState({ options: result, ready: true, error: false });
+                }
             })
             .catch(x => this.setState({ ready: true, error: true }));
     }
@@ -132,12 +147,12 @@ export default class Customize extends Component {
                 <Picker
                     selectedValue={this.state.selectedService}
                     mode='dropdown'
-                    style={{ width: 130, backgroundColor: '#6c757d', }}
+                    style={{ width: 130, backgroundColor: '#6c757d', borderRadius: 6, }}
                     onValueChange={(value, index) => this.setState({ selectedService: value })}>
                     {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
                 </Picker>
 
-                <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 6, margin: 4 }}
+                <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 10, margin: 4 }}
                     onPress={() => this.setState({ selectedTab: 'clients' })}>
                     <Text style={{ color: '#fff' }}>Clients</Text>
                 </TouchableOpacity>
@@ -147,9 +162,11 @@ export default class Customize extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start' }}>
-                {this.renderTitleBar()}
-                {this.renderContent()}
+            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between', backgroundColor: '#eee' }}>
+                <View style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
+                    {this.renderTitleBar()}
+                    {this.renderContent()}
+                </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10 }}>
                     <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.cancel}>
                         <Text style={{ color: '#fff' }}>Cancel</Text>
@@ -158,7 +175,7 @@ export default class Customize extends Component {
                         <Text style={{ color: '#fff' }}>Save</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </View >
         )
     }
 
@@ -204,7 +221,7 @@ export default class Customize extends Component {
                             <Picker
                                 selectedValue={this.state.selectedOtherOption}
                                 mode='dropdown'
-                                style={{ width: 130, backgroundColor: '#ffc107', borderColor: '#6c757d', borderWidth: 1, }}
+                                style={{ width: 130, backgroundColor: '#ffc107', borderColor: '#6c757d', borderWidth: 1, margin: 6, borderRadius: 6 }}
                                 onValueChange={(value, index) => this.setState({ selectedOtherOption: value })}>
                                 {this.state.otherOptions.map(x => <Picker.Item key={x} label={x} value={x} />)}
                             </Picker>
@@ -215,9 +232,8 @@ export default class Customize extends Component {
                                 multiline
                                 numberOfLines={6}
                                 placeholder='Notes'
-                                onChangeText={(text) => this.setState({ notes: text })}
+                                onChangeText={(text) => this.setState({ note: text })}
                                 value={this.state.note} />
-                            <Text> clients </Text>
                         </View>
                         <View style={{ width: 1, backgroundColor: '#999' }}>
 
@@ -239,26 +255,33 @@ export default class Customize extends Component {
                 break;
         }
         return (<View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', borderBottomColor: '#999', borderBottomWidth: 1, paddingHorizontal: 10 }}>
                 {this.tabBtn('component')}
                 {this.tabBtn('weight')}
                 {this.tabBtn('discount')}
             </View>
-            <ScrollView>
+            <ScrollView contentContainerStyle={{ padding: 10, }}>
                 {content}
             </ScrollView>
         </View>)
     }
 
     tabBtn(name) {
+        let style = {};
+        if (this.state.selectedTab == name) {
+            style = {
+                borderWidth: 1,
+                borderColor: '#999',
+                borderBottomWidth: 0,
+            };
+        }
         return (
-        <TouchableOpacity style={{
-            padding: 6,
-            paddingHorizontal: 12,
-            backgroundColor: this.state.selectedTab == name ? '#aaa' : '#fff'
-        }}
-            onPress={() => this.setState({ selectedTab: name })}>
-            <Text>{name}</Text>
-        </TouchableOpacity>);
+            <TouchableOpacity style={[{
+                padding: 10,
+                paddingHorizontal: 16,
+            }, style]}
+                onPress={() => this.setState({ selectedTab: name })}>
+                <Text>{name}</Text>
+            </TouchableOpacity>);
     }
 }
