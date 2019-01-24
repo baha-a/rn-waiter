@@ -311,8 +311,8 @@ export default class TableMenu extends Component {
     }
     moveItemToSerivce(oldItem, newServiceNumber, oldService, servicesList) {
         if (oldService.service_number != newServiceNumber) {
+            oldService.products = oldService.products.filter(x => x.dish_number != oldItem.dish_number);
             servicesList.find(x => x.service_number == newServiceNumber).products.push(oldItem);
-            oldService.products = oldService.products.filter(x => x.dish_number != newServiceNumber);
         }
     }
 
