@@ -16,7 +16,9 @@ export default class Customize extends Component {
             clients = [],
             product_customizes = [],
             discount = 0,
-            discountType = '$',
+            discountType = '%',
+            isBar = false,
+            note = '',
         } = props.item;
 
         let {
@@ -25,6 +27,8 @@ export default class Customize extends Component {
         } = props;
 
         this.state = {
+            isBar: isBar,
+
             selectedOptions: product_customizes.slice(),
             selectedClient: clients.slice(),
             clients: allClients.slice(),
@@ -45,7 +49,7 @@ export default class Customize extends Component {
                 'Without Mayonnaise For All',
             ],
             selectedOtherOption: '',
-            note: '',
+            note: note,
 
             selectedTab: 'component',
 
@@ -68,15 +72,12 @@ export default class Customize extends Component {
         Api.getCustomizes(this.props.item.id)
             .then(result => {
                 if (result) {
-                    //if()
                     if (this.state.selectedOptions && this.state.selectedOptions.length > 0) {
                         let ops = [];
                         this.state.selectedOptions.forEach(x => {
-                            if (!x.custom_name) {
+                            if (typeof x === 'string') {
                                 let t = result.find(y => y.custom_name == x);
-                                if (t) {
-                                    ops.push(t.id);
-                                }
+                                if (t) ops.push(t.id);
                             }
                         });
                         this.setState({ selectedOptions: ops });
@@ -156,7 +157,7 @@ export default class Customize extends Component {
 
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', }}>
                 {
-                    (this.props.services && this.props.services.length > 0) &&
+                    (this.state.isBar == false && this.props.services && this.props.services.length > 0) &&
                     <Picker
                         selectedValue={this.state.selectedService}
                         mode='dropdown'
@@ -165,7 +166,7 @@ export default class Customize extends Component {
                         {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
                     </Picker>
                 }
-                <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 10, margin: 4 }}
+                <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 14, margin: 4 }}
                     onPress={() => this.setState({ selectedTab: 'clients' })}>
                     <Text style={{ color: '#fff' }}>Clients</Text>
                 </TouchableOpacity>
@@ -186,7 +187,7 @@ export default class Customize extends Component {
     }
 
     renderSaveAndCancel() {
-        return (<View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10, borderTopWidth:1, borderTopColor:'#eee' }}>
+        return (<View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
             <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.cancel}>
                 <Text style={{ color: '#fff' }}>Cancel</Text>
             </TouchableOpacity>
@@ -200,15 +201,18 @@ export default class Customize extends Component {
         let content = null;
         switch (this.state.selectedTab) {
             case 'clients':
-                content = (<View
-                    style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                    {
-                        this.state.clients.map(x => <Selectable key={x}
-                            title={'client #' + x}
-                            onSelect={(value) => this.toggleSelectForClient(x, value)}
-                            selected={this.isSelectedForClient(x)}
-                        />)
-                    }
+                content = (
+                <View>
+                    <Text style={{ color:'#6c757d'}}>Click On Clients To Share Item Between Them</Text>
+                    <View style={{ padding:10, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                        {
+                            this.state.clients.map(x => <Selectable key={x}
+                                title={'#' + x}
+                                onSelect={(value) => this.toggleSelectForClient(x, value)}
+                                selected={this.isSelectedForClient(x)}
+                            />)
+                        }
+                    </View>
                 </View>);
                 break;
             case 'discount':
@@ -246,7 +250,7 @@ export default class Customize extends Component {
                             <TextInput
                                 disableFullscreenUI
                                 underlineColorAndroid='rgba(0,0,0,0)'
-                                style={{ backgroundColor: '#fff', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
+                                style={{ backgroundColor: '#fff', borderColor: '#ccc', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
                                 multiline
                                 numberOfLines={6}
                                 placeholder='Notes'
@@ -290,6 +294,7 @@ export default class Customize extends Component {
             style = {
                 borderWidth: 1,
                 borderColor: '#eee',
+                backgroundColor: '#eee',
                 borderBottomWidth: 0,
             };
         }
