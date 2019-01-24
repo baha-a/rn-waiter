@@ -6,6 +6,7 @@ import DiscountInput from '../Components/DiscountInput';
 import { Actions } from 'react-native-router-flux';
 import Loader from '../Components/Loader';
 import ReloadBtn from '../Components/ReloadBtn';
+import DiscountWeightBtns from '../Components/DiscountWeightBtns';
 
 export default class Customize extends Component {
     constructor(props) {
@@ -19,25 +20,35 @@ export default class Customize extends Component {
         } = props.item;
 
         let {
-            selectedService
+            selectedService,
+            allClients = []
         } = props;
 
         this.state = {
             selectedOptions: product_customizes.slice(),
             selectedClient: clients.slice(),
-            clients: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            clients: allClients.slice(),
             options: [],
 
             discount: discount,
             discountType: discountType,
+            weight: 0,
 
             selectedService: selectedService,
 
-            otherOptions: ['option 1', 'option 2', 'option 3', 'option 4', 'option 5', 'option 6', 'option 7',],
-            selectedOtherOption: 'option 1',
+            otherOptions: [
+                'Quickly !',
+                'Well cooked',
+                'Half cooked',
+                'Extral For All',
+                'Extra Fried Potatoes',
+                'Without Mayonnaise For All',
+            ],
+            selectedOtherOption: '',
             note: '',
 
             selectedTab: 'component',
+
 
             ready: false,
             error: false,
@@ -144,14 +155,16 @@ export default class Customize extends Component {
             <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{this.props.item.en_name} Customize</Text>
 
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', }}>
-                <Picker
-                    selectedValue={this.state.selectedService}
-                    mode='dropdown'
-                    style={{ width: 130, backgroundColor: '#6c757d', borderRadius: 6, }}
-                    onValueChange={(value, index) => this.setState({ selectedService: value })}>
-                    {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
-                </Picker>
-
+                {
+                    (this.props.services && this.props.services.length > 0) &&
+                    <Picker
+                        selectedValue={this.state.selectedService}
+                        mode='dropdown'
+                        style={{ width: 130, backgroundColor: '#6c757d', borderRadius: 6, }}
+                        onValueChange={(value, index) => this.setState({ selectedService: value })}>
+                        {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
+                    </Picker>
+                }
                 <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 10, margin: 4 }}
                     onPress={() => this.setState({ selectedTab: 'clients' })}>
                     <Text style={{ color: '#fff' }}>Clients</Text>
@@ -162,21 +175,25 @@ export default class Customize extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between', backgroundColor: '#eee' }}>
+            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between', backgroundColor: '#fff' }}>
                 <View style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
                     {this.renderTitleBar()}
                     {this.renderContent()}
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10 }}>
-                    <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.cancel}>
-                        <Text style={{ color: '#fff' }}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.save}>
-                        <Text style={{ color: '#fff' }}>Save</Text>
-                    </TouchableOpacity>
-                </View>
+                {this.renderSaveAndCancel()}
             </View >
         )
+    }
+
+    renderSaveAndCancel() {
+        return (<View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10, borderTopWidth:1, borderTopColor:'#eee' }}>
+            <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.cancel}>
+                <Text style={{ color: '#fff' }}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }} onPress={this.save}>
+                <Text style={{ color: '#fff' }}>Save</Text>
+            </TouchableOpacity>
+        </View>);
     }
 
     renderContent() {
@@ -195,20 +212,21 @@ export default class Customize extends Component {
                 </View>);
                 break;
             case 'discount':
-                content = (<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', padding: 10, }}>
-                    <Text> discount </Text>
-                    <DiscountInput
-                        placeholder='discount value'
-                        value={this.state.discount}
-                        type={this.state.discountType}
-                        onTypeChange={(type) => this.setState({ discountType: type })}
-                        onValueChange={(value) => this.setState({ discount: value })}
-                    />
-                </View>
-                )
+                content = <DiscountWeightBtns
+                    unit='%'
+                    options={[100, 50, 25, 10, 5]}
+                    validateValue={v => v <= 100}
+                    onValueChange={v => this.setState({ discount: v })}
+                    value={this.state.discount}
+                />;
                 break;
             case 'weight':
-                content = <Text> weight </Text>;
+                content = <DiscountWeightBtns
+                    unit='kg'
+                    options={[2, 1, 0.5, 0.25, 0.2]}
+                    onValueChange={v => this.setState({ weight: v })}
+                    value={this.state.weight}
+                />;
                 break;
             case 'component':
                 if (this.state.ready == false) {
@@ -221,14 +239,14 @@ export default class Customize extends Component {
                             <Picker
                                 selectedValue={this.state.selectedOtherOption}
                                 mode='dropdown'
-                                style={{ width: 130, backgroundColor: '#ffc107', borderColor: '#6c757d', borderWidth: 1, margin: 6, borderRadius: 6 }}
+                                style={{ width: 130, backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
                                 onValueChange={(value, index) => this.setState({ selectedOtherOption: value })}>
                                 {this.state.otherOptions.map(x => <Picker.Item key={x} label={x} value={x} />)}
                             </Picker>
                             <TextInput
                                 disableFullscreenUI
                                 underlineColorAndroid='rgba(0,0,0,0)'
-                                style={{ backgroundColor: '#fff', borderColor: '#999', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
+                                style={{ backgroundColor: '#fff', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
                                 multiline
                                 numberOfLines={6}
                                 placeholder='Notes'
@@ -255,7 +273,7 @@ export default class Customize extends Component {
                 break;
         }
         return (<View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', borderBottomColor: '#999', borderBottomWidth: 1, paddingHorizontal: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', borderBottomColor: '#eee', borderBottomWidth: 1, paddingHorizontal: 10 }}>
                 {this.tabBtn('component')}
                 {this.tabBtn('weight')}
                 {this.tabBtn('discount')}
@@ -271,7 +289,7 @@ export default class Customize extends Component {
         if (this.state.selectedTab == name) {
             style = {
                 borderWidth: 1,
-                borderColor: '#999',
+                borderColor: '#eee',
                 borderBottomWidth: 0,
             };
         }

@@ -29,7 +29,7 @@ export default class TableMenu extends Component {
             doneServices: [],
             selectedService: 1,
 
-            services: [/*{ service_number: 1, products: [{ id: 2, name: 'item2', price: 991, category: 5 }] }*/],
+            services: [],
 
             note: '',
         };
@@ -356,15 +356,21 @@ export default class TableMenu extends Component {
                 item: { ...x },
                 services: this.state.services.map(x => x.service_number),
                 selectedService: this.getServiceNumberOfProduct(x.dish_number),
+                allClients: this.getActiveClients(),
                 onSave: (item) => this.customizeItem(item, type)
             })}
         />;
     }
 
+    getActiveClients() {
+        return this.extractClient(this.state.services).map(x => x.client_number);
+    }
+
     getServiceNumberOfProduct(dish_number) {
-        return this.state.services
-            .find(s => s.products.findIndex(y => y.dish_number == dish_number) != -1)
-            .service_number;
+        let serv = this.state.services.find(s => s.products.findIndex(y => y.dish_number == dish_number) != -1);
+        if (!serv)
+            return null;
+        return serv.service_number;
     }
 
     deleteItem(dish_number) {

@@ -64,17 +64,23 @@ export default class Accordion extends Component {
 
     cats.forEach(c => {
       if (c.isBar || c.category_name.toLowerCase() == 'bar') {
-        let products = [];
-        c.sub_categories.forEach(s => {
-          s.isBar = true;
-          products = [...products, ...s.products];
-        });
+        c.isBar = true;
+        c.products = this.getAllProductsFroSubCat(c);
         c.sub_categories = [];
-        c.products = products;
         c.products.forEach(p => p.isBar = true);
-        //this.addIsBarProperty(c.sub_categories);
       }
     });
+  }
+
+  getAllProductsFroSubCat(cat) {
+    if (!cat) return [];
+
+    let products = [...cat.products];
+    products.forEach(p => p.category_color = cat.category_color);
+    cat.sub_categories.forEach(c => {
+      products = [...products, ...this.getAllProductsFroSubCat(c)];
+    });
+    return products;
   }
 
   addCategoryNumberToProducts(cats) {
@@ -196,12 +202,8 @@ export default class Accordion extends Component {
       return <Loader />;
     }
 
-    if (this.state.error) {
-      return <ReloadBtn onReload={() => { this.setState({ ready: false, error: false }); this.fetchData(); }} />;
-    }
-
-    if (!this.state.sections || this.state.sections.length == 0) {
-      return <Text>no categories</Text>;
+    if (this.state.error || !this.state.sections || this.state.sections.length == 0) {
+      return <ReloadBtn title='no categories' onReload={() => { this.setState({ ready: false, error: false }); this.fetchData(); }} />;
     }
 
     return <Acc dataArray={this.state.sections} renderHeader={this._head} renderContent={this._body} />;
