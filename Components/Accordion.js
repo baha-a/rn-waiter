@@ -65,23 +65,29 @@ export default class Accordion extends Component {
     cats.forEach(c => {
       if (c.isBar || c.category_name.toLowerCase() == 'bar') {
         c.isBar = true;
-        c.products = this.getAllProductsFroSubCat(c);
-        c.sub_categories = [];
-        c.products.forEach(p => p.isBar = true);
+        // c.products = this.getAllProductsFroSubCat(c);
+        // c.sub_categories = [];
+        c.sub_categories.forEach(p => p.isBar = true);
+        c.products.forEach(p => {
+          p.isBar = true;
+          p.category_color = c.category_color;
+        });
+
+        addIsBarProperty(c.sub_categories);
       }
     });
   }
 
-  getAllProductsFroSubCat(cat) {
-    if (!cat) return [];
+  // getAllProductsFroSubCat(cat) {
+  //   if (!cat) return [];
 
-    let products = [...cat.products];
-    products.forEach(p => p.category_color = cat.category_color);
-    cat.sub_categories.forEach(c => {
-      products = [...products, ...this.getAllProductsFroSubCat(c)];
-    });
-    return products;
-  }
+  //   let products = [...cat.products];
+  //   products.forEach(p => p.category_color = cat.category_color);
+  //   cat.sub_categories.forEach(c => {
+  //     products = [...products, ...this.getAllProductsFroSubCat(c)];
+  //   });
+  //   return products;
+  // }
 
   addCategoryNumberToProducts(cats) {
     if (cats == null)

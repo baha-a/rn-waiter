@@ -12,6 +12,9 @@ const fetchData = (url, config = null) => {
 
 export default class Api {
 
+    static getAvailableTables() {
+        return fetchData('availableTables');
+    }
 
     static getCategories() {
         return fetchData('categories');
@@ -34,18 +37,18 @@ export default class Api {
     }
 
     static postOrder(order) {
-        return fetchData(
-            'orders',
-            {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(order),
-            })
-            .then(r => r.json())
-            .catch(Api.onError);
+        return fetchData('orders', {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json', },
+            body: JSON.stringify(order),
+        });
+    }
+    static moveItemToTable(tableNumber, item) {
+        return fetchData('tables/' + tableNumber, {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json', },
+            body: JSON.stringify(item),
+        });
     }
 
     static onError(e) {
