@@ -9,38 +9,44 @@ import TableMenu from '../Components/TableMenu';
 import { Actions } from 'react-native-router-flux';
 
 
-const ClientList = ({ clients, selectedClient, onSelect }) => <ScrollView
-  horizontal
-  alwaysBounceHorizontal
-  showsHorizontalScrollIndicator={false}
->
-  {
-    clients.map(x => <TouchableOpacity key={x} style={{
-      backgroundColor: x == selectedClient ? '#929292' : '#323232',
-      margin: 10,
-      marginHorizontal: 4,
-      padding: 10,
-      paddingHorizontal: 20,
-      borderRadius: 4,
-      maxHeight: 40
-    }}
-      onPress={() => onSelect(x)}>
+const isCloseToEnd = ({ layoutMeasurement, contentOffset, contentSize }) => {
+  return layoutMeasurement.width + contentOffset.x >= contentSize.width - 20
+};
 
-      <Text style={{ color: '#fff' }}> #{x} </Text>
-    </TouchableOpacity>
-    )
-  }
-</ScrollView>
+const ClientList = ({ clients, selectedClient, onSelect, onEndReached }) => (
+  <ScrollView
+    horizontal
+    alwaysBounceHorizontal
+    showsHorizontalScrollIndicator={false}
 
+    onScroll={({ nativeEvent }) => { if (isCloseToEnd(nativeEvent)) onEndReached(); }}
+    scrollEventThrottle={400}
+  >
+    {
+      clients.map(x => <TouchableOpacity key={x} style={{
+        backgroundColor: x == selectedClient ? '#929292' : '#323232',
+        margin: 10,
+        marginHorizontal: 4,
+        padding: 10,
+        paddingHorizontal: 20,
+        borderRadius: 4,
+        maxHeight: 40
+      }}
+        onPress={() => onSelect(x)}>
+
+        <Text style={{ color: '#fff' }}> #{x} </Text>
+      </TouchableOpacity>
+      )
+    }
+  </ScrollView>
+);
 
 export default class Order extends Component {
   constructor(props) {
     super(props);
 
     let clients = [];
-    for (let i = 1; i <= 100; i++) {
-      clients.push(i);
-    }
+    for (let i = 1; i <= 20; i++) clients.push(i);
 
     this.state = {
       openOverly: false,
@@ -103,6 +109,12 @@ export default class Order extends Component {
     );
   }
 
+  addSomeClients() {
+    let clients = this.state.clients.slice();
+    let last = clients[clients.length - 1];
+    for (let i = 0; i < 20; i++) clients.push(++last);
+    this.setState({ clients: clients });
+  }
 
   render() {
     return (
@@ -111,7 +123,12 @@ export default class Order extends Component {
         <View style={{ flex: 1, backgroundColor: '#eee', flexDirection: 'row', }}>
           <View style={{ flex: 0.6 }} >
             <ScrollView>
-              <ClientList clients={this.state.clients} selectedClient={this.state.selectedClient} onSelect={(id) => this.setState({ selectedClient: id })} />
+              <ClientList
+                clients={this.state.clients}
+                selectedClient={this.state.selectedClient}
+                onSelect={(id) => this.setState({ selectedClient: id })}
+                onEndReached={() => this.addSomeClients()}
+              />
               <View style={{ marginLeft: 6 }}>
                 <Accordion onItemPress={this.onItemPress} />
               </View>
@@ -132,7 +149,7 @@ export default class Order extends Component {
 
           </View>
           <View style={{ flex: 0.4, padding: 10 }}>
-            <TableMenu id={this.props.id} selectedClient={this.state.selectedClient} />
+            <TableMenu id={this.props.id} selectedClient={this.state.selectedClient} clients={this.state.clients} />
           </View>
         </View>
         {this.renderOverl()}
@@ -146,7 +163,7 @@ export default class Order extends Component {
             <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
               onPress={() => {
                 TableMenu.PostTheOrder()
-                .then(x => Actions.replace('bill'));
+                  .then(x => Actions.replace('bill'));
                 //.then(x=>Actions.replace('bill'));
               }}>
               <Text style={{ color: '#fff' }}>Save</Text>

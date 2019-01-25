@@ -385,7 +385,7 @@ export default class TableMenu extends Component {
                 item: { ...x },
                 services: this.state.services.map(x => x.service_number),
                 selectedService: this.getServiceNumberOfProduct(x.dish_number),
-                allClients: this.getActiveClients(),
+                allClients: this.props.clients,
                 table: this.state.tableNumber,
                 onSave: (item) => this.customizeItem(item, type)
             })}
@@ -419,10 +419,6 @@ export default class TableMenu extends Component {
     //     TableMenu.lastDishNumberAdded = null;
     // }
 
-    getActiveClients() {
-        return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,];
-        //return this.extractClient(this.state.services).map(x => x.client_number);
-    }
 
     getServiceNumberOfProduct(dish_number) {
         let serv = this.state.services.find(s => s.products.findIndex(y => y.dish_number == dish_number) != -1);
