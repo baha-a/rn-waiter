@@ -68,6 +68,7 @@ export default class TableMenu extends Component {
         TableMenu.postOrderEvt = null;
     }
 
+    // static lastDishNumberAdded = null;
     componentDidMount() {
         // if (!this.props.id)
         //     return;
@@ -110,6 +111,7 @@ export default class TableMenu extends Component {
                 this.setState({ barItems: bar, selectedTab: 1, selectedSubTab: 2 });
             }
             else {
+                // TableMenu.lastDishNumberAdded = x.dish_number;
                 let services = this.state.services.slice();
                 if (!services || services.length == 0)
                     services = [{ service_number: 1, products: [x] }];
@@ -279,13 +281,14 @@ export default class TableMenu extends Component {
         );
     }
 
+
     customizeItem(item, type) {
         let { dish_number } = item.item;
 
         if (item.newTable) {
             alert('move item to table #' + item.newTable);
             let oldItem = item.item;
-            this.fillNewItemProperty(oldItem ,item);
+            this.fillNewItemProperty(oldItem, item);
             //Api.moveItemToTable(newTable, oldItem).then(x=>
             type = (type == 'service' || type == 'client') ? 'service' : 'bar';
             this.deleteItem(dish_number, type);
@@ -362,8 +365,14 @@ export default class TableMenu extends Component {
             />;
         }
 
+        // let onlayout = null;
+        // if (TableMenu.lastDishNumberAdded && x.dish_number == TableMenu.lastDishNumberAdded) {
+        //     onlayout = this._onLayout;
+        // }
+
         return <ItemButton
             key={x.dish_number}
+            // _onLayout={onlayout}
             title={x.en_name}
             details={details}
             clients={x.clients}
@@ -380,6 +389,15 @@ export default class TableMenu extends Component {
             })}
         />;
     }
+
+    // static timeout = null;
+    // _onLayout({ nativeEvent: { layout: { x, y, width, height } } }) {
+    //     clearTimeout(TableMenu.timeout);
+    //     TableMenu.timeout = setTimeout(() => {
+    //         this.serviceView.scrollTo({ x: 0, y: y + height, animated: true });
+    //     }, 200);
+    //     TableMenu.lastDishNumberAdded = null;
+    // }
 
     getActiveClients() {
         return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,];
@@ -433,7 +451,9 @@ export default class TableMenu extends Component {
                                                 <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
                                             </TouchableOpacity>
 
-                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
+                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}
+                                                // ref={ref => this.serviceView = ref}
+                                                >
                                                 {
                                                     s.products.map(x => this.renderProduct(x, 'service'))
                                                 }

@@ -132,7 +132,7 @@ export default class Customize extends Component {
         Actions.pop();
     }
 
-    getFinalResult(){
+    getFinalResult() {
         return {
             options: this.state.selectedOptions.slice(),
             clients: this.state.selectedClient.slice(),
@@ -179,7 +179,7 @@ export default class Customize extends Component {
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', }}>
                 <TouchableOpacity style={{ backgroundColor: '#dae0e5', padding: 14, margin: 4 }}
                     onPress={() => this.setState({ selectedTab: 'tables' })}>
-                    <Text>Table #{this.state.table}</Text>
+                    <Text>Table #{this.state.newTable || this.state.table}</Text>
                 </TouchableOpacity>
 
                 {
@@ -234,8 +234,11 @@ export default class Customize extends Component {
                             {
                                 this.state.tables.map(x =>
                                     <TouchableOpacity key={x}
-                                        style={{ margin: 4, padding: 10, backgroundColor: 'rgba(0, 0, 0, .125)' }}
-                                        onPress={() => this.setState({ newTable: x})}
+                                        style={{ margin: 4, padding: 10,
+                                             backgroundColor: this.state.newTable == x || this.state.table == x
+                                             ?'#48f':'rgba(0, 0, 0, .125)'
+                                             }}
+                                        onPress={() => this.setState({ newTable: x })}
                                     >
                                         <Text>{'#' + x}</Text>
                                     </TouchableOpacity>
@@ -261,6 +264,7 @@ export default class Customize extends Component {
                 break;
             case 'discount':
                 content = <DiscountWeightBtns
+                    key={1}
                     unit='%'
                     options={[100, 50, 25, 10, 5]}
                     validateValue={v => v <= 100}
@@ -270,10 +274,11 @@ export default class Customize extends Component {
                 break;
             case 'weight':
                 content = <DiscountWeightBtns
+                    key={2}
                     unit='kg'
                     options={[2, 1, 0.5, 0.25, 0.2]}
                     validateValue={v => true}
-                    onValueChange={v => this.setState({ weight: v })}
+                    onValueChange={v => this.setState({ weight: v + '' })}
                     value={this.state.weight}
                 />;
                 break;
@@ -308,7 +313,7 @@ export default class Customize extends Component {
                             </View>
                             <View style={{ flex: 0.65, padding: 10, }}>
                                 <Text style={{ color: '#666666' }}>Description</Text>
-                                <Text>{this.state.description}</Text>
+                                <Text style={{ padding: 6, backgroundColor: '#f8f9fa' }}>{this.state.description}</Text>
 
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Optionals</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>

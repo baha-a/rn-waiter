@@ -37,7 +37,7 @@ export default class Accordion extends Component {
     Api.getCategories()
       .then(cat => {
         this.addIsBarProperty(cat);
-        this.addCategoryNumberToProducts(cat);
+        this.addCategoryInfoIntoProducts(cat);
         this.setState({ sections: cat, ready: true, error: false });
       }).then(() => {
 
@@ -49,7 +49,10 @@ export default class Accordion extends Component {
             }
             )).catch(x => { });
       })
-      .catch(x => this.setState({ ready: true, error: true }));
+      .catch(x => {
+        console.log(x);
+        this.setState({ ready: true, error: true });
+      });
   }
 
   addIsTastingProperty(tasts) {
@@ -58,22 +61,17 @@ export default class Accordion extends Component {
   }
 
   addIsBarProperty(cats) {
-    if (cats == null) {
+    if (!cats)
       return;
-    }
 
     cats.forEach(c => {
       if (c.isBar || c.category_name.toLowerCase() == 'bar') {
         c.isBar = true;
         // c.products = this.getAllProductsFroSubCat(c);
         // c.sub_categories = [];
+        c.products.forEach(p => p.isBar = true);
         c.sub_categories.forEach(p => p.isBar = true);
-        c.products.forEach(p => {
-          p.isBar = true;
-          p.category_color = c.category_color;
-        });
-
-        addIsBarProperty(c.sub_categories);
+        this.addIsBarProperty(c.sub_categories);
       }
     });
   }
@@ -89,14 +87,14 @@ export default class Accordion extends Component {
   //   return products;
   // }
 
-  addCategoryNumberToProducts(cats) {
+  addCategoryInfoIntoProducts(cats) {
     if (cats == null)
       return;
     cats.forEach(c => {
       c.products.forEach(p => {
         p.category_color = c.category_color;
       });
-      this.addCategoryNumberToProducts(c.sub_categories);
+      this.addCategoryInfoIntoProducts(c.sub_categories);
     });
   }
 

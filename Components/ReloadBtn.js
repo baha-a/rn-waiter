@@ -5,7 +5,7 @@ import { Actions } from 'react-native-router-flux';
 
 export default ReloadBtn = ({ title = 'something went wrong', onReload }) =>
     <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems:'flex-start'}}>
-        <Text style={{ justifyContent:'center', alignItems:'center'}}>
+        <Text style={{ textAlignVertical:'center', paddingHorizontal:10}}>
             {title}
         </Text>
         <TouchableOpacity
