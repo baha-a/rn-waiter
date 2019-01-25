@@ -175,7 +175,13 @@ export default class Accordion extends Component {
           this.state.addNewItem == item.id && <ItemPriceBar onAdd={(name, price) => {
             let sections = this.state.sections.slice();
             let section = sections.find(x => x.id == item.id);
-            section.products.push({ id: Api.guid(), en_name: name, price: price, isBar: section.isBar });
+            section.products.push({
+              id: Api.guid(),
+              en_name: name,
+              price: price,
+              isBar: section.isBar,
+              category_color: section.category_color,
+            });
             this.setState({ addNewItem: 0, sections: sections });
           }} />
         }

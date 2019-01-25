@@ -203,11 +203,13 @@ export default class Customize extends Component {
     render() {
         return (
             <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between', backgroundColor: '#fff' }}>
-                <View style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
-                    {this.renderTitleBar()}
-                    {this.renderContent()}
-                </View>
-                {this.renderSaveAndCancel()}
+                <ScrollView>
+                    <View style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
+                        {this.renderTitleBar()}
+                        {this.renderContent()}
+                    </View>
+                    {this.renderSaveAndCancel()}
+                </ScrollView>
             </View >
         )
     }
@@ -234,10 +236,11 @@ export default class Customize extends Component {
                             {
                                 this.state.tables.map(x =>
                                     <TouchableOpacity key={x}
-                                        style={{ margin: 4, padding: 10,
-                                             backgroundColor: this.state.newTable == x || this.state.table == x
-                                             ?'#48f':'rgba(0, 0, 0, .125)'
-                                             }}
+                                        style={{
+                                            margin: 4, padding: 10,
+                                            backgroundColor: this.state.newTable == x || this.state.table == x
+                                                ? '#48f' : 'rgba(0, 0, 0, .125)'
+                                        }}
                                         onPress={() => this.setState({ newTable: x })}
                                     >
                                         <Text>{'#' + x}</Text>
@@ -336,9 +339,9 @@ export default class Customize extends Component {
                 {this.tabBtn('weight')}
                 {this.tabBtn('discount')}
             </View>
-            <ScrollView contentContainerStyle={{ padding: 10, }}>
+            <View style={{ padding: 10, }}>
                 {content}
-            </ScrollView>
+            </View>
         </View>)
     }
 

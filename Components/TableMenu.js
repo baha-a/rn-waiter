@@ -345,12 +345,12 @@ export default class TableMenu extends Component {
         let details = [];
         if (x.discount && x.discount > 0)
             details.push(x.discountType + '' + x.discount + ' off');
+        if (x.weight)
+            details.push(x.weight + ' kg');
         if (x.note)
             details.push(x.note);
         if (x.otherNote)
             details.push(x.otherNote);
-        if (x.weight)
-            details.push(x.weight);
         if (x.product_customizes) {
             x.product_customizes.forEach(x => {
                 details.push(x.custom_name || x);
