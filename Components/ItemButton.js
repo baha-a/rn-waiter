@@ -7,8 +7,11 @@ import Api from '../api';
 export default class ItemButton extends Component {
     constructor(props) {
         super(props);
+
+        let { quantity = 1 } = props;
+        
         this.state = {
-            count: 1,
+            count: quantity,
         }
 
         this.removeItem = this.removeItem.bind(this);
@@ -29,17 +32,23 @@ export default class ItemButton extends Component {
 
     removeItem() {
         if (this.state.count > 1) {
-            this.setState({ count: this.state.count - 1 });
+            let v = this.state.count - 1;
+            this.setState({ count: v });
+            if (this.props.onAddOrRemove)
+                this.props.onAddOrRemove(v);
         }
-        else{
-            if(this.props.onDelete){
+        else {
+            if (this.props.onDelete) {
                 this.props.onDelete();
             }
         }
     }
 
     addItem() {
-        this.setState({ count: this.state.count + 1 });
+        let v = this.state.count + 1;
+        this.setState({ count: v });
+        if (this.props.onAddOrRemove)
+            this.props.onAddOrRemove(v);
     }
 
     render() {
@@ -55,14 +64,14 @@ export default class ItemButton extends Component {
 
             clients = [],
 
-            style={}
+            style = {}
         } = this.props;
 
         let padding = 6, radius = 3;
 
         return (
             <View style={[style, { flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }]}>
-                <View style={{ flexDirection: 'row', justifyContent:'space-between' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     {
                         addAndRemove &&
                         <TouchableOpacity style={{
@@ -79,13 +88,13 @@ export default class ItemButton extends Component {
 
                     <TouchableOpacity style={{
                         padding: padding,
-                        flexDirection:'row',
+                        flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
                         onPress={this.pressMid}
                     >
-                        { addAndRemove && <Text style={{ color: '#fff', fontWeight: 'bold' }}> {this.state.count} </Text> }
+                        {addAndRemove && <Text style={{ color: '#fff', fontWeight: 'bold' }}> {this.state.count} </Text>}
 
                         <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
                     </TouchableOpacity>

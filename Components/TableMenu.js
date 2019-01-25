@@ -377,6 +377,8 @@ export default class TableMenu extends Component {
             details={details}
             clients={x.clients}
             addAndRemove
+            onAddOrRemove={(v) => this.changeItemQuantity(x.dish_number, v)}
+            quantity={x.quantity}
             color={x.color || x.category_color}
             onDelete={() => this.deleteItem(x.dish_number)}
             onPressMid={() => Actions.customize({
@@ -389,6 +391,24 @@ export default class TableMenu extends Component {
             })}
         />;
     }
+
+    changeItemQuantity(dish_number, value) {
+        let bar = this.state.barItems.slice();
+        let p = bar.find(x => x.dish_number == dish_number);
+        if (p) {
+            p.quantity = value;
+            this.setState({ barItems: bar });
+            return;
+        }
+
+        let services = this.state.services.slice();
+        services.forEach(s => {
+            let p = s.products.find(x => x.dish_number == dish_number);
+            p.quantity = value;
+        });
+        this.setState({ services });
+    }
+
 
     // static timeout = null;
     // _onLayout({ nativeEvent: { layout: { x, y, width, height } } }) {
@@ -452,8 +472,8 @@ export default class TableMenu extends Component {
                                             </TouchableOpacity>
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}
-                                                // ref={ref => this.serviceView = ref}
-                                                >
+                                            // ref={ref => this.serviceView = ref}
+                                            >
                                                 {
                                                     s.products.map(x => this.renderProduct(x, 'service'))
                                                 }
@@ -597,11 +617,11 @@ export default class TableMenu extends Component {
 
         this.state.services.forEach(s => {
             s.products.forEach(p => {
-                subtotal += parseInt(p.price);
+                subtotal += (parseInt(p.price) * parseInt(p.quantity > 0 ? p.quantity : 1));
             });
         });
         this.state.barItems.forEach(p => {
-            subtotal += parseInt(p.price);
+            subtotal += (parseInt(p.price) * parseInt(p.quantity > 0 ? p.quantity : 1));
         });
 
         return (<View style={{
