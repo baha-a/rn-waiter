@@ -163,7 +163,8 @@ export default class Order extends Component {
             <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
               onPress={() => {
                 TableMenu.PostTheOrder()
-                  .then(x => Actions.replace('bill'));
+                  .then(x => Actions.replace('bill'))
+                  .catch(x => alert(x));
                 //.then(x=>Actions.replace('bill'));
               }}>
               <Text style={{ color: '#fff' }}>Save</Text>

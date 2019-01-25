@@ -504,6 +504,9 @@ export default class TableMenu extends Component {
     }
 
     postOrder() {
+        if (!this.state.tableNumber) {
+            return new Promise(() => { throw 'choose table number first' });
+        }
         return Api.postOrder({
             table_number: this.state.tableNumber,
             status: 'active',
@@ -518,8 +521,7 @@ export default class TableMenu extends Component {
             })),
 
             bar: this.state.barItems.slice(),
-        })
-            .then(x => alert('order successfully saved'));
+        }).then(x => alert('order successfully saved'));
     }
     buildProducts(products) {
         let result = [];
