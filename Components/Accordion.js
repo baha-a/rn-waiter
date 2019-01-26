@@ -56,6 +56,9 @@ export default class Accordion extends Component {
   }
 
   addIsTastingProperty(tasts) {
+    if (!tasts)
+      tasts = [];
+      
     tasts.forEach(t => t.isTasting = true);
     return tasts;
   }
