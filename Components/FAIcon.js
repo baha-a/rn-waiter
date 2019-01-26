@@ -47,7 +47,10 @@ export default class FAIcon extends Component {
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf0e2;</Text>;
             case 'share-alt':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf1e0;</Text>;
-                
+
+            case 'concierge-bell':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf562;</Text>;
+
             case 'percent':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf295;</Text>;
 

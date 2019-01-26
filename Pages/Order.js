@@ -7,7 +7,7 @@ import ItemPriceBar from '../Components/ItemPriceBar';
 import Collapsible from '../Components/Collapsible';
 import TableMenu from '../Components/TableMenu';
 import { Actions } from 'react-native-router-flux';
-
+import DiscountInput from '../Components/DiscountInput';
 
 const isCloseToEnd = ({ layoutMeasurement, contentOffset, contentSize }) => {
   return layoutMeasurement.width + contentOffset.x >= contentSize.width - 20
@@ -41,17 +41,39 @@ const ClientList = ({ clients, selectedClient, onSelect, onEndReached }) => (
   </ScrollView>
 );
 
+const pushSomeNewClients = (clientsList = null) => {
+
+  if (!clientsList) {
+    clientsList = [];
+  }
+
+  let last = 0;
+  if (clientsList.length > 0) {
+    last = clientsList[clientsList.length - 1];
+  }
+
+  for (let i = 0; i < 10; i++)
+    clientsList.push(++last);
+
+  return clientsList;
+}
+
 export default class Order extends Component {
   constructor(props) {
     super(props);
 
-    let clients = [];
-    for (let i = 1; i <= 20; i++) clients.push(i);
-
     this.state = {
       openOverly: false,
-      clients: clients,
+      clients: pushSomeNewClients(),
       selectedClient: 1,
+
+
+      discountValue: 0,
+      discountType: '$',
+
+      waiterName: 'name',
+      invoiceNumber: 795,
+
     };
 
     Order.openOverlyEvt = () => {
@@ -109,25 +131,68 @@ export default class Order extends Component {
     );
   }
 
-  addSomeClients() {
-    let clients = this.state.clients.slice();
-    let last = clients[clients.length - 1];
-    for (let i = 0; i < 20; i++) clients.push(++last);
-    this.setState({ clients: clients });
+  handelSplit() {
+    alert('Split');
   }
+  handelFlip() {
+    alert('Flip');
+  }
+  handelPay() {
+    alert('Pay');
+  }
+
+  renderHeader() {
+    if (!this.props.id)
+      return null;
+
+    return (
+      <View style={{ flexDirection: 'column', justifyContent: 'flex-start', }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 6, paddingHorizontal: 16 }}>
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Inv No#<Text style={{ color: '#6c757d' }}>{' ' + this.state.invoiceNumber}</Text></Text>
+          </View>
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Waiter:<Text style={{ color: '#6c757d' }}>{' ' + this.state.waiterName}</Text></Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <DiscountInput
+              placeholder='discount value'
+              value={this.state.discountValue}
+              type={this.state.discountType}
+              onValueChange={v => this.setState({ discountValue: v })}
+              onTypeChange={v => this.setState({ discountType: v })}
+            />
+          </View>
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', padding: 10, paddingTop: 0 }}>
+          <TouchableOpacity style={{ backgroundColor: '#6c757d', flex: 1, padding: 10, }} onPress={() => this.handelSplit()}>
+            <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#fff' }}>Split</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ backgroundColor: '#f8f9fa', flex: 1, padding: 10, }} onPress={() => this.handelFlip()}>
+            <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#000' }}>Flip</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, padding: 10, }} onPress={() => this.handelPay()}>
+            <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#fff' }}>Pay</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
 
   render() {
     return (
-      <Container>
+      <Container style={{ backgroundColor: '#eee' }}>
         <Navbar />
-        <View style={{ flex: 1, backgroundColor: '#eee', flexDirection: 'row', }}>
+        {this.renderHeader()}
+        <View style={{ flex: 1, flexDirection: 'row', }}>
           <View style={{ flex: 0.6 }} >
             <ScrollView>
               <ClientList
                 clients={this.state.clients}
                 selectedClient={this.state.selectedClient}
                 onSelect={(id) => this.setState({ selectedClient: id })}
-                onEndReached={() => this.addSomeClients()}
+                onEndReached={() => this.setState({ clients: pushSomeNewClients(this.state.clients.slice()) })}
               />
               <View style={{ marginLeft: 6 }}>
                 <Accordion onItemPress={this.onItemPress} />
@@ -156,16 +221,15 @@ export default class Order extends Component {
         <View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
+            <TouchableOpacity style={{ backgroundColor: '#dc3545', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
               onPress={() => Actions.replace('bill')}>
               <Text style={{ color: '#fff' }}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor: 'green', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
+            <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
               onPress={() => {
                 TableMenu.PostTheOrder()
                   .then(x => Actions.replace('bill'))
                   .catch(x => alert(x));
-                //.then(x=>Actions.replace('bill'));
               }}>
               <Text style={{ color: '#fff' }}>Save</Text>
             </TouchableOpacity>

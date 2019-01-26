@@ -5,6 +5,14 @@ add bar items in postOrder
 add discount & discountType in postOrder
 add weight of item
 
-add getAvaliableTables() return [1,2,3,4, ... ];
-add moveItemToTable(tableNumber, item);
+
+
+add getAllTablesNumber() return [1,2,3,4, ... ];
+add moveItemToTable(tableNumber, itemInfo);
+
+add combineOrders(orderIdList=[1,2,3,4]) return ok;
+add splitOrder(orderId) return ok;
+add flipOrder(orderId) return ok;
+
+
 
