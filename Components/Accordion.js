@@ -58,7 +58,7 @@ export default class Accordion extends Component {
   addIsTastingProperty(tasts) {
     if (!tasts)
       tasts = [];
-      
+
     tasts.forEach(t => t.isTasting = true);
     return tasts;
   }
@@ -73,7 +73,10 @@ export default class Accordion extends Component {
         // c.products = this.getAllProductsFroSubCat(c);
         // c.sub_categories = [];
         c.products.forEach(p => p.isBar = true);
-        c.sub_categories.forEach(p => p.isBar = true);
+        c.sub_categories.forEach(p => {
+          p.isBar = true;
+          p.isSub = true;
+        });
         this.addIsBarProperty(c.sub_categories);
       }
     });
@@ -112,6 +115,8 @@ export default class Accordion extends Component {
   _head(item) {
     let radius = item.id == 1 ? 4 : 0;
     let hotjarColor = this.isHotjarEnabled(item.id) ? '#fff' : 'rgba(0,0,0,0.2)';
+    let isSub = item.isSub;
+
     return (
       <View style={{
         backgroundColor: item.category_color,
@@ -124,21 +129,24 @@ export default class Accordion extends Component {
         <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}>
           <Text style={{ color: '#fff' }}>{item.category_name}</Text>
         </View>
-        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
-          <TouchableOpacity transparent style={{ backgroundColor: 'rgba(0,0,0,0.1)', padding: 2 }}
-            onPress={() => {
-              if (this.state.addNewItem == item.id)
-                this.setState({ addNewItem: 0 });
-              else
-                this.setState({ addNewItem: item.id });
-            }}
-          >
-            <Text style={{ color: '#fff' }}> Not listed ? </Text>
-          </TouchableOpacity>
-          <TouchableOpacity transparent style={{ marginHorizontal: 6 }} onPress={() => this.toggleHotjar(item.id)}>
-            <FAIcon style={{ color: hotjarColor, fontSize: 20 }} name='hotjar' />
-          </TouchableOpacity>
-        </View>
+        {
+          !isSub &&
+          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <TouchableOpacity transparent style={{ backgroundColor: 'rgba(0,0,0,0.1)', padding: 2 }}
+              onPress={() => {
+                if (this.state.addNewItem == item.id)
+                  this.setState({ addNewItem: 0 });
+                else
+                  this.setState({ addNewItem: item.id });
+              }}
+            >
+              <Text style={{ color: '#fff' }}> Not listed ? </Text>
+            </TouchableOpacity>
+            <TouchableOpacity transparent style={{ marginHorizontal: 6 }} onPress={() => this.toggleHotjar(item.id)}>
+              <FAIcon style={{ color: hotjarColor, fontSize: 20 }} name='hotjar' />
+            </TouchableOpacity>
+          </View>
+        }
       </View>
     );
   }
@@ -159,7 +167,7 @@ export default class Accordion extends Component {
   _body(item) {
     if (item.sub_categories && item.sub_categories.length > 0) {
       return <View style={{ padding: 10, }}>
-        <Acc dataArray={item.sub_categories} renderHeader={this._head} renderContent={this._body} />
+        <Acc style={{ margin:6 }} dataArray={item.sub_categories} renderHeader={this._head} renderContent={this._body} />
       </View>;
     }
 
@@ -169,7 +177,6 @@ export default class Accordion extends Component {
         borderColor: item.category_color,
         borderWidth: 1,
         backgroundColor: '#fff',
-        flex: 1,
         flexDirection: 'column',
         justifyContent: 'flex-start',
       }}>
@@ -198,12 +205,36 @@ export default class Accordion extends Component {
 
   renderProductsOfCategory(item) {
     if (item.isTasting) {
-      return item.products.map(x => <ItemButton style={{ width: '42%' }} key={x.id} title={x.tasting_name} color={x.color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+      return item.products.map(x => <ItemButton
+        style={{ width: '42%' }}
+        key={x.id}
+        title={x.tasting_name}
+        color={x.color}
+        price={x.price}
+        onPressMid={() => this.addItemToMenu(x)}
+      />);
     }
+
     if (item.isBar) {
-      return item.products.map(x => <ItemButton style={{ width: '42%' }} key={x.id} title={x.en_name} color={x.category_color} onPressMid={() => this.addItemToMenu(x)} />);
+      return item.products.map(x => <ItemButton
+        style={{ width: '42%' }}
+        key={x.id}
+        title={x.en_name}
+        color={x.category_color}
+        onPressMid={() => this.addItemToMenu(x)}
+      />);
     }
-    return item.products.map(x => <ItemButton style={{ width: '42%' }} key={x.id} title={x.en_name} color={x.category_color} price={x.price} onPressMid={() => this.addItemToMenu(x)} />);
+
+    return item.products.map(x => <ItemButton
+      style={{ width: '42%' }}
+      key={x.id}
+      title={x.en_name}
+      color={x.category_color}
+      price={x.price}
+      quantity={x.limit_quantity || -1}
+      showCount
+      onPressMid={() => this.addItemToMenu(x)}
+    />);
   }
 
   addItemToMenu(x) {

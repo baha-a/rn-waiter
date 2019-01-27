@@ -6,8 +6,8 @@ import Invoice from '../Components/Invoice';
 import FAIcon from '../Components/FAIcon';
 import Api from "../api";
 import Loader from '../Components/Loader';
-import { Actions } from 'react-native-router-flux';
 import ReloadBtn from '../Components/ReloadBtn';
+import { Actions } from 'react-native-router-flux';
 
 const Row = ({ children }) => {
   return (<View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
@@ -47,11 +47,14 @@ export default class Bill extends Component {
       ready: false,
       error: false,
     }
+
+    this.handelSelectInvoice = this.handelSelectInvoice.bind(this);
   }
 
   componentDidMount() {
     this.fetchData();
   }
+  
   fetchData() {
     Api.getOrders()
       .then(orders => this.setState({ invoiceData: orders, ready: true, error: false }))
@@ -65,17 +68,17 @@ export default class Bill extends Component {
     } else if (this.state.error) {
       content = <ReloadBtn onReload={() => { this.setState({ ready: false }); this.fetchData(); }} />;
     } else {
-      content = (<ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}>
-        <CardView>
-          {this.renderSearchAndCombinBar()}
-        </CardView>
+      content = (
+        <ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}>
+          <CardView>
+            {this.renderSearchAndCombinBar()}
+          </CardView>
 
-        <CardView>
-          {this.renderInvoices()}
-        </CardView>
-      </ScrollView>);
+          <CardView>
+            {this.renderInvoices()}
+          </CardView>
+        </ScrollView>);
     }
-
 
     return (
       <Container>
@@ -148,38 +151,42 @@ export default class Bill extends Component {
 
 
   renderInvoices() {
-    let res = [],
-      bills = this.state.invoiceData;
-    if (!bills) {
-      return <Text> no bills </Text>
+    if (!this.state.invoiceData) {
+      return <ReloadBtn title='no bills' onReload={() => { this.setState({ ready: false, error: false }); this.fetchData(); }} />;
     }
 
-    for (let i = 0; i < bills.length; i += 4) {
-      let items = [];
-      for (let j = 0; j + i < bills.length && j < 4; j++) {
-        const e = bills[j + i];
-        items.push(
-          <Invoice isSelectionEnabeld={this.state.combining}
-            onSelected={(isOn) => {
-              let list = this.state.selectedInvoices.slice();
-              if (isOn) list.push(e.id);
-              else list = list.filter(x => x != e.id);
+    return (<View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+      {
+        this.state.invoiceData.map(e =>
+          <Invoice
 
-              this.setState({ selectedInvoices: list });
-            }}
-            isSelected={this.state.selectedInvoices.findIndex(x => x == e.id) != -1}
-            style={{ flex: 1, margin: 10, }} key={e.id} info={e} />)
+            isSelected={this.state.selectedInvoices.findIndex(x => x === e.id) >= 0}
+            onSelected={this.handelSelectInvoice}
+            style={{ width: '21%' }}
+            key={e.id}
+            info={e}
+          />)
       }
+    </View>);
+  }
 
-      if (items.length == 0) {
-        break;
-      }
-      res.push(<Row key={i}>{items}</Row>);
+  handelSelectInvoice(isOn) {
+    if (!this.state.combining) {
+      Actions.order({
+        id: e.id,
+        waiter: e.waiter,
+        discount: e.discount,
+        discountType: e.discountType
+      });
     }
 
-    if (res.length == 0) {
-      return <View />;
+    let list = this.state.selectedInvoices.slice();
+    if (isOn) {
+      list.push(e.id);
+    } else {
+      list = list.filter(x => x != e.id);
     }
-    return res;
+    this.setState({ selectedInvoices: list });
+    return true;
   }
 }

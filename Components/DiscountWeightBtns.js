@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Text, View, TouchableOpacity, TextInput } from 'react-native'
 
 const Btn = ({ name, color = '#f0f0f0', onPress }) => (
-    <TouchableOpacity style={{ flex: 1, backgroundColor: color, margin: 4, padding: 16 }} onPress={()=> onPress()}>
+    <TouchableOpacity style={{ flex: 1, backgroundColor: color, margin: 4, padding: 16 }} onPress={() => onPress()}>
         <Text style={{ textAlign: 'center' }}>{name}</Text>
     </TouchableOpacity>
 );
@@ -12,7 +12,7 @@ export default class DiscountWeightBtns extends Component {
         super(props);
 
         let { value = 0 } = props;
-        
+
         this.state = {
             value: value + '',
         };
@@ -53,6 +53,7 @@ export default class DiscountWeightBtns extends Component {
                 </View>
                 <View style={{ flex: 0.3, flexDirection: 'column', justifyContent: 'center' }}>
                     <TextInput
+                        
                         style={{ flex: 1, textAlign: 'center', textAlignVertical: 'center', fontSize: 32, fontWeight: 'bold' }}
                         underlineColorAndroid='rgba(0,0,0,0)'
                         disableFullscreenUI

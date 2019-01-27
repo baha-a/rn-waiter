@@ -7,6 +7,7 @@ import { Actions } from 'react-native-router-flux';
 import Loader from '../Components/Loader';
 import ReloadBtn from '../Components/ReloadBtn';
 import DiscountWeightBtns from '../Components/DiscountWeightBtns';
+import FAIcon from '../Components/FAIcon';
 
 export default class Customize extends Component {
     constructor(props) {
@@ -90,7 +91,7 @@ export default class Customize extends Component {
                                     selectedOptions.push(t);
                                 }
                             }
-                            else{
+                            else {
                                 selectedOptions.push(x);
                             }
                         });
@@ -100,8 +101,7 @@ export default class Customize extends Component {
             })
             .catch(x => this.setState({ ready: true, error: true }));
 
-        // Api.getAvailableTables()
-        // .then(x => this.setState({ tables: x }));
+        // Api.getAvailableTables().then(x => this.setState({ tables: x }));
     }
 
     toggleSelectForOption(id, value) {
@@ -265,6 +265,19 @@ export default class Customize extends Component {
                                     selected={this.isSelectedForClient(x)}
                                 />)
                             }
+                            <TouchableOpacity style={{ padding: 10, margin: 6, backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center', alignContent: 'center' }}
+                                onPress={() => {
+                                    let last = 0, clients = this.state.clients.slice();
+
+                                    if (clients && clients.length > 0)
+                                        last = clients[clients.length - 1];
+                                    for (let i = 0; i < 10; i++)
+                                        clients.push(++last);
+
+                                    this.setState({ clients: clients });
+                                }}>
+                                <FAIcon name='plus' />
+                            </TouchableOpacity>
                         </View>
                     </View>);
                 break;
@@ -305,6 +318,7 @@ export default class Customize extends Component {
                                     {this.state.otherOptions.map(x => <Picker.Item key={x} label={x} value={x} />)}
                                 </Picker>
                                 <TextInput
+                                    
                                     disableFullscreenUI
                                     underlineColorAndroid='rgba(0,0,0,0)'
                                     style={{ backgroundColor: '#fff', borderColor: '#ccc', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}

@@ -18,12 +18,16 @@ export default class ItemPriceBar extends Component {
             onAdd = null
         } = this.props;
 
-        return(<View style={{ margin: 6, flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'stretch' }}>
-            <TextInput style={style} disableFullscreenUI underlineColorAndroid='#fff' placeholder={firstInputTitle}
+        return (<View style={{ margin: 6, flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'stretch' }}>
+            <TextInput
+                
+                style={style} disableFullscreenUI underlineColorAndroid='#fff' placeholder={firstInputTitle}
                 onChangeText={value => this.setState({ text1: value })}
                 value={this.state.text1}
             />
-            <TextInput style={style} disableFullscreenUI underlineColorAndroid='#fff' placeholder={secandInputTitle} keyboardType='numeric'
+            <TextInput
+                
+                style={style} disableFullscreenUI underlineColorAndroid='#fff' placeholder={secandInputTitle} keyboardType='numeric'
                 onChangeText={value => this.setState({ text2: value })}
                 value={this.state.text2}
             />

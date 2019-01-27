@@ -504,10 +504,15 @@ export default class TableMenu extends Component {
     }
 
     postOrder() {
+        if (this.props.id) {
+            return new Promise(() => { throw 'edit order not supported yet' });
+        }
         if (!this.state.tableNumber) {
             return new Promise(() => { throw 'choose table number first' });
         }
-        return Api.postOrder({
+        let data = {
+            id: this.props.id,
+
             table_number: this.state.tableNumber,
             status: 'active',
 
@@ -521,27 +526,41 @@ export default class TableMenu extends Component {
             })),
 
             bar: this.state.barItems.slice(),
-        }).then(x => alert('order successfully saved'));
+        };
+
+        console.log(data);
+        console.log('------------------')
+        //        return new Promise(() => { throw 'mock api' });
+
+        return Api.postOrder(data).then(x => alert('order successfully saved'));
     }
     buildProducts(products) {
         let result = [];
 
         let dish_number = 1;
         products.forEach(p => {
-            if (p.clients) {
+            if (p.clients && p.clients.length > 0) {
                 p.clients.forEach(c => {
                     result.push({
                         product_id: p.id,
                         client_number: c,
                         dish_number: dish_number++,
-                        product_customizes: p.product_customizes && p.product_customizes.map(x => x.id),
+                        note: p.note || '',
+                        cookingNote: p.otherNote || '',
+                        discount: p.discount || 0,
+                        quantity: p.quantity || 1,
+                        product_customizes: p.product_customizes && p.product_customizes.map(x => x.id) || [],
                     });
                 });
             } else {
                 result.push({
                     product_id: p.id,
                     dish_number: dish_number++,
-                    product_customizes: p.product_customizes && p.product_customizes.map(x => x.id),
+                    note: p.note || '',
+                    cookingNote: p.otherNote || '',
+                    discount: p.discount || 0,
+                    quantity: p.quantity || 1,
+                    product_customizes: p.product_customizes && p.product_customizes.map(x => x.id) || [],
                 });
             }
         });
@@ -580,7 +599,9 @@ export default class TableMenu extends Component {
                     <View style={{ flex: 1, flexDirection: 'column', padding: 6 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
                             <Text style={{ fontSize: 18 }}> Table No# </Text>
-                            <TextInput keyboardType='numeric' style={{ backgroundColor: '#dae0e5' }}
+                            <TextInput
+
+                                keyboardType='numeric' style={{ backgroundColor: '#dae0e5' }}
                                 onChangeText={(v) => this.setState({ tableNumber: v })}
                                 underlineColorAndroid='rgba(0,0,0,0)'
                                 disableFullscreenUI

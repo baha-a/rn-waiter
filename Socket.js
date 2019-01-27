@@ -23,7 +23,7 @@ export default class Socket extends React.Component {
                 <Button title='send' onPress={() => this.socket.send(this.state.message)}>
                     <Text>Send</Text>
                 </Button>
-                <Input placeholder='message to echo' onChangeText={(t) => this.setState({ message: t })} />
+                <Input  placeholder='message to echo' onChangeText={(t) => this.setState({ message: t })} />
             </View>
         );
     }

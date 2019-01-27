@@ -47,7 +47,9 @@ export default class DiscountInput extends Component {
                     <Text style={{ alignItems: 'center', justifyContent: 'center' }}>{this.state.dolarOrPercent}</Text>
                 </TouchableOpacity>
                 <View style={[{ flex: 0.9, backgroundColor: '#fff', justifyContent: 'flex-start', }, style]}>
-                    <TextInput placeholder={this.props.placeholder}
+                    <TextInput
+                        
+                        placeholder={this.props.placeholder}
                         value={this.state.value + ''}
                         onChangeText={x => this.valueChange(x)}
                         keyboardType='numeric'

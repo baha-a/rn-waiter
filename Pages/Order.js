@@ -62,18 +62,18 @@ export default class Order extends Component {
   constructor(props) {
     super(props);
 
+    let{
+      discount = 0,
+      discountType = '$',
+    } = this.props;
+
     this.state = {
       openOverly: false,
       clients: pushSomeNewClients(),
       selectedClient: 1,
 
-
-      discountValue: 0,
-      discountType: '$',
-
-      waiterName: 'name',
-      invoiceNumber: 795,
-
+      discount: discount,
+      discountType: discountType,
     };
 
     Order.openOverlyEvt = () => {
@@ -149,17 +149,17 @@ export default class Order extends Component {
       <View style={{ flexDirection: 'column', justifyContent: 'flex-start', }}>
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 6, paddingHorizontal: 16 }}>
           <View style={{ flex: 1, justifyContent: 'center' }}>
-            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Inv No#<Text style={{ color: '#6c757d' }}>{' ' + this.state.invoiceNumber}</Text></Text>
+            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Inv No#<Text style={{ color: '#6c757d' }}>{' ' + this.props.id}</Text></Text>
           </View>
           <View style={{ flex: 1, justifyContent: 'center' }}>
-            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Waiter:<Text style={{ color: '#6c757d' }}>{' ' + this.state.waiterName}</Text></Text>
+            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Waiter:<Text style={{ color: '#6c757d' }}>{' ' + this.props.waiter}</Text></Text>
           </View>
           <View style={{ flex: 1 }}>
             <DiscountInput
               placeholder='discount value'
-              value={this.state.discountValue}
+              value={this.state.discount}
               type={this.state.discountType}
-              onValueChange={v => this.setState({ discountValue: v })}
+              onValueChange={v => this.setState({ discount: v })}
               onTypeChange={v => this.setState({ discountType: v })}
             />
           </View>

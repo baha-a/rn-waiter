@@ -54,7 +54,10 @@ export default class FAIcon extends Component {
             case 'percent':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf295;</Text>;
 
-            default:
+            case 'infinity':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf534;</Text>;
+
+           default:
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf059;</Text>;
         }
     }

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Text, View, TouchableOpacity } from 'react-native';
 import { Icon } from 'native-base';
 import Api from '../api';
+import FAIcon from './FAIcon';
 
 
 export default class ItemButton extends Component {
@@ -9,7 +10,7 @@ export default class ItemButton extends Component {
         super(props);
 
         let { quantity = 1 } = props;
-        
+
         this.state = {
             count: quantity,
         }
@@ -18,11 +19,6 @@ export default class ItemButton extends Component {
         this.addItem = this.addItem.bind(this);
 
         this.pressMid = this.pressMid.bind(this);
-    }
-
-
-    componentDidMount() {
-        this.setState({ count: this.props.count ? this.props.count : 1 });
     }
 
     pressMid() {
@@ -57,6 +53,7 @@ export default class ItemButton extends Component {
             title,
 
             addAndRemove,
+            showCount,
 
             price,
 
@@ -94,8 +91,12 @@ export default class ItemButton extends Component {
                     }}
                         onPress={this.pressMid}
                     >
-                        {addAndRemove && <Text style={{ color: '#fff', fontWeight: 'bold' }}> {this.state.count} </Text>}
-
+                        {
+                            (addAndRemove || showCount) &&
+                            <Text style={{ color: '#fff' }}>
+                                {this.state.count == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold'}}>{this.state.count}</Text>}
+                            </Text>
+                        }
                         <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
                     </TouchableOpacity>
 
