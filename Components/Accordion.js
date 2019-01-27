@@ -8,6 +8,7 @@ import Api from '../api';
 import Loader from './Loader';
 import TableMenu from './TableMenu';
 import ReloadBtn from './ReloadBtn';
+import Collapsible from './Collapsible';
 
 export default class Accordion extends Component {
   constructor(props) {
@@ -164,16 +165,33 @@ export default class Accordion extends Component {
     this.setState({ hotjarEnabled: list });
   }
 
+
+  renderSub(sub) {
+    return <View style={{ padding: 4, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+      {
+        sub.map(x => <Collapsible
+          key={x.id}
+          title={x.category_name}
+          style={{ width: '44%', margin: 4 }}
+          headerStyle={{ backgroundColor: x.category_color, padding: 10 }}
+          titleColor='#fff'
+        >
+          {this._body(x)}
+        </Collapsible>)
+      }
+    </View>;
+  }
+
   _body(item) {
+    let result = null, padding = 10;
     if (item.sub_categories && item.sub_categories.length > 0) {
-      return <View style={{ padding: 10, }}>
-        <Acc style={{ margin:6 }} dataArray={item.sub_categories} renderHeader={this._head} renderContent={this._body} />
-      </View>;
+      result = this.renderSub(item.sub_categories);
+      padding = 0;
     }
 
     return (
       <View style={{
-        padding: 10,
+        padding: padding,
         borderColor: item.category_color,
         borderWidth: 1,
         backgroundColor: '#fff',
@@ -199,6 +217,7 @@ export default class Accordion extends Component {
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
           {this.renderProductsOfCategory(item)}
         </View>
+        {result}
       </View>
     );
   }

@@ -54,7 +54,7 @@ export default class Bill extends Component {
   componentDidMount() {
     this.fetchData();
   }
-  
+
   fetchData() {
     Api.getOrders()
       .then(orders => this.setState({ invoiceData: orders, ready: true, error: false }))
@@ -93,7 +93,13 @@ export default class Bill extends Component {
       <View style={{ flex: 1, flexDirection: 'row' }}>
         <View style={{ flex: 0.5, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ flex: 0.8 }}>
-            <TextInput disableFullscreenUI underlineColorAndroid='#fff' placeholder='Table No#' style={{ borderWidth: 1, borderColor: '#bbb', borderBottomStartRadius: 4, paddingLeft: 6 }} />
+            <TextInput
+              keyboardType='numeric'
+              disableFullscreenUI
+              underlineColorAndroid='#fff'
+              placeholder='Table No#'
+              style={{ borderWidth: 1, borderColor: '#bbb', borderBottomStartRadius: 4, paddingLeft: 6 }}
+            />
           </View>
           <View style={{ flex: 0.2 }}>
             <TouchableOpacity style={{ backgroundColor: '#6c757d', height: '100%', alignItems: 'center', justifyContent: 'center' }}>

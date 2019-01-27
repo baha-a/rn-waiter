@@ -7,7 +7,7 @@ const Btn = ({ name, color = '#f0f0f0', onPress }) => (
     </TouchableOpacity>
 );
 
-export default class DiscountWeightBtns extends Component {
+export default class OptionPad extends Component {
     constructor(props) {
         super(props);
 

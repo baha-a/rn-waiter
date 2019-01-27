@@ -11,17 +11,17 @@ export default class Collapsible extends Component {
     }
 
     render() {
-
-        let { style, children, title } = this.props;
+        let { style, children, title, headerStyle, titleColor = '#000' } = this.props;
 
         return (
             <View style={style}>
-                <TouchableOpacity onPress={() => this.setState({ collapsed: !this.state.collapsed })} style={{ paddingLeft:10,}}>
-                    <Text>{title}</Text>
+                <TouchableOpacity onPress={() => this.setState({ collapsed: !this.state.collapsed })}
+                    style={{ paddingLeft: 10, ...headerStyle }}>
+                    <Text lineBreakMode='tail' numberOfLines={1} style={{ color:titleColor }}>{title}</Text>
                 </TouchableOpacity>
                 {
                     this.state.collapsed &&
-                    <View style={{ marginTop:10}}>
+                    <View style={{}}>
                         {children}
                     </View>
                 }

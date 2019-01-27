@@ -331,22 +331,19 @@ export default class TableMenu extends Component {
     }
 
     fillNewItemProperty(oldItem, newItem) {
-        let { options, clients, discount, discountType, note, otherNote, weight } = newItem;
+        let { options, clients, discount, discountType, note, otherNote} = newItem;
         oldItem.clients = !clients ? [] : clients.slice();
         oldItem.product_customizes = !options ? [] : options.slice();
         oldItem.discount = discount;
         oldItem.discountType = discountType;
         oldItem.note = note;
         oldItem.otherNote = otherNote;
-        oldItem.weight = weight;
     }
 
     renderProduct(x, type) {
         let details = [];
         if (x.discount && x.discount > 0)
             details.push(x.discountType + '' + x.discount + ' off');
-        if (x.weight)
-            details.push(x.weight + ' kg');
         if (x.note)
             details.push(x.note);
         if (x.otherNote)

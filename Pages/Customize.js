@@ -6,7 +6,7 @@ import DiscountInput from '../Components/DiscountInput';
 import { Actions } from 'react-native-router-flux';
 import Loader from '../Components/Loader';
 import ReloadBtn from '../Components/ReloadBtn';
-import DiscountWeightBtns from '../Components/DiscountWeightBtns';
+import OptionPad from '../Components/OptionPad';
 import FAIcon from '../Components/FAIcon';
 
 export default class Customize extends Component {
@@ -21,7 +21,6 @@ export default class Customize extends Component {
             isBar = false,
             note = '',
             otherNote = '',
-            weight = 0,
             description = '',
         } = props.item;
 
@@ -41,7 +40,6 @@ export default class Customize extends Component {
 
             discount: discount,
             discountType: discountType,
-            weight: weight,
 
             description: description,
 
@@ -141,8 +139,6 @@ export default class Customize extends Component {
             clients: this.state.selectedClient.slice(),
             discountType: this.state.discountType,
             discount: this.state.discount,
-
-            weight: this.state.weight,
 
             service: this.state.selectedService,
             note: this.state.note,
@@ -282,23 +278,13 @@ export default class Customize extends Component {
                     </View>);
                 break;
             case 'discount':
-                content = <DiscountWeightBtns
+                content = <OptionPad
                     key={1}
                     unit='%'
                     options={[100, 50, 25, 10, 5]}
                     validateValue={v => v <= 100}
                     onValueChange={v => this.setState({ discount: v })}
                     value={this.state.discount}
-                />;
-                break;
-            case 'weight':
-                content = <DiscountWeightBtns
-                    key={2}
-                    unit='kg'
-                    options={[2, 1, 0.5, 0.25, 0.2]}
-                    validateValue={v => true}
-                    onValueChange={v => this.setState({ weight: v + '' })}
-                    value={this.state.weight}
                 />;
                 break;
             case 'component':
@@ -318,7 +304,6 @@ export default class Customize extends Component {
                                     {this.state.otherOptions.map(x => <Picker.Item key={x} label={x} value={x} />)}
                                 </Picker>
                                 <TextInput
-                                    
                                     disableFullscreenUI
                                     underlineColorAndroid='rgba(0,0,0,0)'
                                     style={{ backgroundColor: '#fff', borderColor: '#ccc', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
@@ -353,7 +338,6 @@ export default class Customize extends Component {
         return (<View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', borderBottomColor: '#eee', borderBottomWidth: 1, paddingHorizontal: 10 }}>
                 {this.tabBtn('component')}
-                {this.tabBtn('weight')}
                 {this.tabBtn('discount')}
             </View>
             <View style={{ padding: 10, }}>
