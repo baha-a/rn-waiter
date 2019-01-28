@@ -4,7 +4,6 @@ import FAIcon from './FAIcon';
 import Selectable from './Selectable';
 import { Input, Item, Radio, Tab } from 'native-base';
 import ItemButton from './ItemButton';
-import Order from '../Pages/Order';
 import Api from '../api';
 import Loader from './Loader';
 import { Actions } from 'react-native-router-flux';
@@ -21,6 +20,8 @@ export default class TableMenu extends Component {
 
             invoiceHoldLimitedTime: true,
             invoiceHoldUnlimited: false,
+
+            hold: false,
 
             tableNumber: 0,
 
@@ -199,6 +200,10 @@ export default class TableMenu extends Component {
     randerSchedule() {
         return (
             <View style={{ flex: 1, flexDirection: 'column', paddingVertical: 10 }}>
+                <Selectable title='Hold The Order' selected={this.state.hold} onSelect={(v) => this.toggleHoldOrder(v)} />
+                <View style={{ backgroundColor: '#dee2e6', height: 1, margin: 10 }} />
+
+
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                     {
                         this.state.services.map(x =>
@@ -271,9 +276,7 @@ export default class TableMenu extends Component {
                             <View key={client.client_number}>
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
-                                    {
-                                        client.products.map(x => this.renderProduct(x, 'client'))
-                                    }
+                                    {client.products.map(x => this.renderProduct(x, 'client'))}
                                 </View>
                             </View>
                         )
@@ -283,19 +286,49 @@ export default class TableMenu extends Component {
         );
     }
 
+    holdOrder() {
+        if (this.props.id) {
+            Api.hold({ order_id: this.props.id, status: "hold" })
+                .then(x => this.setState({ hold: true }));
+        } else {
+            this.setState({ hold: true });
+        }
+    }
+
+    unHoldOrder() {
+        if (this.props.id) {
+            Api.hold({ order_id: this.props.id, status: "active" })
+                .then(x => this.setState({ hold: false }));
+        } else {
+            this.setState({ hold: false });
+        }
+    }
+
+    toggleHoldOrder() {
+        if (this.state.hold) {
+            this.unHoldOrder();
+        } else {
+            this.holdOrder();
+        }
+    }
 
     customizeItem(item, type) {
         let { dish_number } = item.item;
 
         if (item.newTable) {
-            alert('move item to table #' + item.newTable);
-            let oldItem = item.item;
-            this.fillNewItemProperty(oldItem, item);
-            //Api.moveItemToTable(newTable, oldItem).then(x=>
-            type = (type == 'service' || type == 'client') ? 'service' : 'bar';
-            this.deleteItem(dish_number, type);
-            //);
-            return;
+            if (this.props.id && item.item.unique_id) {
+                Api.moveItemToTable({
+                    product_unique_id: item.item.unique_id,
+                    new_order_id: item.newTable.id
+                }).then(x => {
+                    type = (type == 'service' || type == 'client') ? 'service' : 'bar';
+                    this.deleteItem(dish_number, type);
+                    alert('move item to table #' + item.newTable.table_number);
+                });
+                return;
+            } else {
+                alert('save order before moving items to another table');
+            }
         }
 
         if (type == 'bar') {
@@ -497,7 +530,7 @@ export default class TableMenu extends Component {
         let dashedBorderStyle = arrangeItemsEnable ? { borderStyle: 'dashed', borderColor: '#eee', borderWidth: 3, margin: 4 } : {};
 
         return (
-            <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
                 <View style={{ marginVertical: 8, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                     <TouchableOpacity style={{ padding: 4, flex: 1, alignItems: 'center', backgroundColor: color1 }}
                         onPress={() => this.setState({ selectedSubTab: 1 })}>
@@ -510,12 +543,11 @@ export default class TableMenu extends Component {
                 </View>
                 {
                     this.state.selectedSubTab == 1 ?
-                        <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
                             {
                                 this.state.services.map(s => {
                                     return (
-                                        <View key={s.service_number}
-                                            style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start' }}>
+                                        <View key={s.service_number} style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start', alignItems:'stretch' }}>
 
                                             <View style={{ margin: 6 }}>
                                                 <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 8, justifyContent: 'center', alignItems: 'center' }}
@@ -531,11 +563,9 @@ export default class TableMenu extends Component {
 
                                                 {
                                                     arrangeItemsEnable &&
-                                                    <TouchableOpacity style={{ backgroundColor: '#ddd', padding: 8, justifyContent: 'center', alignItems: 'center' }}
-                                                        onPress={() => {
-                                                            this.toggleSelectionForItemOfService(s.service_number);
-                                                        }}>
-                                                        <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>Select All</Text>
+                                                    <TouchableOpacity style={{ backgroundColor: '#ddd', padding: 6, justifyContent: 'center', alignItems: 'center' }}
+                                                        onPress={() => this.toggleSelectionForItemOfService(s.service_number) }>
+                                                        <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center' , fontSize:12 }}>Select All</Text>
                                                     </TouchableOpacity>
                                                 }
                                             </View>
@@ -580,35 +610,68 @@ export default class TableMenu extends Component {
             return new Promise(() => { throw 'choose table number first' });
         }
 
-        let data = {
+        let status = this.state.hold ? 'hold' : 'active';
+
+        let order = {
             table_number: this.state.tableNumber,
-            status: 'active',
-            type: 'prepaid',
-
+            status: status,
+            type: 'postpaid',
             note: this.state.note,
-
-            services: this.state.services.map(x => ({
-                service_number: x.service_number,
-                service_status: 'ToBeCall',
-                products: this.buildProducts(x.products)
-            })),
-
             bar: this.state.barItems.slice(),
-        }
+
+            services: this.state.services
+                .map(x => ({
+                    service_number: x.service_number,
+                    service_status: 'ToBeCall',
+                    products: this.buildProducts(x.products /* .filter(y => !y.isTasting) */)
+                }))
+                .filter(x => x.products && x.products.length > 0),
+        };
+
+
+        // let tastingOrder = {
+        //     table_number: this.state.tableNumber,
+        //     status: status,
+        //     type: 'tasting',
+        //     note: this.state.note,
+        //     services: this.state.services
+        //         .map(x => ({
+        //             service_number: x.service_number,
+        //             service_status: 'ToBeCall',
+        //             products: this.buildProducts(x.products.filter(y => y.isTasting))
+        //         }))
+        //         .filter(x => x.products && x.products.length > 0),
+        // }
 
         if (this.props.id) {
-            data.id = this.props.id;
+            order.id = this.props.id;
+            //tastingOrder.id = this.props.id;
         }
 
+        let promises = [];
+        // if (tastingOrder.services && tastingOrder.services.length > 0) {
+        //     promises.push(tastingOrder);
+        // }
+        if (order.services && order.services.length > 0) {
+            promises.push(Api.postOrder(order));
+        }
 
-
-
-        console.log(data);
+        console.log('---------------- order --')
+        console.log(order);
+        // console.log('---------------- tasting order --')
+        // console.log(tastingOrder);
         console.log('------------------')
         //        return new Promise(() => { throw 'mock api' });
 
-        return Api.postOrder(data).then(x => alert('order successfully saved'));
+        if (promises.length == 0) {
+            return new Promise(() => { throw 'add items to the order first' });
+        }
+        
+        //       return new Promise(() => { throw 'mock api' });
+
+        return Promise.all(promises).then(x => alert('order successfully saved'));
     }
+
     buildProducts(products) {
         let result = [];
 
@@ -636,7 +699,7 @@ export default class TableMenu extends Component {
             client_number: client,
             dish_number: dish_number,
             note: product.note || '',
-            cookingNote: product.otherNote || '',
+            //cookingNote: product.otherNote || '',
             discount: product.discount || 0,
             product_customizes: product.product_customizes && product.product_customizes.map(x => x.id) || [],
         };
@@ -674,8 +737,8 @@ export default class TableMenu extends Component {
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
                             <Text style={{ fontSize: 18 }}> Table No# </Text>
                             <TextInput
-
-                                keyboardType='numeric' style={{ backgroundColor: '#dae0e5' }}
+                                keyboardType='numeric'
+                                style={{ backgroundColor: '#dae0e5' }}
                                 onChangeText={(v) => this.setState({ tableNumber: v })}
                                 underlineColorAndroid='rgba(0,0,0,0)'
                                 disableFullscreenUI

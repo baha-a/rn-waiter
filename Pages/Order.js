@@ -62,7 +62,7 @@ export default class Order extends Component {
   constructor(props) {
     super(props);
 
-    let{
+    let {
       discount = 0,
       discountType = '$',
     } = this.props;
@@ -132,13 +132,13 @@ export default class Order extends Component {
   }
 
   handelSplit() {
-    alert('Split');
+    alert('Split not supported yet');
   }
   handelFlip() {
-    alert('Flip');
+    alert('Flip not supported yet');
   }
   handelPay() {
-    alert('Pay');
+    alert('Pay not supported yet');
   }
 
   renderHeader() {
@@ -184,57 +184,57 @@ export default class Order extends Component {
     return (
       <Container style={{ backgroundColor: '#eee' }}>
         <Navbar />
-        {this.renderHeader()}
-        <View style={{ flex: 1, flexDirection: 'row', }}>
-          <View style={{ flex: 0.6 }} >
-            <ScrollView>
-              <ClientList
-                clients={this.state.clients}
-                selectedClient={this.state.selectedClient}
-                onSelect={(id) => this.setState({ selectedClient: id })}
-                onEndReached={() => this.setState({ clients: pushSomeNewClients(this.state.clients.slice()) })}
-              />
-              <View style={{ marginLeft: 6 }}>
-                <Accordion onItemPress={this.onItemPress} />
-              </View>
-              <View>
-                <Collapsible title='Custom Dish' style={{
-                  backgroundColor: '#fff',
-                  borderWidth: 2,
-                  borderColor: '#ccc',
-                  marginVertical: 10,
-                  marginLeft: 6,
-                  padding: 10
-                }}
-                >
-                  <ItemPriceBar secandInputTitle='Budget' buttonTitle='Add' />
-                </Collapsible>
-              </View>
-            </ScrollView>
+          {this.renderHeader()}
+          <View style={{ flex: 1, flexDirection: 'row', }}>
+            <View style={{ flex: 0.6 }} >
+              <ScrollView>
+                <ClientList
+                  clients={this.state.clients}
+                  selectedClient={this.state.selectedClient}
+                  onSelect={(id) => this.setState({ selectedClient: id })}
+                  onEndReached={() => this.setState({ clients: pushSomeNewClients(this.state.clients.slice()) })}
+                />
+                <View style={{ marginLeft: 6 }}>
+                  <Accordion onItemPress={this.onItemPress} />
+                </View>
+                <View>
+                  <Collapsible title='Custom Dish' style={{
+                    backgroundColor: '#fff',
+                    borderWidth: 2,
+                    borderColor: '#ccc',
+                    marginVertical: 10,
+                    marginLeft: 6,
+                    padding: 10
+                  }}
+                  >
+                    <ItemPriceBar secandInputTitle='Budget' buttonTitle='Add' />
+                  </Collapsible>
+                </View>
+              </ScrollView>
 
+            </View>
+            <View style={{ flex: 0.4, padding: 10 }}>
+              <TableMenu id={this.props.id} selectedClient={this.state.selectedClient} clients={this.state.clients} />
+            </View>
           </View>
-          <View style={{ flex: 0.4, padding: 10 }}>
-            <TableMenu id={this.props.id} selectedClient={this.state.selectedClient} clients={this.state.clients} />
-          </View>
-        </View>
-        {this.renderOverl()}
-        <View>
+          {this.renderOverl()}
+          <View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <TouchableOpacity style={{ backgroundColor: '#dc3545', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
-              onPress={() => Actions.replace('bill')}>
-              <Text style={{ color: '#fff' }}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
-              onPress={() => {
-                TableMenu.PostTheOrder()
-                  .then(x => Actions.replace('bill'))
-                  .catch(x => alert(x));
-              }}>
-              <Text style={{ color: '#fff' }}>Save</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+              <TouchableOpacity style={{ backgroundColor: '#dc3545', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
+                onPress={() => Actions.replace('bill')}>
+                <Text style={{ color: '#fff' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
+                onPress={() => {
+                  TableMenu.PostTheOrder()
+                    .then(x => Actions.replace('bill'))
+                    .catch(x => alert(x));
+                }}>
+                <Text style={{ color: '#fff' }}>Save</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
       </Container>
     )
   }

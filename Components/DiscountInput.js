@@ -41,7 +41,7 @@ export default class DiscountInput extends Component {
     render() {
         let style = { flexDirection: 'column', alignItems: 'stretch', padding: 6, borderColor: '#ddd', borderWidth: 1 };
         return (
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', margin: 4, }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'stretch', margin: 4, }}>
                 <TouchableOpacity onPress={this.toggleInputType}
                     style={[{ flex: 0.1, backgroundColor: '#ddd', justifyContent: 'center', }, style]}>
                     <Text style={{ alignItems: 'center', justifyContent: 'center' }}>{this.state.dolarOrPercent}</Text>

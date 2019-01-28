@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, View, TextInput, ScrollView, TouchableOpacity, Picker } from 'react-native'
+import { Text, View, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import Api from '../api';
 import Selectable from '../Components/Selectable';
 import DiscountInput from '../Components/DiscountInput';
@@ -8,6 +8,7 @@ import Loader from '../Components/Loader';
 import ReloadBtn from '../Components/ReloadBtn';
 import OptionPad from '../Components/OptionPad';
 import FAIcon from '../Components/FAIcon';
+import { Picker } from 'native-base';
 
 export default class Customize extends Component {
     constructor(props) {
@@ -58,7 +59,7 @@ export default class Customize extends Component {
 
             selectedTab: 'component',
 
-            tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            tables: [],
             table: table,
             newTable: null,
 
@@ -99,7 +100,7 @@ export default class Customize extends Component {
             })
             .catch(x => this.setState({ ready: true, error: true }));
 
-        // Api.getAvailableTables().then(x => this.setState({ tables: x }));
+        Api.getTableNumbers().then(x => this.setState({ tables: x }));
     }
 
     toggleSelectForOption(id, value) {
@@ -172,31 +173,40 @@ export default class Customize extends Component {
 
 
     renderTitleBar() {
-        return (<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', margin: 2, padding: 4, }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{this.props.item.en_name} Customize</Text>
+        return (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', margin: 2, padding: 4, }}>
+                <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{this.props.item.en_name} Customize</Text>
+                </View>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', }}>
-                <TouchableOpacity style={{ backgroundColor: '#dae0e5', padding: 14, margin: 4 }}
-                    onPress={() => this.setState({ selectedTab: 'tables' })}>
-                    <Text>Table #{this.state.newTable || this.state.table}</Text>
-                </TouchableOpacity>
+                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'stretch', }}>
+                    <View style={{ flex: 1, margin: 4 }}>
+                        <TouchableOpacity style={{ flex: 1, backgroundColor: '#dae0e5', padding: 6, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}
+                            onPress={() => this.setState({ selectedTab: 'tables' })}>
+                            <Text>Table #{(this.state.newTable && this.state.newTable.table_number) || this.state.table}</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                {
-                    (this.state.isBar == false && this.props.services && this.props.services.length > 0) &&
-                    <Picker
-                        selectedValue={this.state.selectedService}
-                        mode='dropdown'
-                        style={{ width: 130, backgroundColor: '#6c757d', borderRadius: 6, }}
-                        onValueChange={(value, index) => this.setState({ selectedService: value })}>
-                        {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
-                    </Picker>
-                }
-                <TouchableOpacity style={{ backgroundColor: '#3e3e3e', padding: 14, margin: 4 }}
-                    onPress={() => this.setState({ selectedTab: 'clients' })}>
-                    <Text style={{ color: '#fff' }}>Clients</Text>
-                </TouchableOpacity>
-            </View>
-        </View>);
+                    <View style={{ flex: 1, margin: 4 }}>
+                        {
+                            (this.state.isBar == false && this.props.services && this.props.services.length > 0) &&
+                            <Picker
+                                mode='dropdown'
+                                style={{ flex: 1, backgroundColor: '#6c757d', padding: 6, }}
+                                selectedValue={this.state.selectedService}
+                                onValueChange={(value, index) => this.setState({ selectedService: value })}>
+                                {this.props.services.map(x => <Picker.Item key={x} label={'Service #' + x} value={x} />)}
+                            </Picker>
+                        }
+                    </View>
+                    <View style={{ flex: 1, margin: 4 }}>
+                        <TouchableOpacity style={{ flex: 1, backgroundColor: '#3e3e3e', padding: 6, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}
+                            onPress={() => this.setState({ selectedTab: 'clients' })}>
+                            <Text style={{ color: '#fff' }}>Clients</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>);
     }
 
     render() {
@@ -224,6 +234,12 @@ export default class Customize extends Component {
         </View>);
     }
 
+    isSelectedTableNumber(table_number) {
+        if (this.state.newTable)
+            return this.state.newTable.table_number == table_number;
+        return this.state.table == table_number;
+    }
+
     renderContent() {
         let content = null;
         switch (this.state.selectedTab) {
@@ -234,15 +250,14 @@ export default class Customize extends Component {
                         <View style={{ padding: 10, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                             {
                                 this.state.tables.map(x =>
-                                    <TouchableOpacity key={x}
+                                    <TouchableOpacity key={x.id}
                                         style={{
                                             margin: 4, padding: 10,
-                                            backgroundColor: this.state.newTable == x || this.state.table == x
-                                                ? '#48f' : 'rgba(0, 0, 0, .125)'
+                                            backgroundColor: this.isSelectedTableNumber(x.table_number) ? '#48f' : 'rgba(0, 0, 0, .125)'
                                         }}
                                         onPress={() => this.setState({ newTable: x })}
                                     >
-                                        <Text>{'#' + x}</Text>
+                                        <Text>{'#' + x.table_number}</Text>
                                     </TouchableOpacity>
                                 )
                             }
@@ -299,7 +314,7 @@ export default class Customize extends Component {
                                 <Picker
                                     selectedValue={this.state.selectedOtherNote}
                                     mode='dropdown'
-                                    style={{ width: 130, backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
+                                    style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
                                     onValueChange={(value, index) => this.setState({ selectedOtherNote: value })}>
                                     {this.state.otherOptions.map(x => <Picker.Item key={x} label={x} value={x} />)}
                                 </Picker>
@@ -317,7 +332,10 @@ export default class Customize extends Component {
 
                             </View>
                             <View style={{ flex: 0.65, padding: 10, }}>
-                                <Text style={{ color: '#666666' }}>Description</Text>
+                                <Text style={{ color: '#666666' }}>Basic</Text>
+                                <Text style={{ padding: 6, backgroundColor: '#f8f9fa' }}> basics</Text>
+
+                                <Text style={{ color: '#666666', paddingTop: 10, }}>Description</Text>
                                 <Text style={{ padding: 6, backgroundColor: '#f8f9fa' }}>{this.state.description}</Text>
 
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Optionals</Text>

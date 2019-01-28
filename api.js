@@ -6,7 +6,7 @@ const fetchData = (url, config = null) => {
             if (response.status >= 200 && response.status < 300)
                 return response.json();
 
-            
+
             console.log(response);
 
             if (response.status)
@@ -18,8 +18,9 @@ const fetchData = (url, config = null) => {
 
 export default class Api {
 
-    static getAvailableTables() {
-        return fetchData('availableTables');
+    static getTableNumbers() {
+        return fetchData('orders')
+            .then(x => x.map(y => ({ id: y.id, table_number: y.table_number, })));
     }
 
     static getCategories() {
@@ -49,11 +50,20 @@ export default class Api {
             body: JSON.stringify(order),
         });
     }
-    static moveItemToTable(tableNumber, item) {
-        return fetchData('tables/' + tableNumber, {
+
+    static moveItemToTable(data) {
+        return fetchData('order/transfer', {
             method: 'POST',
             headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify(item),
+            body: JSON.stringify(data),
+        });
+    }
+
+    static hold(data){
+        return fetchData('order/changeStatus', {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
         });
     }
 
