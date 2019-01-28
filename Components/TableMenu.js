@@ -31,6 +31,8 @@ export default class TableMenu extends Component {
 
             services: [],
 
+            selectedItemsForArrange: [],
+
             note: '',
         };
 
@@ -331,7 +333,7 @@ export default class TableMenu extends Component {
     }
 
     fillNewItemProperty(oldItem, newItem) {
-        let { options, clients, discount, discountType, note, otherNote} = newItem;
+        let { options, clients, discount, discountType, note, otherNote } = newItem;
         oldItem.clients = !clients ? [] : clients.slice();
         oldItem.product_customizes = !options ? [] : options.slice();
         oldItem.discount = discount;
@@ -367,6 +369,8 @@ export default class TableMenu extends Component {
         //     onlayout = this._onLayout;
         // }
 
+        let isFound = type == 'service' && this.isItemSelected(x.dish_number);
+
         return <ItemButton
             key={x.dish_number}
             // _onLayout={onlayout}
@@ -378,15 +382,64 @@ export default class TableMenu extends Component {
             quantity={x.quantity}
             color={x.color || x.category_color}
             onDelete={() => this.deleteItem(x.dish_number)}
-            onPressMid={() => Actions.customize({
-                item: { ...x },
-                services: this.state.services.map(x => x.service_number),
-                selectedService: this.getServiceNumberOfProduct(x.dish_number),
-                allClients: this.props.clients,
-                table: this.state.tableNumber,
-                onSave: (item) => this.customizeItem(item, type)
-            })}
+            isSelected={isFound}
+            onPressMid={() => {
+                if (type == 'service' && this.state.arrangeItems == true) {
+                    if (isFound) { this.unselectItem(x.dish_number); } else { this.selectItem(x.dish_number); }
+                } else {
+                    Actions.customize({
+                        item: { ...x },
+                        services: this.state.services.map(x => x.service_number),
+                        selectedService: this.getServiceNumberOfProduct(x.dish_number),
+                        allClients: this.props.clients,
+                        table: this.state.tableNumber,
+                        onSave: (item) => this.customizeItem(item, type)
+                    });
+                }
+            }}
         />;
+    }
+
+    unselectItem(dish_number) {
+        this.setState({ selectedItemsForArrange: this.state.selectedItemsForArrange.filter(x => x != dish_number) });
+    }
+
+    selectItem(dish_number) {
+        this.setState({ selectedItemsForArrange: [...this.state.selectedItemsForArrange, dish_number] });
+    }
+
+    isItemSelected(dish_number) {
+        return this.state.selectedItemsForArrange.findIndex(x => x == dish_number) > -1;
+    }
+
+    moveSelectedItemToSerivce(sn) {
+        let
+            items = [],
+            itemsNumbers = this.state.selectedItemsForArrange.slice(),
+            services = this.state.services.slice();
+
+        let selectedServices = services.find(x => x.service_number == sn);
+
+        services.forEach(service => {
+            let selectedItems = service.products.filter(p => itemsNumbers.findIndex(x => x == p.dish_number) != -1);
+            if (selectedItems && selectedItems.length > 0) {
+                items = [...items, ...selectedItems];
+                service.products = service.products.filter(p => itemsNumbers.findIndex(x => x == p.dish_number) == -1);
+            }
+        });
+        selectedServices.products = [...selectedServices.products, ...items];
+
+        this.setState({ selectedItemsForArrange: [], arrangeItems: false, services: services });
+    }
+
+    toggleSelectionForItemOfService(sn) {
+        let items = this.state.selectedItemsForArrange.slice();
+
+        this.state.services.find(x => x.service_number == sn).products.forEach(p => {
+            items = this.isItemSelected(p.dish_number) ? items.filter(x => x != p.dish_number) : [...items, p.dish_number];
+        });
+
+        this.setState({ selectedItemsForArrange: items });
     }
 
     changeItemQuantity(dish_number, value) {
@@ -439,6 +492,10 @@ export default class TableMenu extends Component {
     renderMenuItems() {
         let color1 = 1 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
         let color2 = 2 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
+
+        let arrangeItemsEnable = this.state.arrangeItems == true;
+        let dashedBorderStyle = arrangeItemsEnable ? { borderStyle: 'dashed', borderColor: '#eee', borderWidth: 3, margin: 4 } : {};
+
         return (
             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center' }}>
                 <View style={{ marginVertical: 8, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -457,19 +514,36 @@ export default class TableMenu extends Component {
                             {
                                 this.state.services.map(s => {
                                     return (
-                                        <View key={s.service_number} style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
+                                        <View key={s.service_number}
+                                            style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start' }}>
 
-                                            <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 8, margin: 6, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
-                                                onPress={() => this.setState({ selectedService: s.service_number })}>
-                                                <Text style={{ fontWeight: 'bold', }}>Service #{s.service_number}</Text>
-                                            </TouchableOpacity>
+                                            <View style={{ margin: 6 }}>
+                                                <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 8, justifyContent: 'center', alignItems: 'center' }}
+                                                    onPress={() => {
+                                                        if (arrangeItemsEnable) {
+                                                            this.moveSelectedItemToSerivce(s.service_number);
+                                                        } else {
+                                                            this.setState({ selectedService: s.service_number })
+                                                        }
+                                                    }}>
+                                                    <Text style={{ fontWeight: 'bold', alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>Service #{s.service_number}</Text>
+                                                </TouchableOpacity>
+
+                                                {
+                                                    arrangeItemsEnable &&
+                                                    <TouchableOpacity style={{ backgroundColor: '#ddd', padding: 8, justifyContent: 'center', alignItems: 'center' }}
+                                                        onPress={() => {
+                                                            this.toggleSelectionForItemOfService(s.service_number);
+                                                        }}>
+                                                        <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>Select All</Text>
+                                                    </TouchableOpacity>
+                                                }
+                                            </View>
 
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}
                                             // ref={ref => this.serviceView = ref}
                                             >
-                                                {
-                                                    s.products.map(x => this.renderProduct(x, 'service'))
-                                                }
+                                                {s.products.map(x => this.renderProduct(x, 'service'))}
                                             </View>
                                         </View>
                                     )
@@ -478,9 +552,7 @@ export default class TableMenu extends Component {
                         </View>
                         :
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
-                            {
-                                this.state.barItems.map(x => this.renderProduct(x, 'bar'))
-                            }
+                            {this.state.barItems.map(x => this.renderProduct(x, 'bar'))}
                         </View>
                 }
             </View>
@@ -507,6 +579,7 @@ export default class TableMenu extends Component {
         if (!this.state.tableNumber) {
             return new Promise(() => { throw 'choose table number first' });
         }
+
         let data = {
             table_number: this.state.tableNumber,
             status: 'active',
@@ -521,8 +594,9 @@ export default class TableMenu extends Component {
             })),
 
             bar: this.state.barItems.slice(),
-        };
-        if(this.props.id){
+        }
+
+        if (this.props.id) {
             data.id = this.props.id;
         }
 
@@ -543,20 +617,20 @@ export default class TableMenu extends Component {
             if (p.clients && p.clients.length > 0) {
                 p.clients.forEach(c => {
                     let count = p.quantity || 1;
-                    while(count > 0){
+                    while (count > 0) {
                         count--;
-                        result.push(this.buildProductDataToSend(p, c,  dish_number++));
+                        result.push(this.buildProductDataToSend(p, c, dish_number++));
                     }
                 });
             } else {
-                result.push(this.buildProductDataToSend(p, null,  dish_number++));
+                result.push(this.buildProductDataToSend(p, null, dish_number++));
             }
         });
 
         return result;
     }
 
-    buildProductDataToSend(product, client, dish_number){
+    buildProductDataToSend(product, client, dish_number) {
         return {
             product_id: product.id,
             client_number: client,

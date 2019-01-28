@@ -61,99 +61,108 @@ export default class ItemButton extends Component {
 
             clients = [],
 
-            style = {}
+            style = {},
+
+            isSelected = false
         } = this.props;
 
         let padding = 6, radius = 3;
 
+        let overlyOpacity = {};
+        if (isSelected) {
+            overlyOpacity = { backgroundColor: 'rgba(255,255,255,0.5)' };
+        }
+
         return (
-            <View style={[style, { flexDirection: 'column', margin: 6, backgroundColor: color, borderRadius: radius }]}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    {
-                        addAndRemove &&
-                        <TouchableOpacity style={{
-                            padding: padding,
-                            backgroundColor: 'rgba(0,0,0,0.1)',
-                            borderTopLeftRadius: radius,
-                            borderBottomLeftRadius: radius,
-                        }}
-                            onPress={this.removeItem}
-                        >
-                            <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-remove' />
-                        </TouchableOpacity>
-                    }
-
-                    <TouchableOpacity style={{
-                        padding: padding,
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                        onPress={this.pressMid}
-                    >
+            <View style={[style, { margin: 6, backgroundColor: color, borderRadius: radius }]}>
+                <View style={overlyOpacity}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         {
-                            (addAndRemove || showCount) &&
-                            <Text style={{ color: '#fff' }}>
-                                {this.state.count == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold'}}>{this.state.count}</Text>}
-                            </Text>
+                            addAndRemove &&
+                            <TouchableOpacity style={{
+                                padding: padding,
+                                backgroundColor: 'rgba(0,0,0,0.1)',
+                                borderTopLeftRadius: radius,
+                                borderBottomLeftRadius: radius,
+                            }}
+                                onPress={this.removeItem}
+                            >
+                                <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-remove' />
+                            </TouchableOpacity>
                         }
-                        <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
-                    </TouchableOpacity>
 
-                    {
-                        price &&
                         <TouchableOpacity style={{
                             padding: padding,
-                            backgroundColor: 'rgba(0,0,0,0.1)',
-                            borderTopRightRadius: radius,
-                            borderBottomRightRadius: radius,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
                         }}
+                            onPress={this.pressMid}
                         >
-                            <Text style={{ color: '#fff', fontWeight: 'bold' }} > {price}$ </Text>
+                            {
+                                (addAndRemove || showCount) &&
+                                <Text style={{ color: '#fff' }}>
+                                    {this.state.count == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold' }}>{this.state.count}</Text>}
+                                </Text>
+                            }
+                            <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
                         </TouchableOpacity>
-                    }
 
-                    {
-                        addAndRemove &&
-                        <TouchableOpacity style={{
-                            padding: padding,
-                            backgroundColor: 'rgba(0,0,0,0.1)',
-                            borderTopRightRadius: radius,
-                            borderBottomRightRadius: radius,
-                        }}
-                            onPress={this.addItem}
-                        >
-                            <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />
-                        </TouchableOpacity>
-                    }
+                        {
+                            price &&
+                            <TouchableOpacity style={{
+                                padding: padding,
+                                backgroundColor: 'rgba(0,0,0,0.1)',
+                                borderTopRightRadius: radius,
+                                borderBottomRightRadius: radius,
+                            }}
+                            >
+                                <Text style={{ color: '#fff', fontWeight: 'bold' }} > {price}$ </Text>
+                            </TouchableOpacity>
+                        }
+
+                        {
+                            addAndRemove &&
+                            <TouchableOpacity style={{
+                                padding: padding,
+                                backgroundColor: 'rgba(0,0,0,0.1)',
+                                borderTopRightRadius: radius,
+                                borderBottomRightRadius: radius,
+                            }}
+                                onPress={this.addItem}
+                            >
+                                <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />
+                            </TouchableOpacity>
+                        }
 
 
-                </View>
+                    </View>
 
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'flex-end',
-                    flexWrap: 'wrap',
-                    borderTopColor: 'rgba(0,0,0,0.1)',
-                    borderTopWidth: 1,
-                }}>
-                    {clients.map(x => <Text style={{ marginHorizontal: 2, padding: 2, color: '#fff', backgroundColor: '#3e3e3e' }} key={x}>{x}</Text>)}
-                </View>
-
-                {
-                    details &&
                     <View style={{
-                        flexDirection: 'column',
-                        justifyContent: 'flex-start',
-                        alignItems: 'flex-start',
+                        flexDirection: 'row',
+                        justifyContent: 'flex-end',
+                        flexWrap: 'wrap',
                         borderTopColor: 'rgba(0,0,0,0.1)',
                         borderTopWidth: 1,
-                        paddingLeft: 4,
-                    }}
-                    >
-                        {details.map(x => <Text key={x} style={{ color: '#fff', marginVertical: 2, }}>-{x}</Text>)}
+                    }}>
+                        {clients.map(x => <Text style={{ marginHorizontal: 2, padding: 2, color: '#fff', backgroundColor: '#3e3e3e' }} key={x}>{x}</Text>)}
                     </View>
-                }
+
+                    {
+                        details &&
+                        <View style={{
+                            flexDirection: 'column',
+                            justifyContent: 'flex-start',
+                            alignItems: 'flex-start',
+                            borderTopColor: 'rgba(0,0,0,0.1)',
+                            borderTopWidth: 1,
+                            paddingLeft: 4,
+                        }}
+                        >
+                            {details.map(x => <Text key={x} style={{ color: '#fff', marginVertical: 2, }}>-{x}</Text>)}
+                        </View>
+                    }
+                </View>
             </View>
         )
     }
