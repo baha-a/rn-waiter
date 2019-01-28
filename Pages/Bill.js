@@ -165,9 +165,8 @@ export default class Bill extends Component {
       {
         this.state.invoiceData.map(e =>
           <Invoice
-
             isSelected={this.state.selectedInvoices.findIndex(x => x === e.id) >= 0}
-            onSelected={this.handelSelectInvoice}
+            onSelected={(isOn)=>this.handelSelectInvoice(isOn, e)}
             style={{ width: '21%' }}
             key={e.id}
             info={e}
@@ -176,21 +175,21 @@ export default class Bill extends Component {
     </View>);
   }
 
-  handelSelectInvoice(isOn) {
+  handelSelectInvoice(isOn, invoice) {
     if (!this.state.combining) {
       Actions.order({
-        id: e.id,
-        waiter: e.waiter,
-        discount: e.discount,
-        discountType: e.discountType
+        id: invoice.id,
+        waiter: invoice.waiter,
+        discount: invoice.discount,
+        discountType: invoice.discountType
       });
     }
 
     let list = this.state.selectedInvoices.slice();
     if (isOn) {
-      list.push(e.id);
+      list.push(invoice.id);
     } else {
-      list = list.filter(x => x != e.id);
+      list = list.filter(x => x != invoice.id);
     }
     this.setState({ selectedInvoices: list });
     return true;

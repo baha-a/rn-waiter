@@ -508,22 +508,26 @@ export default class TableMenu extends Component {
             return new Promise(() => { throw 'choose table number first' });
         }
         let data = {
-            id: this.props.id,
-
             table_number: this.state.tableNumber,
             status: 'active',
+            type: 'prepaid',
 
             note: this.state.note,
 
             services: this.state.services.map(x => ({
                 service_number: x.service_number,
                 service_status: 'ToBeCall',
-                service_type: 'prepaid',
                 products: this.buildProducts(x.products)
             })),
 
             bar: this.state.barItems.slice(),
         };
+        if(this.props.id){
+            data.id = this.props.id;
+        }
+
+
+
 
         console.log(data);
         console.log('------------------')
@@ -538,31 +542,30 @@ export default class TableMenu extends Component {
         products.forEach(p => {
             if (p.clients && p.clients.length > 0) {
                 p.clients.forEach(c => {
-                    result.push({
-                        product_id: p.id,
-                        client_number: c,
-                        dish_number: dish_number++,
-                        note: p.note || '',
-                        cookingNote: p.otherNote || '',
-                        discount: p.discount || 0,
-                        quantity: p.quantity || 1,
-                        product_customizes: p.product_customizes && p.product_customizes.map(x => x.id) || [],
-                    });
+                    let count = p.quantity || 1;
+                    while(count > 0){
+                        count--;
+                        result.push(this.buildProductDataToSend(p, c,  dish_number++));
+                    }
                 });
             } else {
-                result.push({
-                    product_id: p.id,
-                    dish_number: dish_number++,
-                    note: p.note || '',
-                    cookingNote: p.otherNote || '',
-                    discount: p.discount || 0,
-                    quantity: p.quantity || 1,
-                    product_customizes: p.product_customizes && p.product_customizes.map(x => x.id) || [],
-                });
+                result.push(this.buildProductDataToSend(p, null,  dish_number++));
             }
         });
 
         return result;
+    }
+
+    buildProductDataToSend(product, client, dish_number){
+        return {
+            product_id: product.id,
+            client_number: client,
+            dish_number: dish_number,
+            note: product.note || '',
+            cookingNote: product.otherNote || '',
+            discount: product.discount || 0,
+            product_customizes: product.product_customizes && product.product_customizes.map(x => x.id) || [],
+        };
     }
 
     render() {

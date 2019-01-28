@@ -3,10 +3,16 @@ const baseUrl = 'http://damas55.upos.ca/public/api/';
 const fetchData = (url, config = null) => {
     return fetch(baseUrl + url, config)
         .then(response => {
-            if (response.ok) {
+            if (response.status >= 200 && response.status < 300)
                 return response.json();
-            }
-            else throw new Error('server returned bad response.');
+
+            
+            console.log(response);
+
+            if (response.status)
+                throw new Error('error ' + response.status);
+
+            throw new Error('connection error, ' + JSON.stringify(response));
         }).catch(Api.onError);
 };
 
@@ -39,14 +45,14 @@ export default class Api {
     static postOrder(order) {
         return fetchData('orders', {
             method: 'POST',
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json', },
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify(order),
         });
     }
     static moveItemToTable(tableNumber, item) {
         return fetchData('tables/' + tableNumber, {
             method: 'POST',
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json', },
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify(item),
         });
     }

@@ -8,6 +8,7 @@ import Bill from './Pages/Bill';
 import Order from './Pages/Order';
 import BillInfo from './Pages/BillInfo';
 import Customize from './Pages/Customize';
+import Socket from './Socket';
 
 export default class App extends React.Component 
 {
