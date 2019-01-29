@@ -47,11 +47,6 @@ export default class Customize extends Component {
 
             otherOptions: [
                 'Quickly !',
-                'Well cooked',
-                'Half cooked',
-                'Extral For All',
-                'Extra Fried Potatoes',
-                'Without Mayonnaise For All',
             ],
             selectedOtherNote: otherNote,
             note: note,
@@ -77,27 +72,28 @@ export default class Customize extends Component {
     }
 
     componentDidMount() {
-        Api.getCustomizes(this.props.item.id)
-            .then(result => {
-                if (result) {
-                    let selectedOptions = [];
-                    if (this.state.selectedOptions && this.state.selectedOptions.length > 0) {
-                        this.state.selectedOptions.forEach(x => {
-                            if (typeof x === 'string') {
-                                let t = result.find(y => y.custom_name == x);
-                                if (t) {
-                                    selectedOptions.push(t);
-                                }
-                            }
-                            else {
-                                selectedOptions.push(x);
-                            }
-                        });
-                    }
-                    this.setState({ options: result, selectedOptions: selectedOptions, ready: true, error: false });
-                }
-            })
-            .catch(x => this.setState({ ready: true, error: true }));
+        // Api.getCustomizes(this.props.item.id)
+        //     .then(result => {
+        //         if (result) {
+        //             let selectedOptions = [];
+        //             if (this.state.selectedOptions && this.state.selectedOptions.length > 0) {
+        //                 this.state.selectedOptions.forEach(x => {
+        //                     if (typeof x === 'string') {
+        //                         let t = result.find(y => y.custom_name == x);
+        //                         if (t) {
+        //                             selectedOptions.push(t);
+        //                         }
+        //                     }
+        //                     else {
+        //                         selectedOptions.push(x);
+        //                     }
+        //                 });
+        //             }
+
+                     this.setState({ /* options: result, selectedOptions: selectedOptions, */ ready: true, error: false });
+        //         }
+        //     })
+        //     .catch(x => this.setState({ ready: true, error: true }));
 
         Api.getTableNumbers().then(x => this.setState({ tables: x }));
     }
@@ -310,13 +306,13 @@ export default class Customize extends Component {
                     content = (
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingHorizontal: 10, }}>
                             <View style={{ flex: 0.3, flexDirection: 'column', padding: 10, }}>
-                                <Picker
+                                {/* <Picker
                                     selectedValue={this.state.selectedOtherNote}
                                     mode='dropdown'
                                     style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
                                     onValueChange={(value, index) => this.setState({ selectedOtherNote: value })}>
                                     {this.state.otherOptions.map(x => <Picker.Item key={x} label={x} value={x} />)}
-                                </Picker>
+                                </Picker> */}
                                 <TextInput
                                     disableFullscreenUI
                                     underlineColorAndroid='rgba(0,0,0,0)'
@@ -332,21 +328,53 @@ export default class Customize extends Component {
                             </View>
                             <View style={{ flex: 0.65, padding: 10, }}>
                                 <Text style={{ color: '#666666' }}>Basic</Text>
-                                <Text style={{ padding: 6, backgroundColor: '#f8f9fa' }}> basics</Text>
-
-                                <Text style={{ color: '#666666', paddingTop: 10, }}>Description</Text>
-                                <Text style={{ padding: 6, backgroundColor: '#f8f9fa' }}>{this.state.description}</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
+                                    {
+                                        this.props.item.basics.map(b => <Text
+                                            key={b.id}
+                                            style={{ margin: 4, padding: 6, backgroundColor: '#f8f9fa' }}
+                                        >
+                                            {b.basic_name}
+                                        </Text>)
+                                    }
+                                </View>
 
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Optionals</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
                                     {
-                                        this.state.options.map(x => <Selectable key={x.id}
-                                            title={x.custom_name}
+                                        this.props.item.optionals.map(x => <Selectable key={x.id}
+                                            title={x.option_name}
                                             onSelect={(value) => this.toggleSelectForOption(x.id, value)}
                                             selected={this.isSelectedForOption(x.id)}
                                         />)
                                     }
                                 </View>
+
+                                <Text style={{ color: '#666666', paddingTop: 10, }}>Customize Groups</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
+                                    {
+                                        this.props.item.customize_groups.map(x => <Selectable key={x.id}
+                                            title={x.group_name}
+                                            onSelect={(value) => this.toggleSelectForOption(x.id, value)}
+                                            selected={this.isSelectedForOption(x.id)}
+                                        />)
+                                    }
+                                </View>
+
+
+                                <Text style={{ color: '#666666', paddingTop: 10, }}>Customize</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
+                                    {
+                                        this.state.options.map(x => <Selectable key={x.id}
+                                            title={x.group_name}
+                                            onSelect={(value) => this.toggleSelectForOption(x.id, value)}
+                                            selected={this.isSelectedForOption(x.id)}
+                                        />)
+                                    }
+                                </View>
+
+                                <Text style={{ color: '#666666', paddingTop: 10, }}>Description</Text>
+                                <Text style={{ padding: 6, backgroundColor: '#f8f9fa' }}>{this.state.description}</Text>
                             </View>
                         </View>);
                 }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
+import FAIcon from './FAIcon';
 
 
 export default class SubCat extends Component {
@@ -45,9 +46,11 @@ export default class SubCat extends Component {
             <View style={{ padding: 4, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                 {
                     this.state.selectedCat.length > 0 &&
-                    <TouchableOpacity style={{ width: '44%', margin: 4, padding: 10, backgroundColor: '#000' }}
+                    <TouchableOpacity style={{ width: '90%', margin: 4, padding: 10, backgroundColor: '#ddd', justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}
                         onPress={() => this.pop()}>
-                        <Text style={{ color: '#eee' }}>back</Text>
+                        <Text style={{ color: '#000' }}>
+                            <FAIcon name='arrow-left' /> back
+                        </Text>
                     </TouchableOpacity>
                 }
 
@@ -63,7 +66,7 @@ export default class SubCat extends Component {
                         </TouchableOpacity>)
                 }
 
-                { selectedCat && selectedCat.products && this.props.renderItems(selectedCat.products) }
+                {selectedCat && selectedCat.products && this.props.renderItems(selectedCat.products)}
             </View>);
     }
 }

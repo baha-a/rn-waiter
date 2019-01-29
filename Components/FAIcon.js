@@ -57,7 +57,10 @@ export default class FAIcon extends Component {
             case 'infinity':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf534;</Text>;
 
-           default:
+            case 'arrow-left':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf060;</Text>;
+
+            default:
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf059;</Text>;
         }
     }

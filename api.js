@@ -11,9 +11,8 @@ const fetchData = (url, config = null) => {
             if (response.status)
                 throw 'error ' + response.status;
             throw  'connection error, ' + JSON.stringify(response);
-            
-        }).catch(Api.onError)
-        .then(x=> null);
+
+        }).catch(Api.onError);
 };
 
 export default class Api {
