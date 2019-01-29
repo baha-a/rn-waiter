@@ -487,7 +487,9 @@ export default class TableMenu extends Component {
         let services = this.state.services.slice();
         services.forEach(s => {
             let p = s.products.find(x => x.dish_number == dish_number);
-            p.quantity = value;
+            if (p) {
+                p.quantity = value;
+            }
         });
         this.setState({ services });
     }
@@ -547,7 +549,7 @@ export default class TableMenu extends Component {
                             {
                                 this.state.services.map(s => {
                                     return (
-                                        <View key={s.service_number} style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start', alignItems:'stretch' }}>
+                                        <View key={s.service_number} style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
 
                                             <View style={{ margin: 6 }}>
                                                 <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 8, justifyContent: 'center', alignItems: 'center' }}
@@ -564,8 +566,8 @@ export default class TableMenu extends Component {
                                                 {
                                                     arrangeItemsEnable &&
                                                     <TouchableOpacity style={{ backgroundColor: '#ddd', padding: 6, justifyContent: 'center', alignItems: 'center' }}
-                                                        onPress={() => this.toggleSelectionForItemOfService(s.service_number) }>
-                                                        <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center' , fontSize:12 }}>Select All</Text>
+                                                        onPress={() => this.toggleSelectionForItemOfService(s.service_number)}>
+                                                        <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center', fontSize: 12 }}>Select All</Text>
                                                     </TouchableOpacity>
                                                 }
                                             </View>
@@ -666,7 +668,7 @@ export default class TableMenu extends Component {
         if (promises.length == 0) {
             return new Promise(() => { throw 'add items to the order first' });
         }
-        
+
         //       return new Promise(() => { throw 'mock api' });
 
         return Promise.all(promises).then(x => alert('order successfully saved'));

@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Text, View, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import Api from '../api';
 import Selectable from '../Components/Selectable';
-import DiscountInput from '../Components/DiscountInput';
 import { Actions } from 'react-native-router-flux';
 import Loader from '../Components/Loader';
 import ReloadBtn from '../Components/ReloadBtn';

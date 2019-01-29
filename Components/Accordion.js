@@ -9,6 +9,7 @@ import Loader from './Loader';
 import TableMenu from './TableMenu';
 import ReloadBtn from './ReloadBtn';
 import Collapsible from './Collapsible';
+import SubCat from './SubCat';
 
 export default class Accordion extends Component {
   constructor(props) {
@@ -45,8 +46,12 @@ export default class Accordion extends Component {
         Api.getTasting()
           .then(tast =>
             this.setState(state => {
-              if (state == null) { return { sections: [{ id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }] } }
-              return { sections: [...state.sections, { id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }] }
+              if (!state || !state.sections) {
+                return { sections: [{ id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }] }
+              }
+              return {
+                sections: [...state.sections, { id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }]
+              }
             }
             )).catch(x => { });
       })
@@ -183,15 +188,13 @@ export default class Accordion extends Component {
   }
 
   _body(item) {
-    let result = null, padding = 10;
     if (item.sub_categories && item.sub_categories.length > 0) {
-      result = this.renderSub(item.sub_categories);
-      padding = 0;
+      return <SubCat cat={item.sub_categories} renderItems={(items) => this.renderProductsOfCategory(items)} />
     }
 
     return (
       <View style={{
-        padding: padding,
+        padding: 10,
         borderColor: item.category_color,
         borderWidth: 1,
         backgroundColor: '#fff',
@@ -215,45 +218,38 @@ export default class Accordion extends Component {
         }
 
         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
-          {this.renderProductsOfCategory(item)}
+          {this.renderProductsOfCategory(item.products, item.isTasting)}
         </View>
-        {result}
-      </View>
+      </View >
     );
   }
 
-  renderProductsOfCategory(item) {
-    if (item.isTasting) {
-      return item.products.map(x => <ItemButton
+  renderProductsOfCategory(products, isTasting) {
+    if (!products || products.length == 0) {
+      return null;
+    }
+
+    if (isTasting) {
+      return products.map(x => <ItemButton
         style={{ width: '42%' }}
         key={x.id}
-        title={x.tasting_name}
-        color={x.color}
+        title={x.tasting_name || x.en_name}
+        color={x.color || x.category_color}
         price={x.price}
         onPressMid={() => this.addItemToMenu(x)}
-      />);
+      />)
     }
 
-    if (item.isBar) {
-      return item.products.map(x => <ItemButton
-        style={{ width: '42%' }}
-        key={x.id}
-        title={x.en_name}
-        color={x.category_color}
-        onPressMid={() => this.addItemToMenu(x)}
-      />);
-    }
-
-    return item.products.map(x => <ItemButton
+    return products.map(x => <ItemButton
       style={{ width: '42%' }}
       key={x.id}
       title={x.en_name}
-      color={x.category_color}
+      color={x.category_color || x.color}
       price={x.price}
       quantity={x.limit_quantity || -1}
       showCount
       onPressMid={() => this.addItemToMenu(x)}
-    />);
+    />)
   }
 
   addItemToMenu(x) {

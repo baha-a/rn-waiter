@@ -3,21 +3,20 @@ const baseUrl = 'http://damas55.upos.ca/public/api/';
 const fetchData = (url, config = null) => {
     return fetch(baseUrl + url, config)
         .then(response => {
-            if (response.status >= 200 && response.status < 300)
+            if (response.ok || (response.status >= 200 && response.status < 300))
                 return response.json();
-
 
             console.log(response);
 
             if (response.status)
-                throw new Error('error ' + response.status);
-
-            throw new Error('connection error, ' + JSON.stringify(response));
-        }).catch(Api.onError);
+                throw 'error ' + response.status;
+            throw  'connection error, ' + JSON.stringify(response);
+            
+        }).catch(Api.onError)
+        .then(x=> null);
 };
 
 export default class Api {
-
     static getTableNumbers() {
         return fetchData('orders')
             .then(x => x.map(y => ({ id: y.id, table_number: y.table_number, })));
