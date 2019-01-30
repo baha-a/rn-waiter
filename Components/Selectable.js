@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 
 export default class Selectable extends Component {
     constructor(props) {
@@ -25,14 +25,23 @@ export default class Selectable extends Component {
     }
 
     render() {
-        let borderColor = this.state.selected ? '#007bff' : 'rgba(0, 0, 0, .125)';
-        let titleColor = this.state.selected ? '#fff' : '#212121';
-        let backgroundColor = this.state.selected ? '#007bff' : '#fff';
+        let color = this.props.disabled == true
+            ? { backgroundColor: 'rgba(0,0,0,0.2)' }
+            : { backgroundColor: this.state.selected ? '#007bff' : '#fff' };
 
         return (
-            <TouchableOpacity style={{ margin:4, padding: 10, borderWidth: 1, borderColor: borderColor, backgroundColor: backgroundColor }}
-                onPress={this.toggleSelection}>
-                <Text style={{ color: titleColor }}> {this.props.title} </Text>
+            <TouchableOpacity
+                disabled={this.props.disabled == true}
+                onPress={this.toggleSelection}
+                style={{
+                    margin: 4,
+                    padding: 10,
+                    borderWidth: 1,
+                    borderColor: this.state.selected ? '#007bff' : 'rgba(0, 0, 0, .125)',
+                    ...color
+                }}
+            >
+                <Text style={{ color: this.state.selected ? '#fff' : '#212121' }}> {this.props.title} </Text>
             </TouchableOpacity>
         )
     }

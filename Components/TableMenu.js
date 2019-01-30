@@ -424,7 +424,6 @@ export default class TableMenu extends Component {
                         item: { ...x },
                         services: this.state.services.map(x => x.service_number),
                         selectedService: this.getServiceNumberOfProduct(x.dish_number),
-                        allClients: this.props.clients,
                         table: this.state.tableNumber,
                         onSave: (item) => this.customizeItem(item, type)
                     });

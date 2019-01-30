@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Text, View, TouchableOpacity, TextInput } from 'react-native'
 
 const Btn = ({ name, color = '#f0f0f0', onPress }) => (
-    <TouchableOpacity style={{ flex: 1, backgroundColor: color, margin: 4, padding: 16 }} onPress={() => onPress()}>
+    <TouchableOpacity style={{ flex: 1, backgroundColor: color, margin: 4, padding: 10 }} onPress={() => onPress()}>
         <Text style={{ textAlign: 'center' }}>{name}</Text>
     </TouchableOpacity>
 );

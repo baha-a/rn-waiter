@@ -26,16 +26,31 @@ export default class Customize extends Component {
 
         let {
             selectedService,
-            allClients = [],
             table = 0,
         } = props;
+
+        let allClients = [];
+        if (clients && clients.length > 1) {
+            let max = clients[clients.length - 1];
+            for (let i = 1; i <= max; i++) {
+                allClients.push(i);
+            }
+        }else{
+            for (let i = 1; i <= 10; i++) {
+                allClients.push(i);
+            }
+        }
 
         this.state = {
             isBar: isBar,
 
-            selectedOptions: product_customizes.slice(),
-            selectedClient: clients.slice(),
-            clients: allClients.slice(),
+            selectedOptional: [],
+            selectedCustomize: [],
+            selectedCG: [],
+            selectedCookWays: null,
+
+            selectedClient: clients.map(x => ({ id: x })),
+            clients: allClients.map(x => ({ id: x })),
             options: [],
 
             discount: discount,
@@ -45,9 +60,6 @@ export default class Customize extends Component {
 
             selectedService: selectedService,
 
-            otherOptions: [
-                'Quickly !',
-            ],
             selectedOtherNote: otherNote,
             note: note,
 
@@ -61,60 +73,97 @@ export default class Customize extends Component {
             error: false,
         };
 
-        this.toggleSelectForOption = this.toggleSelectForOption.bind(this);
-        this.isSelectedForOption = this.isSelectedForOption.bind(this);
-
-        this.toggleSelectForClient = this.toggleSelectForClient.bind(this);
-        this.isSelectedForClient = this.isSelectedForClient.bind(this);
-
         this.save = this.save.bind(this);
         this.cancel = this.cancel.bind(this);
+
+        this.isSelectedForClient = this.isSelectedForClient.bind(this);
+        this.isSelectedForCustomize = this.isSelectedForCustomize.bind(this);
+        this.isSelectedForOptional = this.isSelectedForOptional.bind(this);
+        this.isSelectedForCG = this.isSelectedForCG.bind(this);
+        this.isSelectedFor = this.isSelectedFor.bind(this);
+        this.toggleSelectForClient = this.toggleSelectForClient.bind(this);
+        this.toggleSelectForCustomize = this.toggleSelectForCustomize.bind(this);
+        this.toggleSelectForOptional = this.toggleSelectForOptional.bind(this);
+        this.toggleSelectForCG = this.toggleSelectForCG.bind(this);
+        this.toggleSelectFor = this.toggleSelectFor.bind(this);
     }
 
     componentDidMount() {
-        // Api.getCustomizes(this.props.item.id)
-        //     .then(result => {
-        //         if (result) {
-        //             let selectedOptions = [];
-        //             if (this.state.selectedOptions && this.state.selectedOptions.length > 0) {
-        //                 this.state.selectedOptions.forEach(x => {
-        //                     if (typeof x === 'string') {
-        //                         let t = result.find(y => y.custom_name == x);
-        //                         if (t) {
-        //                             selectedOptions.push(t);
-        //                         }
-        //                     }
-        //                     else {
-        //                         selectedOptions.push(x);
-        //                     }
-        //                 });
-        //             }
-
-                     this.setState({ /* options: result, selectedOptions: selectedOptions, */ ready: true, error: false });
-        //         }
-        //     })
-        //     .catch(x => this.setState({ ready: true, error: true }));
+        this.fetchData();
+    }
+    fetchData() {
+        Api.getCustomizes(this.props.item.id)
+            .then(result => {
+                if (result) {
+                    // let selectedOptions = [];
+                    // if (this.state.selectedOptions && this.state.selectedOptions.length > 0) {
+                    //     this.state.selectedOptions.forEach(x => {
+                    //         if (typeof x === 'string') {
+                    //             let t = result.find(y => y.custom_name == x);
+                    //             if (t) {
+                    //                 selectedOptions.push(t);
+                    //             }
+                    //         }
+                    //         else {
+                    //             selectedOptions.push(x);
+                    //         }
+                    //     });
+                    // }
+                    this.setState({
+                        options: result,
+                        //selectedOptions: selectedOptions,
+                        ready: true,
+                        error: false
+                    });
+                }
+            })
+            .catch(x => this.setState({ ready: true, error: true }));
 
         Api.getTableNumbers().then(x => this.setState({ tables: x }));
     }
 
-    toggleSelectForOption(id, value) {
-        if (value) {
-            if (this.isSelectedForOption(id)) {
-                return;
-            }
-            let options = this.state.selectedOptions.slice();
-            options.push(this.state.options.find(x => x.id == id));
-            this.setState({ selectedOptions: options });
-        }
-        else {
-            let options = this.state.selectedOptions.filter(x => x.id != id);
-            this.setState({ selectedOptions: options });
-        }
+
+
+    isSelectedForClient(x) {
+        return this.isSelectedFor(x, 'Client')
+    }
+    isSelectedForCustomize(x) {
+        return this.isSelectedFor(x, 'Customize')
+    }
+    isSelectedForOptional(x) {
+        return this.isSelectedFor(x, 'Optional')
+    }
+    isSelectedForCG(x) {
+        return this.isSelectedFor(x, 'CG')
+    }
+    isSelectedFor(x, type) {
+        return this.state['selected' + type].findIndex(y => y.id == x.id) != -1;
     }
 
-    isSelectedForOption(id) {
-        return this.state.selectedOptions.findIndex(x => x.id == id) != -1;
+    toggleSelectForClient(x, value) {
+        this.setState({ selectedClient: this.toggleSelectFor(x, value, 'Client') })
+    }
+    toggleSelectForCustomize(x, value) {
+        this.setState({ selectedCustomize: this.toggleSelectFor(x, value, 'Customize') })
+    }
+    toggleSelectForOptional(x, value) {
+        this.setState({ selectedOptional: this.toggleSelectFor(x, value, 'Optional') })
+    }
+    toggleSelectForCG(x, value) {
+        this.setState({ selectedCG: this.toggleSelectFor(x, value, 'CG') })
+    }
+    toggleSelectFor(x, value, type) {
+        let list = this.state['selected' + type].slice();
+        if (value) {
+            if (this['isSelectedFor' + type](x))
+                return;
+            list.push(x);
+        }
+        else {
+            list = list.filter(y => y.id != x.id);
+        }
+
+        return list;
     }
 
 
@@ -131,41 +180,23 @@ export default class Customize extends Component {
 
     getFinalResult() {
         return {
-            options: this.state.selectedOptions.slice(),
-            clients: this.state.selectedClient.slice(),
+            optional: this.state.selectedOptional.slice(),
+            customize: this.state.selectedCustomize.slice(),
+            cg: this.state.selectedCG.slice(),
+            cookWays: this.state.selectedCookWays,
+
+            clients: this.state.selectedClient.map(x => x.id),
+
             discountType: this.state.discountType,
             discount: this.state.discount,
 
             service: this.state.selectedService,
             note: this.state.note,
-            otherNote: this.state.selectedOtherNote,
-
             newTable: this.state.newTable,
 
             item: this.props.item,
         };
     }
-
-
-    toggleSelectForClient(id, value) {
-        if (value) {
-            if (this.isSelectedForClient(id)) {
-                return;
-            }
-            let clients = this.state.selectedClient.slice();
-            clients.push(id);
-            this.setState({ selectedClient: clients });
-        }
-        else {
-            let clients = this.state.selectedClient.filter(x => x != id);
-            this.setState({ selectedClient: clients });
-        }
-    }
-
-    isSelectedForClient(id) {
-        return this.state.selectedClient.findIndex(x => x == id) != -1;
-    }
-
 
     renderTitleBar() {
         return (
@@ -265,8 +296,8 @@ export default class Customize extends Component {
                         <Text style={{ color: '#6c757d' }}>Click On Clients To Share Item Between Them</Text>
                         <View style={{ padding: 10, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                             {
-                                this.state.clients.map(x => <Selectable key={x}
-                                    title={'#' + x}
+                                this.state.clients.map(x => <Selectable key={x.id}
+                                    title={'#' + x.id}
                                     onSelect={(value) => this.toggleSelectForClient(x, value)}
                                     selected={this.isSelectedForClient(x)}
                                 />)
@@ -274,11 +305,10 @@ export default class Customize extends Component {
                             <TouchableOpacity style={{ padding: 10, margin: 6, backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center', alignContent: 'center' }}
                                 onPress={() => {
                                     let last = 0, clients = this.state.clients.slice();
-
                                     if (clients && clients.length > 0)
-                                        last = clients[clients.length - 1];
+                                        last = clients[clients.length - 1].id;
                                     for (let i = 0; i < 10; i++)
-                                        clients.push(++last);
+                                        clients.push({ id: ++last });
 
                                     this.setState({ clients: clients });
                                 }}>
@@ -305,23 +335,28 @@ export default class Customize extends Component {
                 } else {
                     content = (
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingHorizontal: 10, }}>
-                            <View style={{ flex: 0.3, flexDirection: 'column', padding: 10, }}>
-                                {/* <Picker
-                                    selectedValue={this.state.selectedOtherNote}
-                                    mode='dropdown'
-                                    style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
-                                    onValueChange={(value, index) => this.setState({ selectedOtherNote: value })}>
-                                    {this.state.otherOptions.map(x => <Picker.Item key={x} label={x} value={x} />)}
-                                </Picker> */}
-                                <TextInput
-                                    disableFullscreenUI
-                                    underlineColorAndroid='rgba(0,0,0,0)'
-                                    style={{ backgroundColor: '#fff', borderColor: '#ccc', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
-                                    multiline
-                                    numberOfLines={6}
-                                    placeholder='Note'
-                                    onChangeText={(text) => this.setState({ note: text })}
-                                    value={this.state.note} />
+                            <View style={{ flex: 0.3, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch', padding: 10, }}>
+                                <View>
+                                    <Picker
+                                        selectedValue={this.state.selectedCookWays}
+                                        mode='dropdown'
+                                        style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
+                                        onValueChange={(value, index) => this.setState({ selectedCookWays: value })}>
+                                        {this.state.options.cookWays.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x.id} />)}
+                                    </Picker>
+                                </View>
+                                <View>
+                                    <TextInput
+                                        style={{ backgroundColor: '#fff', borderColor: '#ccc', borderWidth: 1, margin: 6, borderRadius: 4, padding: 6, textAlignVertical: 'top' }}
+                                        disableFullscreenUI
+                                        underlineColorAndroid='rgba(0,0,0,0)'
+                                        multiline
+                                        numberOfLines={6}
+                                        placeholder='Note'
+                                        onChangeText={(text) => this.setState({ note: text })}
+                                        value={this.state.note}
+                                    />
+                                </View>
                             </View>
                             <View style={{ width: 1, backgroundColor: '#999' }}>
 
@@ -330,10 +365,8 @@ export default class Customize extends Component {
                                 <Text style={{ color: '#666666' }}>Basic</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
                                     {
-                                        this.props.item.basics.map(b => <Text
-                                            key={b.id}
-                                            style={{ margin: 4, padding: 6, backgroundColor: '#f8f9fa' }}
-                                        >
+                                        this.state.options.basic.map(b => <Text key={b.id}
+                                            style={{ margin: 6, padding: 12, backgroundColor: '#f8f9fa' }}>
                                             {b.basic_name}
                                         </Text>)
                                     }
@@ -342,10 +375,10 @@ export default class Customize extends Component {
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Optionals</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
                                     {
-                                        this.props.item.optionals.map(x => <Selectable key={x.id}
+                                        this.state.options.optional.map(x => <Selectable key={x.id}
                                             title={x.option_name}
-                                            onSelect={(value) => this.toggleSelectForOption(x.id, value)}
-                                            selected={this.isSelectedForOption(x.id)}
+                                            onSelect={(value) => this.toggleSelectForOptional(x, value)}
+                                            selected={this.isSelectedForOptional(x)}
                                         />)
                                     }
                                 </View>
@@ -355,8 +388,9 @@ export default class Customize extends Component {
                                     {
                                         this.props.item.customize_groups.map(x => <Selectable key={x.id}
                                             title={x.group_name}
-                                            onSelect={(value) => this.toggleSelectForOption(x.id, value)}
-                                            selected={this.isSelectedForOption(x.id)}
+                                            onSelect={(value) => this.toggleSelectForCG(x, value)}
+                                            selected={this.isSelectedForCG(x)}
+                                            disabled
                                         />)
                                     }
                                 </View>
@@ -365,10 +399,10 @@ export default class Customize extends Component {
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Customize</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
                                     {
-                                        this.state.options.map(x => <Selectable key={x.id}
-                                            title={x.group_name}
-                                            onSelect={(value) => this.toggleSelectForOption(x.id, value)}
-                                            selected={this.isSelectedForOption(x.id)}
+                                        this.state.options.customizes.map(x => <Selectable key={x.id}
+                                            title={x.custom_name}
+                                            onSelect={(value) => this.toggleSelectForCustomize(x, value)}
+                                            selected={this.isSelectedForCustomize(x)}
                                         />)
                                     }
                                 </View>
