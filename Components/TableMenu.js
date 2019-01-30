@@ -726,9 +726,8 @@ export default class TableMenu extends Component {
             client_number: client,
             dish_number: dish_number,
             note: product.note || '',
-            //cookingNote: product.otherNote || '',
             discount: product.discount || 0,
-            product_customizes: product.product_customizes || {},
+            //product_customizes: product.product_customizes || {},
         };
     }
 

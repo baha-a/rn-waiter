@@ -25,7 +25,6 @@ export default class Customize extends Component {
             discountType = '%',
             isBar = false,
             note = '',
-            otherNote = '',
             description = '',
         } = props.item;
 
@@ -65,7 +64,6 @@ export default class Customize extends Component {
 
             selectedService: selectedService,
 
-            selectedOtherNote: otherNote,
             note: note,
 
             selectedTab: 'component',
