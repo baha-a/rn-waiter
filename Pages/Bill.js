@@ -164,12 +164,9 @@ export default class Bill extends Component {
     return (<View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
       {
         this.state.invoiceData.map(e =>
-          <Invoice
+          <Invoice key={e.id} style={{ width: '21%' }} info={e}
             isSelected={this.state.selectedInvoices.findIndex(x => x === e.id) >= 0}
-            onSelected={(isOn)=>this.handelSelectInvoice(isOn, e)}
-            style={{ width: '21%' }}
-            key={e.id}
-            info={e}
+            onSelected={(isOn) => this.handelSelectInvoice(isOn, e)}
           />)
       }
     </View>);
@@ -184,14 +181,14 @@ export default class Bill extends Component {
         discountType: invoice.discountType
       });
     }
-
-    let list = this.state.selectedInvoices.slice();
-    if (isOn) {
-      list.push(invoice.id);
-    } else {
-      list = list.filter(x => x != invoice.id);
+    else {
+      let list = this.state.selectedInvoices.slice();
+      if (isOn) {
+        list.push(invoice.id);
+      } else {
+        list = list.filter(x => x != invoice.id);
+      }
+      this.setState({ selectedInvoices: list });
     }
-    this.setState({ selectedInvoices: list });
-    return true;
   }
 }

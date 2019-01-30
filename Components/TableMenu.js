@@ -128,13 +128,33 @@ export default class TableMenu extends Component {
         if (this.props.id && this.props.id != 0) {
             Api.getOrder(this.props.id)
                 .then(x => {
-                    //let clients = this.extractClient(x.services);
+                    if (x.services) {
+                        x.services.forEach(s => {
+                            if (s.products) {
+                                let products = [];
+                                s.products.forEach(p => {
+                                    let pt = products.find(x => x.id == p.id);
+                                    if (pt) {
+                                        if (pt.clients.findIndex(x => x == p.client_number) == -1) {
+                                            pt.clients.push(p.dish_number);
+                                        }else{
+                                            pt.quantity++;
+                                        }
+                                    }
+                                    else {
+                                        products.push({ ...p, clients: [p.client_number], quantity: 1 });
+                                    }
+                                });
+
+                                s.products = products;
+                            }
+                        });
+                    }
 
                     this.setState({
                         ready: true,
                         tableNumber: x.table_number,
                         services: x.services,
-                        //clients: clients
                     });
                 });
         }
@@ -143,7 +163,6 @@ export default class TableMenu extends Component {
                 ready: true,
                 tableNumber: '',
                 services: [],
-                //clients: []
             });
         }
     }
@@ -374,15 +393,15 @@ export default class TableMenu extends Component {
 
         if (product_customizes) {
             oldItem.product_customizes = {};
-            
-            if (product_customizes.cookWays){
+
+            if (product_customizes.cookWays) {
                 oldItem.product_customizes.cookWays = product_customizes.cookWays;
             }
 
-            if (product_customizes.customize){
+            if (product_customizes.customize) {
                 oldItem.product_customizes.customize = product_customizes.customize.slice();
             }
-            if (product_customizes.optional){
+            if (product_customizes.optional) {
                 oldItem.product_customizes.optional = product_customizes.optional.slice();
             }
 
@@ -396,7 +415,7 @@ export default class TableMenu extends Component {
         let details = [];
         if (x.discount && x.discount > 0)
             details.push(x.discountType + '' + x.discount + ' off');
-        
+
         if (x.product_customizes) {
             if (x.product_customizes.cookWays && x.product_customizes.cookWays.custom_name)
                 details.push(x.product_customizes.cookWays.custom_name);
@@ -688,13 +707,10 @@ export default class TableMenu extends Component {
         // console.log('---------------- tasting order --')
         // console.log(tastingOrder);
         console.log('------------------')
-        //        return new Promise(() => { throw 'mock api' });
 
         if (promises.length == 0) {
             return new Promise(() => { throw 'add items to the order first' });
         }
-
-        //       return new Promise(() => { throw 'mock api' });
 
         return Promise.all(promises).then(x => alert('order successfully saved'));
     }
@@ -721,13 +737,19 @@ export default class TableMenu extends Component {
     }
 
     buildProductDataToSend(product, client, dish_number) {
+        let cstm = [];
+        if (product.product_customizes &&
+            product.product_customizes.customize &&
+            product.product_customizes.customize.length > 0) {
+            cstm = product.product_customizes.customize.map(x => x.id);
+        }
         return {
             product_id: product.id,
             client_number: client,
             dish_number: dish_number,
             note: product.note || '',
             discount: product.discount || 0,
-            //product_customizes: product.product_customizes || {},
+            product_customizes: cstm,
         };
     }
 

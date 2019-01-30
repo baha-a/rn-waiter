@@ -98,23 +98,23 @@ export default class Customize extends Component {
         Api.getCustomizes(this.props.item.id)
             .then(result => {
                 if (result) {
-                    // let selectedOptions = [];
-                    // if (this.state.selectedOptions && this.state.selectedOptions.length > 0) {
-                    //     this.state.selectedOptions.forEach(x => {
-                    //         if (typeof x === 'string') {
-                    //             let t = result.find(y => y.custom_name == x);
-                    //             if (t) {
-                    //                 selectedOptions.push(t);
-                    //             }
-                    //         }
-                    //         else {
-                    //             selectedOptions.push(x);
-                    //         }
-                    //     });
-                    // }
+                    let selectedCustomize = [];
+                    if (this.state.selectedCustomize && this.state.selectedCustomize.length > 0) {
+                        this.state.selectedCustomize.forEach(x => {
+                            if (typeof x === 'string') {
+                                let t = result.find(y => y.custom_name == x);
+                                if (t) {
+                                    selectedCustomize.push(t);
+                                }
+                            }
+                            else {
+                                selectedCustomize.push(x);
+                            }
+                        });
+                    }
                     this.setState({
                         options: result,
-                        //selectedOptions: selectedOptions,
+                        selectedCustomize: selectedCustomize,
                         ready: true,
                         error: false
                     });
