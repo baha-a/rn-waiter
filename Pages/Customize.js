@@ -15,7 +15,12 @@ export default class Customize extends Component {
 
         let {
             clients = [],
-            product_customizes = [],
+            product_customizes = {
+                cookWays:{},
+                customize:[],
+                //customize_groups:[],
+                optional:[]
+            },
             discount = 0,
             discountType = '%',
             isBar = false,
@@ -35,7 +40,7 @@ export default class Customize extends Component {
             for (let i = 1; i <= max; i++) {
                 allClients.push(i);
             }
-        }else{
+        } else {
             for (let i = 1; i <= 10; i++) {
                 allClients.push(i);
             }
@@ -44,10 +49,10 @@ export default class Customize extends Component {
         this.state = {
             isBar: isBar,
 
-            selectedOptional: [],
-            selectedCustomize: [],
-            selectedCG: [],
-            selectedCookWays: null,
+            selectedOptional: product_customizes.optional||[],
+            selectedCustomize: product_customizes.customize||[],
+            //selectedCG: product_customizes.customize_groups||[],
+            selectedCookWays: product_customizes.cookWays,
 
             selectedClient: clients.map(x => ({ id: x })),
             clients: allClients.map(x => ({ id: x })),
@@ -79,12 +84,12 @@ export default class Customize extends Component {
         this.isSelectedForClient = this.isSelectedForClient.bind(this);
         this.isSelectedForCustomize = this.isSelectedForCustomize.bind(this);
         this.isSelectedForOptional = this.isSelectedForOptional.bind(this);
-        this.isSelectedForCG = this.isSelectedForCG.bind(this);
+        //this.isSelectedForCG = this.isSelectedForCG.bind(this);
         this.isSelectedFor = this.isSelectedFor.bind(this);
         this.toggleSelectForClient = this.toggleSelectForClient.bind(this);
         this.toggleSelectForCustomize = this.toggleSelectForCustomize.bind(this);
         this.toggleSelectForOptional = this.toggleSelectForOptional.bind(this);
-        this.toggleSelectForCG = this.toggleSelectForCG.bind(this);
+        //this.toggleSelectForCG = this.toggleSelectForCG.bind(this);
         this.toggleSelectFor = this.toggleSelectFor.bind(this);
     }
 
@@ -133,9 +138,9 @@ export default class Customize extends Component {
     isSelectedForOptional(x) {
         return this.isSelectedFor(x, 'Optional')
     }
-    isSelectedForCG(x) {
-        return this.isSelectedFor(x, 'CG')
-    }
+    // isSelectedForCG(x) {
+    //     return this.isSelectedFor(x, 'CG')
+    // }
     isSelectedFor(x, type) {
         return this.state['selected' + type].findIndex(y => y.id == x.id) != -1;
     }
@@ -149,9 +154,9 @@ export default class Customize extends Component {
     toggleSelectForOptional(x, value) {
         this.setState({ selectedOptional: this.toggleSelectFor(x, value, 'Optional') })
     }
-    toggleSelectForCG(x, value) {
-        this.setState({ selectedCG: this.toggleSelectFor(x, value, 'CG') })
-    }
+    // toggleSelectForCG(x, value) {
+    //     this.setState({ selectedCG: this.toggleSelectFor(x, value, 'CG') })
+    // }
     toggleSelectFor(x, value, type) {
         let list = this.state['selected' + type].slice();
         if (value) {
@@ -180,11 +185,6 @@ export default class Customize extends Component {
 
     getFinalResult() {
         return {
-            optional: this.state.selectedOptional.slice(),
-            customize: this.state.selectedCustomize.slice(),
-            cg: this.state.selectedCG.slice(),
-            cookWays: this.state.selectedCookWays,
-
             clients: this.state.selectedClient.map(x => x.id),
 
             discountType: this.state.discountType,
@@ -193,6 +193,12 @@ export default class Customize extends Component {
             service: this.state.selectedService,
             note: this.state.note,
             newTable: this.state.newTable,
+            product_customizes: {
+                optional: this.state.selectedOptional.slice() || [],
+                customize: this.state.selectedCustomize.slice() || [],
+                //customize_groups: this.state.selectedCG.slice() || [],
+                cookWays: this.state.selectedCookWays,
+            },
 
             item: this.props.item,
         };
@@ -342,7 +348,8 @@ export default class Customize extends Component {
                                         mode='dropdown'
                                         style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
                                         onValueChange={(value, index) => this.setState({ selectedCookWays: value })}>
-                                        {this.state.options.cookWays.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x.id} />)}
+                                        <Picker.Item key={-1} label={''} value={{}} />
+                                        {this.state.options.cookWays.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x} />)}
                                     </Picker>
                                 </View>
                                 <View>
@@ -383,17 +390,16 @@ export default class Customize extends Component {
                                     }
                                 </View>
 
-                                <Text style={{ color: '#666666', paddingTop: 10, }}>Customize Groups</Text>
+                                {/* <Text style={{ color: '#666666', paddingTop: 10, }}>Customize Groups</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
                                     {
                                         this.props.item.customize_groups.map(x => <Selectable key={x.id}
                                             title={x.group_name}
                                             onSelect={(value) => this.toggleSelectForCG(x, value)}
                                             selected={this.isSelectedForCG(x)}
-                                            disabled
                                         />)
                                     }
-                                </View>
+                                </View> */}
 
 
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Customize</Text>

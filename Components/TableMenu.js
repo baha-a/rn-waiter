@@ -366,33 +366,59 @@ export default class TableMenu extends Component {
     }
 
     fillNewItemProperty(oldItem, newItem) {
-        let { options, clients, discount, discountType, note, otherNote } = newItem;
+        let { product_customizes, clients, discount, discountType, note } = newItem;
         oldItem.clients = !clients ? [] : clients.slice();
-        oldItem.product_customizes = !options ? [] : options.slice();
         oldItem.discount = discount;
         oldItem.discountType = discountType;
         oldItem.note = note;
-        oldItem.otherNote = otherNote;
+
+        if (product_customizes) {
+            oldItem.product_customizes = {};
+            
+            if (product_customizes.cookWays){
+                oldItem.product_customizes.cookWays = product_customizes.cookWays;
+            }
+
+            if (product_customizes.customize){
+                oldItem.product_customizes.customize = product_customizes.customize.slice();
+            }
+            if (product_customizes.optional){
+                oldItem.product_customizes.optional = product_customizes.optional.slice();
+            }
+
+            // if (product_customizes.customize_groups){
+            //     oldItem.product_customizes.customize_groups = product_customizes.customize_groups.slice();
+            // }
+        }
     }
 
     renderProduct(x, type) {
         let details = [];
         if (x.discount && x.discount > 0)
             details.push(x.discountType + '' + x.discount + ' off');
+        
+        if (x.product_customizes) {
+            if (x.product_customizes.cookWays && x.product_customizes.cookWays.custom_name)
+                details.push(x.product_customizes.cookWays.custom_name);
+
+            if (x.product_customizes.customize)
+                x.product_customizes.customize.forEach(y => details.push(y.custom_name));
+
+            if (x.product_customizes.optional)
+                x.product_customizes.optional.forEach(y => details.push(y.option_name));
+
+            // if (x.product_customizes.customize_groups)
+            //     x.product_customizes.customize_groups.forEach(y => details.push(y.group_name));
+        }
+
         if (x.note)
             details.push(x.note);
-        if (x.otherNote)
-            details.push(x.otherNote);
-        if (x.product_customizes) {
-            x.product_customizes.forEach(x => {
-                details.push(x.custom_name || x);
-            });
-        }
 
         if (x.isTasting) {
             return <ItemButton
                 key={x.dish_number}
                 title={x.tasting_name}
+                quantity={x.quantity}
                 color={x.color || x.category_color}
             />;
         }
@@ -414,7 +440,7 @@ export default class TableMenu extends Component {
             onAddOrRemove={(v) => this.changeItemQuantity(x.dish_number, v)}
             quantity={x.quantity}
             color={x.color || x.category_color}
-            onDelete={() => this.deleteItem(x.dish_number)}
+            onDelete={() => this.deleteItem(x.dish_number, 'bar')}
             isSelected={isFound}
             onPressMid={() => {
                 if (type == 'service' && this.state.arrangeItems == true) {
@@ -702,7 +728,7 @@ export default class TableMenu extends Component {
             note: product.note || '',
             //cookingNote: product.otherNote || '',
             discount: product.discount || 0,
-            product_customizes: product.product_customizes && product.product_customizes.map(x => x.id) || [],
+            product_customizes: product.product_customizes || {},
         };
     }
 
