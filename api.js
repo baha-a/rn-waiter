@@ -10,7 +10,7 @@ const fetchData = (url, config = null) => {
 
             if (response.status)
                 throw 'error ' + response.status;
-            throw  'connection error, ' + JSON.stringify(response);
+            throw 'connection error, ' + JSON.stringify(response);
 
         }).catch(Api.onError);
 };
@@ -18,7 +18,11 @@ const fetchData = (url, config = null) => {
 export default class Api {
     static getTableNumbers() {
         return fetchData('orders')
-            .then(x => x.map(y => ({ id: y.id, table_number: y.table_number, })));
+            .then(x => {
+                if (x)
+                    return x.map(y => ({ id: y.id, table_number: y.table_number, }));
+                return [];
+            });
     }
 
     static getCategories() {
@@ -57,7 +61,7 @@ export default class Api {
         });
     }
 
-    static hold(data){
+    static hold(data) {
         return fetchData('order/changeStatus', {
             method: 'POST',
             headers: { Accept: 'application/json', 'Content-Type': 'application/json' },

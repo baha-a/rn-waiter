@@ -348,8 +348,8 @@ export default class Customize extends Component {
                                         mode='dropdown'
                                         style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
                                         onValueChange={(value, index) => this.setState({ selectedCookWays: value })}>
-                                        <Picker.Item key={-1} label={''} value={{}} />
-                                        {this.state.options.cookWays.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x} />)}
+                                        <Picker.Item key={-1} label={''} />
+                                        {this.state.options.cookWays.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x}  />)}
                                     </Picker>
                                 </View>
                                 <View>
