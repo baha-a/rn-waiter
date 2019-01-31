@@ -435,7 +435,9 @@ export default class TableMenu extends Component {
                 x.product_customizes.optional.forEach(y => details.push(y.option_name));
 
             if (beforeCount == details.length) {
-                x.product_customizes.forEach(x => details.push(x));
+                try {
+                    x.product_customizes.forEach(x => details.push(x));
+                } catch(e) { }
             }
         }
 
@@ -625,7 +627,7 @@ export default class TableMenu extends Component {
                                                 }
                                             </View>
 
-                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}
+                                            <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}
                                             // ref={ref => this.serviceView = ref}
                                             >
                                                 {s.products.map(x => this.renderProduct(x, 'service'))}
@@ -636,7 +638,7 @@ export default class TableMenu extends Component {
                             }
                         </View>
                         :
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
+                        <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
                             {this.state.barItems.map(x => this.renderProduct(x, 'bar'))}
                         </View>
                 }

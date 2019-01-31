@@ -24,9 +24,6 @@ export default class Customize extends Component {
         } = props.item;
 
         if (props.item.product_customizes) {
-            console.log('----=-=-=-=-=-=-=-')
-            console.log(props.item.product_customizes);
-
             product_customizes.customizes = props.item.product_customizes.customizes ? [...props.item.product_customizes.customizes] : [];
             product_customizes.optional = props.item.product_customizes.optional ? [...props.item.product_customizes.optional] : [];
             product_customizes.cookWays = props.item.product_customizes.cookWays ? props.item.product_customizes.cookWays.id : null;
@@ -109,12 +106,19 @@ export default class Customize extends Component {
             .then(result => {
                 if (result) {
                     let selectedCustomize = [];
+                    let selectedCookWays = this.state.selectedCookWays;
                     if (this.state.selectedCustomize && this.state.selectedCustomize.length > 0) {
                         this.state.selectedCustomize.forEach(x => {
                             if (typeof x === 'string') {
-                                let t = result.find(y => y.custom_name == x);
+                                let t = this.mapCustomTextToObject(result.customizes, x);
                                 if (t) {
                                     selectedCustomize.push(t);
+                                }
+                                else {
+                                    t = this.mapCustomTextToObject(result.cookWays, x);
+                                    if (t) {
+                                        selectedCookWays = t.id;
+                                    }
                                 }
                             }
                             else {
@@ -123,15 +127,10 @@ export default class Customize extends Component {
                         });
                     }
 
-                    console.log('-------------');
-                    console.log(selectedCustomize);
-
-                    console.log('-------------');
-                    console.log(this.state.selectedCustomize);
-
                     this.setState({
                         options: result,
                         selectedCustomize: selectedCustomize,
+                        selectedCookWays: selectedCookWays,
                         ready: true,
                         error: false
                     });
@@ -142,7 +141,18 @@ export default class Customize extends Component {
         Api.getTableNumbers().then(x => this.setState({ tables: x }));
     }
 
-
+    mapCustomTextToObject(optionslist, text) {
+        let ans = null;
+        if (optionslist && optionslist.length > 0) {
+            for (const i of optionslist) {
+                if (i.custom_name == text) {
+                    ans = i;
+                    break;
+                }
+            }
+        }
+        return ans;
+    }
 
     isSelectedForClient(x) {
         return this.isSelectedFor(x, 'Client')
