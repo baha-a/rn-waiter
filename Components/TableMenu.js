@@ -134,35 +134,35 @@ export default class TableMenu extends Component {
         if (this.props.id && this.props.id != 0) {
             Api.getOrder(this.props.id)
                 .then(x => {
-                    // if (x.services) {
-                    //     x.services.forEach(s => {
-                    //         if (s.products) {
-                    //             let products = [];
-                    //             s.products.forEach(p => {
-                    //                 let pt = products.find(x => this.isSameProducts(x, p));
-                    //                 if (pt) {
-                    //                     if (pt.clients.findIndex(x => x == p.client_number) == -1) {
-                    //                         pt.clients.push(p.dish_number);
-                    //                     } else {
-                    //                         pt.quantity++;
-                    //                     }
-                    //                 }
-                    //                 else {
-                    //                     products.push({ ...p, clients: [p.client_number], quantity: 1 });
-                    //                 }
-                    //             });
+                    if (x.services) {
+                        x.services.forEach(s => {
+                            if (s.products) {
+                                let products = [];
+                                s.products.forEach(p => {
+                                    let pt = products.find(x => this.isSameProducts(x, p));
+                                    if (pt) {
+                                        if (pt.clients.findIndex(x => x == p.client_number) == -1) {
+                                            pt.clients.push(p.dish_number);
+                                        } else {
+                                            pt.quantity++;
+                                        }
+                                    }
+                                    else {
+                                        products.push({ ...p, clients: [p.client_number], quantity: 1 });
+                                    }
+                                });
 
-                    //             s.products = products;
-                    //         }
-                    //     });
-                    // }
+                                s.products = products;
+                            }
+                        });
+                    }
 
                     this.setState({
                         ready: true,
                         tableNumber: x.table_number,
                         services: x.services,
                     });
-                });
+                }).catch(error => alert('Order' + error.message));
         }
         else {
             this.setState({
@@ -173,10 +173,11 @@ export default class TableMenu extends Component {
     }
 
     isSameProducts(p1, p2) {
-        if (p1.id != p2.id)
-            return false;
-        // p1.product_customizes != p2.product_customizes check later
-        return true;
+        return false;
+        // if (p1.id != p2.id)
+        //     return false;
+        // // p1.product_customizes != p2.product_customizes check later
+        // return true;
     }
 
     extractClient(services) {
@@ -320,7 +321,8 @@ export default class TableMenu extends Component {
     holdOrder() {
         if (this.props.id) {
             Api.hold({ order_id: this.props.id, status: "hold" })
-                .then(x => this.setState({ hold: true }));
+                .then(x => this.setState({ hold: true }))
+                .catch(x => { alert('Holde\n' + x.message); });
         } else {
             this.setState({ hold: true });
         }
@@ -329,7 +331,8 @@ export default class TableMenu extends Component {
     unHoldOrder() {
         if (this.props.id) {
             Api.hold({ order_id: this.props.id, status: "active" })
-                .then(x => this.setState({ hold: false }));
+                .then(x => this.setState({ hold: false }))
+                .catch(x => { alert('Unhold\n' + x.message); });
         } else {
             this.setState({ hold: false });
         }
@@ -437,7 +440,7 @@ export default class TableMenu extends Component {
             if (beforeCount == details.length) {
                 try {
                     x.product_customizes.forEach(x => details.push(x));
-                } catch(e) { }
+                } catch (e) { }
             }
         }
 
@@ -474,7 +477,11 @@ export default class TableMenu extends Component {
             isSelected={isFound}
             onPressMid={() => {
                 if (type == 'service' && this.state.arrangeItems == true) {
-                    if (isFound) { this.unselectItem(x.dish_number); } else { this.selectItem(x.dish_number); }
+                    if (isFound) {
+                        this.unselectItem(x.dish_number);
+                    } else {
+                        this.selectItem(x.dish_number);
+                    }
                 } else {
                     Actions.customize({
                         item: { ...x },

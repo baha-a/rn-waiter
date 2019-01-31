@@ -8,11 +8,9 @@ const fetchData = (url, config = null) => {
 
             console.log(response);
 
-            if (response.status)
-                throw 'error ' + response.status;
-            throw 'connection error, ' + JSON.stringify(response);
-
-        }).catch(Api.onError);
+            throw `error ${response.status}, ${response.statusText}`;
+        })
+        //.catch(error => { throw error.message; });
 };
 
 export default class Api {
@@ -67,10 +65,6 @@ export default class Api {
             headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         });
-    }
-
-    static onError(e) {
-        console.log(e);
     }
 
     static guid(separator) {

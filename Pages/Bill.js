@@ -58,7 +58,10 @@ export default class Bill extends Component {
   fetchData() {
     Api.getOrders()
       .then(orders => this.setState({ invoiceData: orders, ready: true, error: false }))
-      .catch(x => this.setState({ ready: true, error: true }));
+      .catch(x => {
+        alert('Orders\n' + x.message);
+        this.setState({ ready: true, error: true });
+      });
   }
 
   render() {

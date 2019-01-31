@@ -53,11 +53,13 @@ export default class Accordion extends Component {
                 sections: [...state.sections, { id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }]
               }
             }
-            )).catch(x => { });
+            ))
+          .catch(x => { alert('Tasting\n' + x.message); });
       })
       .catch(x => {
-        console.log(x);
         this.setState({ ready: true, error: true });
+        console.log(x);
+        alert('Categories\n' + x.message);
       });
   }
 

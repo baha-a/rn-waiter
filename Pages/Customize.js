@@ -23,10 +23,14 @@ export default class Customize extends Component {
             description = '',
         } = props.item;
 
+        let product_customizesRawText = null;
+
         if (props.item.product_customizes) {
             product_customizes.customizes = props.item.product_customizes.customizes ? [...props.item.product_customizes.customizes] : [];
             product_customizes.optional = props.item.product_customizes.optional ? [...props.item.product_customizes.optional] : [];
             product_customizes.cookWays = props.item.product_customizes.cookWays ? props.item.product_customizes.cookWays.id : null;
+
+            product_customizesRawText = props.item.product_customizes.slice();
         }
         else {
             product_customizes = {
@@ -59,6 +63,8 @@ export default class Customize extends Component {
             selectedOptional: product_customizes.optional || [],
             selectedCustomize: product_customizes.customizes || [],
             selectedCookWays: product_customizes.cookWays,
+
+            product_customizesRawText: product_customizesRawText,
 
             selectedClient: clients.map(x => ({ id: x })),
             clients: allClients.map(x => ({ id: x })),
@@ -103,32 +109,30 @@ export default class Customize extends Component {
     }
     fetchData() {
         Api.getCustomizes(this.props.item.id)
-            .then(result => {
-                if (result) {
-                    let selectedCustomize = [];
+            .then(options => {
+                if (options) {
+                    let selectedCustomize = this.state.selectedCustomize.slice();
                     let selectedCookWays = this.state.selectedCookWays;
-                    if (this.state.selectedCustomize && this.state.selectedCustomize.length > 0) {
-                        this.state.selectedCustomize.forEach(x => {
-                            if (typeof x === 'string') {
-                                let t = this.mapCustomTextToObject(result.customizes, x);
-                                if (t) {
-                                    selectedCustomize.push(t);
-                                }
-                                else {
-                                    t = this.mapCustomTextToObject(result.cookWays, x);
-                                    if (t) {
-                                        selectedCookWays = t.id;
-                                    }
-                                }
+
+                    console.log(this.state.product_customizesRawText);
+
+                    if (this.state.product_customizesRawText) {
+                        this.state.product_customizesRawText.forEach(x => {
+                            let t = this.mapCustomTextToObject(options.customizes, x);
+                            if (t) {
+                                selectedCustomize.push(t);
                             }
                             else {
-                                selectedCustomize.push(x);
+                                t = this.mapCustomTextToObject(options.cookWays, x);
+                                if (t) {
+                                    selectedCookWays = t.id;
+                                }
                             }
                         });
                     }
 
                     this.setState({
-                        options: result,
+                        options: options,
                         selectedCustomize: selectedCustomize,
                         selectedCookWays: selectedCookWays,
                         ready: true,
@@ -136,7 +140,10 @@ export default class Customize extends Component {
                     });
                 }
             })
-            .catch(x => this.setState({ ready: true, error: true }));
+            .catch(x => {
+                alert('Customizes\n' + x.message);
+                this.setState({ ready: true, error: true });
+            });
 
         Api.getTableNumbers().then(x => this.setState({ tables: x }));
     }
@@ -144,11 +151,16 @@ export default class Customize extends Component {
     mapCustomTextToObject(optionslist, text) {
         let ans = null;
         if (optionslist && optionslist.length > 0) {
-            for (const i of optionslist) {
-                if (i.custom_name == text) {
-                    ans = i;
-                    break;
+            for (const x of optionslist) {
+                for (const i of x.items) {
+                    if (i.custom_name == text) {
+                        ans = i;
+                        break;
+                    }
                 }
+                
+                if (ans)
+                    break;
             }
         }
         return ans;
