@@ -30,7 +30,13 @@ export default class TableMenu extends Component {
             doneServices: [],
             selectedService: 1,
 
-            services: [],
+            services: [
+                { service_number: 1, products: [] },
+                { service_number: 2, products: [] },
+                { service_number: 3, products: [] },
+                { service_number: 4, products: [] },
+                { service_number: 5, products: [] },
+            ],
 
             selectedItemsForArrange: [],
 
@@ -128,28 +134,28 @@ export default class TableMenu extends Component {
         if (this.props.id && this.props.id != 0) {
             Api.getOrder(this.props.id)
                 .then(x => {
-                    if (x.services) {
-                        x.services.forEach(s => {
-                            if (s.products) {
-                                let products = [];
-                                s.products.forEach(p => {
-                                    let pt = products.find(x => x.id == p.id);
-                                    if (pt) {
-                                        if (pt.clients.findIndex(x => x == p.client_number) == -1) {
-                                            pt.clients.push(p.dish_number);
-                                        }else{
-                                            pt.quantity++;
-                                        }
-                                    }
-                                    else {
-                                        products.push({ ...p, clients: [p.client_number], quantity: 1 });
-                                    }
-                                });
+                    // if (x.services) {
+                    //     x.services.forEach(s => {
+                    //         if (s.products) {
+                    //             let products = [];
+                    //             s.products.forEach(p => {
+                    //                 let pt = products.find(x => this.isSameProducts(x, p));
+                    //                 if (pt) {
+                    //                     if (pt.clients.findIndex(x => x == p.client_number) == -1) {
+                    //                         pt.clients.push(p.dish_number);
+                    //                     } else {
+                    //                         pt.quantity++;
+                    //                     }
+                    //                 }
+                    //                 else {
+                    //                     products.push({ ...p, clients: [p.client_number], quantity: 1 });
+                    //                 }
+                    //             });
 
-                                s.products = products;
-                            }
-                        });
-                    }
+                    //             s.products = products;
+                    //         }
+                    //     });
+                    // }
 
                     this.setState({
                         ready: true,
@@ -162,9 +168,15 @@ export default class TableMenu extends Component {
             this.setState({
                 ready: true,
                 tableNumber: '',
-                services: [],
             });
         }
+    }
+
+    isSameProducts(p1, p2) {
+        if (p1.id != p2.id)
+            return false;
+        // p1.product_customizes != p2.product_customizes check later
+        return true;
     }
 
     extractClient(services) {
@@ -197,12 +209,12 @@ export default class TableMenu extends Component {
     renderNote() {
         return (
             <View style={{ flex: 1, flexDirection: 'column' }}>
-                <Selectable title='Quickly !' />
-                <Selectable title='Well cooked' />
-                <Selectable title='Half cooked' />
-                <Selectable title='Extral For All' />
-                <Selectable title='Extra Fried Potatoes' />
-                <Selectable title='Without Mayonnaise For All' />
+                <Selectable title='Quickly !' style={{ margin: 0 }} />
+                <Selectable title='Well cooked' style={{ margin: 0 }} />
+                <Selectable title='Half cooked' style={{ margin: 0 }} />
+                <Selectable title='Extral For All' style={{ margin: 0 }} />
+                <Selectable title='Extra Fried Potatoes' style={{ margin: 0 }} />
+                <Selectable title='Without Mayonnaise For All' style={{ margin: 0 }} />
 
                 <Input style={{
                     marginVertical: 8, padding: 6, justifyContent: 'flex-start', borderRadius: 4,
@@ -340,8 +352,7 @@ export default class TableMenu extends Component {
                     product_unique_id: item.item.unique_id,
                     new_order_id: item.newTable.id
                 }).then(x => {
-                    type = (type == 'service' || type == 'client') ? 'service' : 'bar';
-                    this.deleteItem(dish_number, type);
+                    this.deleteItem(dish_number);
                     alert('move item to table #' + item.newTable.table_number);
                 });
                 return;
@@ -398,16 +409,12 @@ export default class TableMenu extends Component {
                 oldItem.product_customizes.cookWays = product_customizes.cookWays;
             }
 
-            if (product_customizes.customize) {
-                oldItem.product_customizes.customize = product_customizes.customize.slice();
+            if (product_customizes.customizes) {
+                oldItem.product_customizes.customizes = product_customizes.customizes.slice();
             }
             if (product_customizes.optional) {
                 oldItem.product_customizes.optional = product_customizes.optional.slice();
             }
-
-            // if (product_customizes.customize_groups){
-            //     oldItem.product_customizes.customize_groups = product_customizes.customize_groups.slice();
-            // }
         }
     }
 
@@ -417,17 +424,19 @@ export default class TableMenu extends Component {
             details.push(x.discountType + '' + x.discount + ' off');
 
         if (x.product_customizes) {
+            let beforeCount = details.length;
             if (x.product_customizes.cookWays && x.product_customizes.cookWays.custom_name)
                 details.push(x.product_customizes.cookWays.custom_name);
 
-            if (x.product_customizes.customize)
-                x.product_customizes.customize.forEach(y => details.push(y.custom_name));
+            if (x.product_customizes.customizes)
+                x.product_customizes.customizes.forEach(y => details.push(y.custom_name));
 
             if (x.product_customizes.optional)
                 x.product_customizes.optional.forEach(y => details.push(y.option_name));
 
-            // if (x.product_customizes.customize_groups)
-            //     x.product_customizes.customize_groups.forEach(y => details.push(y.group_name));
+            if (beforeCount == details.length) {
+                x.product_customizes.forEach(x => details.push(x));
+            }
         }
 
         if (x.note)
@@ -459,7 +468,7 @@ export default class TableMenu extends Component {
             onAddOrRemove={(v) => this.changeItemQuantity(x.dish_number, v)}
             quantity={x.quantity}
             color={x.color || x.category_color}
-            onDelete={() => this.deleteItem(x.dish_number, 'bar')}
+            onDelete={() => this.deleteItem(x.dish_number)}
             isSelected={isFound}
             onPressMid={() => {
                 if (type == 'service' && this.state.arrangeItems == true) {
@@ -556,16 +565,16 @@ export default class TableMenu extends Component {
         return serv.service_number;
     }
 
-    deleteItem(dish_number, from = 'service') {
-        if (from == 'service') {
+    deleteItem(dish_number) {
+        if (this.state.barItems.findIndex(x => x.dish_number == dish_number) != -1) {
+            this.setState({ barItems: this.state.barItems.filter(x => x.dish_number != dish_number) });
+        }
+        else {
             let services = this.state.services.slice();
             services.forEach(s => {
                 s.products = s.products.filter(x => x.dish_number != dish_number);
             });
             this.setState({ services });
-        }
-        else if (from == 'bar') {
-            this.setState({ barItems: this.state.barItems.filter(x => x.dish_number != dish_number) });
         }
     }
     renderMenuItems() {
@@ -671,7 +680,7 @@ export default class TableMenu extends Component {
                     service_status: 'ToBeCall',
                     products: this.buildProducts(x.products /* .filter(y => !y.isTasting) */)
                 }))
-                .filter(x => x.products && x.products.length > 0),
+            //.filter(x => x.products && x.products.length > 0),
         };
 
 
@@ -738,11 +747,20 @@ export default class TableMenu extends Component {
 
     buildProductDataToSend(product, client, dish_number) {
         let cstm = [];
-        if (product.product_customizes &&
-            product.product_customizes.customize &&
-            product.product_customizes.customize.length > 0) {
-            cstm = product.product_customizes.customize.map(x => x.id);
+        let optnl = [];
+
+        if (product.product_customizes) {
+            if (product.product_customizes.customize) {
+                cstm = product.product_customizes.customizes.map(x => x.id);
+            }
+            if (product.product_customizes.cookWays) {
+                cstm.push(product.product_customizes.cookWays.id);
+            }
+            if (product.product_customizes.optional) {
+                optnl = product.product_customizes.optional.map(x => x.id);
+            }
         }
+
         return {
             product_id: product.id,
             client_number: client,
@@ -750,6 +768,7 @@ export default class TableMenu extends Component {
             note: product.note || '',
             discount: product.discount || 0,
             product_customizes: cstm,
+            product_optionals: optnl,
         };
     }
 

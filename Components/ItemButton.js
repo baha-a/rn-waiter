@@ -116,6 +116,7 @@ export default class ItemButton extends Component {
                                 borderTopRightRadius: radius,
                                 borderBottomRightRadius: radius,
                             }}
+                                onPress={this.pressMid}
                             >
                                 <Text style={{ color: '#fff', fontWeight: 'bold' }} > {price}$ </Text>
                             </TouchableOpacity>

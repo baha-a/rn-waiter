@@ -15,18 +15,29 @@ export default class Customize extends Component {
 
         let {
             clients = [],
-            product_customizes = {
-                cookWays:{},
-                customize:[],
-                //customize_groups:[],
-                optional:[]
-            },
+            product_customizes,
             discount = 0,
             discountType = '%',
             isBar = false,
             note = '',
             description = '',
         } = props.item;
+
+        if (props.item.product_customizes) {
+            console.log('----=-=-=-=-=-=-=-')
+            console.log(props.item.product_customizes);
+
+            product_customizes.customizes = props.item.product_customizes.customizes ? [...props.item.product_customizes.customizes] : [];
+            product_customizes.optional = props.item.product_customizes.optional ? [...props.item.product_customizes.optional] : [];
+            product_customizes.cookWays = props.item.product_customizes.cookWays ? props.item.product_customizes.cookWays.id : null;
+        }
+        else {
+            product_customizes = {
+                customizes: [],
+                optional: [],
+                cookWays: null,
+            };
+        }
 
         let {
             selectedService,
@@ -48,9 +59,8 @@ export default class Customize extends Component {
         this.state = {
             isBar: isBar,
 
-            selectedOptional: product_customizes.optional||[],
-            selectedCustomize: product_customizes.customize||[],
-            //selectedCG: product_customizes.customize_groups||[],
+            selectedOptional: product_customizes.optional || [],
+            selectedCustomize: product_customizes.customizes || [],
             selectedCookWays: product_customizes.cookWays,
 
             selectedClient: clients.map(x => ({ id: x })),
@@ -112,6 +122,13 @@ export default class Customize extends Component {
                             }
                         });
                     }
+
+                    console.log('-------------');
+                    console.log(selectedCustomize);
+
+                    console.log('-------------');
+                    console.log(this.state.selectedCustomize);
+
                     this.setState({
                         options: result,
                         selectedCustomize: selectedCustomize,
@@ -174,6 +191,19 @@ export default class Customize extends Component {
         Actions.pop();
     }
 
+    getSelectedCookWakObject() {
+        if (this.state.options.cookWays) {
+            let obj = null;
+            for (const i of this.state.options.cookWays) {
+                obj = i.items.find(x => x.id == this.state.selectedCookWays);
+                if (obj) {
+                    return obj;
+                }
+            }
+        }
+        return null;
+    }
+
     save() {
         if (this.props.onSave) {
             this.props.onSave(this.getFinalResult());
@@ -193,9 +223,8 @@ export default class Customize extends Component {
             newTable: this.state.newTable,
             product_customizes: {
                 optional: this.state.selectedOptional.slice() || [],
-                customize: this.state.selectedCustomize.slice() || [],
-                //customize_groups: this.state.selectedCG.slice() || [],
-                cookWays: this.state.selectedCookWays,
+                customizes: this.state.selectedCustomize.slice() || [],
+                cookWays: this.getSelectedCookWakObject(),
             },
 
             item: this.props.item,
@@ -346,8 +375,12 @@ export default class Customize extends Component {
                                         mode='dropdown'
                                         style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
                                         onValueChange={(value, index) => this.setState({ selectedCookWays: value })}>
-                                        <Picker.Item key={-1} label={''} />
-                                        {this.state.options.cookWays.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x}  />)}
+                                        <Picker.Item key={-1} label='select cook way' value={null} />
+                                        {
+                                            this.state.options.cookWays.map(y =>
+                                                y.items.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x.id} />)
+                                            )
+                                        }
                                     </Picker>
                                 </View>
                                 <View>
@@ -388,28 +421,24 @@ export default class Customize extends Component {
                                     }
                                 </View>
 
-                                {/* <Text style={{ color: '#666666', paddingTop: 10, }}>Customize Groups</Text>
-                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
-                                    {
-                                        this.props.item.customize_groups.map(x => <Selectable key={x.id}
-                                            title={x.group_name}
-                                            onSelect={(value) => this.toggleSelectForCG(x, value)}
-                                            selected={this.isSelectedForCG(x)}
-                                        />)
-                                    }
-                                </View> */}
-
-
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Customize</Text>
-                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
-                                    {
-                                        this.state.options.customizes.map(x => <Selectable key={x.id}
-                                            title={x.custom_name}
-                                            onSelect={(value) => this.toggleSelectForCustomize(x, value)}
-                                            selected={this.isSelectedForCustomize(x)}
-                                        />)
-                                    }
-                                </View>
+                                {
+                                    this.state.options.customizes &&
+                                    this.state.options.customizes.map(y =>
+                                        <View key={y.id} style={{ backgroundColor: '#eee', margin: 6 }}>
+                                            <Text>{y.group_name}</Text>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', }}>
+                                                {
+                                                    y.items.map(x => <Selectable key={x.id}
+                                                        title={x.custom_name}
+                                                        onSelect={(value) => this.toggleSelectForCustomize(x, value)}
+                                                        selected={this.isSelectedForCustomize(x)}
+                                                    />)
+                                                }
+                                            </View>
+                                        </View>
+                                    )
+                                }
 
                                 <Text style={{ color: '#666666', paddingTop: 10, }}>Description</Text>
                                 <Text style={{ padding: 6, backgroundColor: '#f8f9fa' }}>{this.state.description}</Text>

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+ import React, { Component } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 
 export default class Selectable extends Component {
@@ -38,7 +38,8 @@ export default class Selectable extends Component {
                     padding: 10,
                     borderWidth: 1,
                     borderColor: this.state.selected ? '#007bff' : 'rgba(0, 0, 0, .125)',
-                    ...color
+                    ...color, 
+                    ...this.props.style
                 }}
             >
                 <Text style={{ color: this.state.selected ? '#fff' : '#212121' }}> {this.props.title} </Text>
