@@ -103,7 +103,7 @@ export default class TableMenu extends Component {
                         p.color = x.color;
                         p.dish_number = TableMenu.dish_number++;
                         p.clients = [this.props.selectedClient];
-                        service.products.push(p);
+                        service.products = [p, ...service.products];
                     });
                 });
 
@@ -307,7 +307,7 @@ export default class TableMenu extends Component {
                         return (
                             <View key={client.client_number}>
                                 <Text style={{ fontWeight: 'bold' }}>Client #{client.client_number}</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
+                                <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
                                     {client.products.map(x => this.renderProduct(x, 'client'))}
                                 </View>
                             </View>
@@ -422,6 +422,16 @@ export default class TableMenu extends Component {
     }
 
     renderProduct(x, type) {
+
+        if (x.isTasting) {
+            return <ItemButton
+                key={x.dish_number}
+                title={x.tasting_name}
+                quantity={x.quantity}
+                color={x.color || x.category_color}
+            />;
+        }
+
         let details = [];
         if (x.discount && x.discount > 0)
             details.push(x.discountType + '' + x.discount + ' off');
@@ -446,15 +456,6 @@ export default class TableMenu extends Component {
 
         if (x.note)
             details.push(x.note);
-
-        if (x.isTasting) {
-            return <ItemButton
-                key={x.dish_number}
-                title={x.tasting_name}
-                quantity={x.quantity}
-                color={x.color || x.category_color}
-            />;
-        }
 
         // let onlayout = null;
         // if (TableMenu.lastDishNumberAdded && x.dish_number == TableMenu.lastDishNumberAdded) {
@@ -634,10 +635,13 @@ export default class TableMenu extends Component {
                                                 }
                                             </View>
 
+                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                                                {s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service'))}
+                                            </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}
                                             // ref={ref => this.serviceView = ref}
                                             >
-                                                {s.products.map(x => this.renderProduct(x, 'service'))}
+                                                {s.products.filter(x => !x.isTasting).map(x => this.renderProduct(x, 'service'))}
                                             </View>
                                         </View>
                                     )
@@ -730,6 +734,8 @@ export default class TableMenu extends Component {
             return new Promise(() => { throw 'add items to the order first' });
         }
 
+        return new Promise(() => { throw 'mock api' });
+
         return Promise.all(promises).then(x => alert('order successfully saved'));
     }
 
@@ -759,7 +765,7 @@ export default class TableMenu extends Component {
         let optnl = [];
 
         if (product.product_customizes) {
-            if (product.product_customizes.customize) {
+            if (product.product_customizes.customizes) {
                 cstm = product.product_customizes.customizes.map(x => x.id);
             }
             if (product.product_customizes.cookWays) {
