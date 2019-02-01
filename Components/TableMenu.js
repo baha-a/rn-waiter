@@ -45,6 +45,8 @@ export default class TableMenu extends Component {
 
         this.postOrder = this.postOrder.bind(this);
         this.customizeItem = this.customizeItem.bind(this);
+        this.onProductLayout = this.onProductLayout.bind(this);
+        this.handelServiceLayout = this.handelServiceLayout.bind(this);
     }
 
     static addItemEvt = null;
@@ -77,7 +79,6 @@ export default class TableMenu extends Component {
         TableMenu.postOrderEvt = null;
     }
 
-    // static lastDishNumberAdded = null;
     componentDidMount() {
         // if (!this.props.id)
         //     return;
@@ -103,14 +104,14 @@ export default class TableMenu extends Component {
                         let found = service.products.find(x => x.isTasting && x.id == p.id);
                         if (found) {
                             found.quantity++;
-                            found.clients = [...found.clients, this.props.selectedClient];
+                            //found.clients = [...found.clients, this.props.selectedClient];
                         }
                         else {
                             p.isTasting = true;
                             p.color = x.color;
                             p.quantity = 1;
                             p.dish_number = TableMenu.dish_number++;
-                            p.clients = [this.props.selectedClient];
+                            //p.clients = [this.props.selectedClient];
                             service.products = [p, ...service.products];
                         }
                     });
@@ -124,13 +125,13 @@ export default class TableMenu extends Component {
             x.dish_number = TableMenu.dish_number++;
             x.clients = [this.props.selectedClient];
             x.quantity = 1;
+
             if (x.isBar) {
                 let bar = this.state.barItems.slice();
                 bar.push(x);
                 this.setState({ barItems: bar, selectedTab: 1, selectedSubTab: 2 });
             }
             else {
-                // TableMenu.lastDishNumberAdded = x.dish_number;
                 let services = this.state.services.slice();
                 if (!services || services.length == 0)
                     services = [{ service_number: 1, products: [x] }];
@@ -435,7 +436,7 @@ export default class TableMenu extends Component {
         }
     }
 
-    renderProduct(x, type) {
+    renderProduct(x, type, serviceNumber) {
 
         if (x.isTasting) {
             return (
@@ -470,16 +471,12 @@ export default class TableMenu extends Component {
         if (x.note)
             details.push(x.note);
 
-        // let onlayout = null;
-        // if (TableMenu.lastDishNumberAdded && x.dish_number == TableMenu.lastDishNumberAdded) {
-        //     onlayout = this._onLayout;
-        // }
-
         let isFound = type == 'service' && this.isItemSelected(x.dish_number);
 
         return <ItemButton
             key={x.dish_number}
-            // _onLayout={onlayout}
+            ref={ref => this.lastProductAdd = ref}
+            onLayout={event => this.onProductLayout(event, type == 'service' ? serviceNumber : null)}
             title={x.en_name}
             details={details}
             clients={x.clients}
@@ -571,15 +568,33 @@ export default class TableMenu extends Component {
     }
 
 
-    // static timeout = null;
-    // _onLayout({ nativeEvent: { layout: { x, y, width, height } } }) {
-    //     clearTimeout(TableMenu.timeout);
-    //     TableMenu.timeout = setTimeout(() => {
-    //         this.serviceView.scrollTo({ x: 0, y: y + height, animated: true });
-    //     }, 200);
-    //     TableMenu.lastDishNumberAdded = null;
-    // }
-
+    timeout = null;
+    onProductLayout({ nativeEvent: { layout: { x, y, width, height } } }, service_number) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
+            if (this.contentScrollView) {
+                let offest = y + height;
+                if(service_number){
+                    let service = this.serviceScrollViewLayout.find(z => z.service_number == service_number);
+                    if(service){
+                        offest += service.offest;
+                    }
+                }
+                this.contentScrollView.scrollTo({ y: offest, animated: true });
+            }
+        }, 400);
+    }
+    serviceScrollViewLayout = [];
+    handelServiceLayout(service_number, { nativeEvent: { layout: { x, y, width, height } } }) {
+        let service = this.serviceScrollViewLayout.find(z => z.service_number == service_number);
+        if (service) {
+            service.offest = y;
+        } else {
+            this.serviceScrollViewLayout.push({ service_number, offest: y })
+        }
+        console.log('______________')
+        console.log(this.serviceScrollViewLayout);
+    }
 
     getServiceNumberOfProduct(dish_number) {
         let serv = this.state.services.find(s => s.products.findIndex(y => y.dish_number == dish_number) != -1);
@@ -600,6 +615,7 @@ export default class TableMenu extends Component {
             this.setState({ services });
         }
     }
+
     renderMenuItems() {
         let color1 = 1 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
         let color2 = 2 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
@@ -611,7 +627,9 @@ export default class TableMenu extends Component {
             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
                 <View style={{ marginVertical: 8, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                     <TouchableOpacity style={{ padding: 4, flex: 1, alignItems: 'center', backgroundColor: color1 }}
-                        onPress={() => this.setState({ selectedSubTab: 1 })}>
+                        onPress={() => {
+                            this.setState({ selectedSubTab: 1 });
+                        }}>
                         <Text> Menu </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={{ padding: 4, flex: 1, alignItems: 'center', backgroundColor: color2 }}
@@ -625,7 +643,9 @@ export default class TableMenu extends Component {
                             {
                                 this.state.services.map(s => {
                                     return (
-                                        <View key={s.service_number} style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
+                                        <View style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}
+                                            key={s.service_number} onLayout={event => this.handelServiceLayout(s.service_number, event)}
+                                        >
 
                                             <View style={{ margin: 6 }}>
                                                 <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 8, justifyContent: 'center', alignItems: 'center' }}
@@ -651,10 +671,8 @@ export default class TableMenu extends Component {
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                 {s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service'))}
                                             </View>
-                                            <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}
-                                            // ref={ref => this.serviceView = ref}
-                                            >
-                                                {s.products.filter(x => !x.isTasting).map(x => this.renderProduct(x, 'service'))}
+                                            <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
+                                                {s.products.filter(x => !x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
                                             </View>
                                         </View>
                                     )
@@ -851,7 +869,7 @@ export default class TableMenu extends Component {
                                 <FAIcon name='hand-rock' />
                             </TouchableOpacity>
                         </View>
-                        <ScrollView style={{ flex: 1 }}>
+                        <ScrollView style={{ flex: 1 }} ref={r => this.contentScrollView = r}>
                             {this.renderTabContent()}
                         </ScrollView>
                     </View>

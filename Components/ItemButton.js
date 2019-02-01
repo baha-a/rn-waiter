@@ -66,7 +66,7 @@ export default class ItemButton extends Component {
         }
 
         return (
-            <View style={[style, { margin: 6, backgroundColor: color, borderRadius: radius }]}>
+            <View onLayout={this.props.onLayout} style={[style, { margin: 6, backgroundColor: color, borderRadius: radius }]}>
                 <View style={overlyOpacity}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         {

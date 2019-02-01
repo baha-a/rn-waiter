@@ -30,6 +30,7 @@ export default class Customize extends Component {
             product_customizes.optional = props.item.product_customizes.optional ? [...props.item.product_customizes.optional] : [];
             product_customizes.cookWays = props.item.product_customizes.cookWays ? props.item.product_customizes.cookWays.id : null;
 
+            if(typeof props.item.product_customizes.length > 0)
             product_customizesRawText = props.item.product_customizes.slice();
         }
         else {
@@ -231,7 +232,7 @@ export default class Customize extends Component {
             this.props.onSave(this.getFinalResult());
         }
         Actions.pop();
-    }
+    } 
 
     getFinalResult() {
         return {
