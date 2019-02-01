@@ -99,11 +99,20 @@ export default class TableMenu extends Component {
                     }
                     s.products.forEach(pr => {
                         let p = { ...pr };
-                        p.isTasting = true;
-                        p.color = x.color;
-                        p.dish_number = TableMenu.dish_number++;
-                        p.clients = [this.props.selectedClient];
-                        service.products = [p, ...service.products];
+
+                        let found = service.products.find(x => x.isTasting && x.id == p.id);
+                        if (found) {
+                            found.quantity++;
+                            found.clients = [...found.clients, this.props.selectedClient];
+                        }
+                        else {
+                            p.isTasting = true;
+                            p.color = x.color;
+                            p.quantity = 1;
+                            p.dish_number = TableMenu.dish_number++;
+                            p.clients = [this.props.selectedClient];
+                            service.products = [p, ...service.products];
+                        }
                     });
                 });
 
@@ -114,6 +123,7 @@ export default class TableMenu extends Component {
 
             x.dish_number = TableMenu.dish_number++;
             x.clients = [this.props.selectedClient];
+            x.quantity = 1;
             if (x.isBar) {
                 let bar = this.state.barItems.slice();
                 bar.push(x);
@@ -139,17 +149,7 @@ export default class TableMenu extends Component {
                             if (s.products) {
                                 let products = [];
                                 s.products.forEach(p => {
-                                    let pt = products.find(x => this.isSameProducts(x, p));
-                                    if (pt) {
-                                        if (pt.clients.findIndex(x => x == p.client_number) == -1) {
-                                            pt.clients.push(p.dish_number);
-                                        } else {
-                                            pt.quantity++;
-                                        }
-                                    }
-                                    else {
-                                        products.push({ ...p, clients: [p.client_number], quantity: 1 });
-                                    }
+                                    this.fillMissingDateForProducts(p, products);
                                 });
 
                                 s.products = products;
@@ -178,6 +178,20 @@ export default class TableMenu extends Component {
         //     return false;
         // // p1.product_customizes != p2.product_customizes check later
         // return true;
+    }
+
+    fillMissingDateForProducts(p, products) {
+        let pt = products.find(x => this.isSameProducts(x, p));
+        if (pt) {
+            if (pt.clients.findIndex(x => x == p.client_number) == -1) {
+                pt.clients.push(p.dish_number);
+            } else {
+                pt.quantity++;
+            }
+        }
+        else {
+            products.push({ ...p, clients: [p.client_number], quantity: 1 });
+        }
     }
 
     extractClient(services) {
@@ -424,12 +438,11 @@ export default class TableMenu extends Component {
     renderProduct(x, type) {
 
         if (x.isTasting) {
-            return <ItemButton
-                key={x.dish_number}
-                title={x.tasting_name}
-                quantity={x.quantity}
-                color={x.color || x.category_color}
-            />;
+            return (
+                <View key={x.dish_number} style={{ width: '30%' }}>
+                    <ItemButton title={x.tasting_name} quantity={x.quantity} showCount color={x.color || x.category_color} />
+                </View>
+            )
         }
 
         let details = [];
@@ -734,7 +747,7 @@ export default class TableMenu extends Component {
             return new Promise(() => { throw 'add items to the order first' });
         }
 
-        return new Promise(() => { throw 'mock api' });
+        //return new Promise(() => { throw 'mock api' });
 
         return Promise.all(promises).then(x => alert('order successfully saved'));
     }

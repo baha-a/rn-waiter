@@ -9,12 +9,6 @@ export default class ItemButton extends Component {
     constructor(props) {
         super(props);
 
-        let { quantity = 1 } = props;
-
-        this.state = {
-            count: quantity,
-        }
-
         this.removeItem = this.removeItem.bind(this);
         this.addItem = this.addItem.bind(this);
 
@@ -27,9 +21,8 @@ export default class ItemButton extends Component {
     }
 
     removeItem() {
-        if (this.state.count > 1) {
-            let v = this.state.count - 1;
-            this.setState({ count: v });
+        let v = this.props.quantity - 1;
+        if (v > 0) {
             if (this.props.onAddOrRemove)
                 this.props.onAddOrRemove(v);
         }
@@ -41,10 +34,8 @@ export default class ItemButton extends Component {
     }
 
     addItem() {
-        let v = this.state.count + 1;
-        this.setState({ count: v });
         if (this.props.onAddOrRemove)
-            this.props.onAddOrRemove(v);
+            this.props.onAddOrRemove(this.props.quantity + 1);
     }
 
     render() {
@@ -54,6 +45,7 @@ export default class ItemButton extends Component {
 
             addAndRemove,
             showCount,
+            quantity,
 
             price,
 
@@ -102,7 +94,7 @@ export default class ItemButton extends Component {
                             {
                                 (addAndRemove || showCount) &&
                                 <Text style={{ color: '#fff' }}>
-                                    {this.state.count == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold' }}>{this.state.count}</Text>}
+                                    {this.props.quantity == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold' }}>{this.props.quantity}</Text>}
                                 </Text>
                             }
                             <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>

@@ -30,7 +30,6 @@ export default class Accordion extends Component {
     this.addItemToMenu = this.addItemToMenu.bind(this);
   }
 
-
   componentDidMount() {
     this.fetchData();
   }
@@ -78,8 +77,7 @@ export default class Accordion extends Component {
     cats.forEach(c => {
       if (c.isBar || c.category_name.toLowerCase() == 'bar') {
         c.isBar = true;
-        // c.products = this.getAllProductsFroSubCat(c);
-        // c.sub_categories = [];
+
         c.products.forEach(p => p.isBar = true);
         c.sub_categories.forEach(p => {
           p.isBar = true;
