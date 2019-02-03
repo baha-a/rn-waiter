@@ -10,7 +10,18 @@ const fetchData = (url, config = null) => {
 
             throw `error ${response.status}, ${response.statusText}`;
         })
-        //.catch(error => { throw error.message; });
+    //.catch(error => { throw error.message; });
+};
+
+const postData = (url, data) => {
+    return fetchData(url, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+    });
 };
 
 export default class Api {
@@ -39,24 +50,16 @@ export default class Api {
         return fetchData('items/customizes/' + id);
     }
 
-    static getTasting() {
-        return fetchData('tasting');
+    static getTasting(id = '') {
+        return fetchData('tasting/' + id);
     }
 
     static postOrder(order) {
-        return fetchData('orders', {
-            method: 'POST',
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify(order),
-        });
+        return postData('orders', order);
     }
 
     static moveItemToTable(data) {
-        return fetchData('order/transfer', {
-            method: 'POST',
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
+        return fetchData('order/transfer', data);
     }
 
     static hold(data) {

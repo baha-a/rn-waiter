@@ -30,8 +30,8 @@ export default class Customize extends Component {
             product_customizes.optional = props.item.product_customizes.optional ? [...props.item.product_customizes.optional] : [];
             product_customizes.cookWays = props.item.product_customizes.cookWays ? props.item.product_customizes.cookWays.id : null;
 
-            if(typeof props.item.product_customizes.length > 0)
-            product_customizesRawText = props.item.product_customizes.slice();
+            if (typeof props.item.product_customizes.length > 0)
+                product_customizesRawText = props.item.product_customizes.slice();
         }
         else {
             product_customizes = {
@@ -115,14 +115,10 @@ export default class Customize extends Component {
                     let selectedCustomize = this.state.selectedCustomize.slice();
                     let selectedCookWays = this.state.selectedCookWays;
 
-                    console.log(this.state.product_customizesRawText);
-
                     if (this.state.product_customizesRawText) {
                         this.state.product_customizesRawText.forEach(x => {
                             let t = this.mapCustomTextToObject(options.customizes, x);
-                            if (t) {
-                                selectedCustomize.push(t);
-                            }
+                            if (t) { selectedCustomize.push(t); }
                             else {
                                 t = this.mapCustomTextToObject(options.cookWays, x);
                                 if (t) {
@@ -159,7 +155,7 @@ export default class Customize extends Component {
                         break;
                     }
                 }
-                
+
                 if (ans)
                     break;
             }
@@ -232,7 +228,7 @@ export default class Customize extends Component {
             this.props.onSave(this.getFinalResult());
         }
         Actions.pop();
-    } 
+    }
 
     getFinalResult() {
         return {

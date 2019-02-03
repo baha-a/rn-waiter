@@ -9,6 +9,7 @@ import Order from './Pages/Order';
 import BillInfo from './Pages/BillInfo';
 import Customize from './Pages/Customize';
 import Socket from './Socket';
+import Replacements from './Components/Replacements';
 
 export default class App extends React.Component 
 {
@@ -48,6 +49,7 @@ export default class App extends React.Component
             <Scene key="bill" component={Bill} hideNavBar />
             <Scene key="billInfo" component={BillInfo} hideNavBar />
             <Scene key="customize" component={Customize} hideNavBar />
+            <Scene key="replacements" component={Replacements} hideNavBar />
           </Stack>
         </Router>
       </Container>

@@ -45,19 +45,24 @@ export default class Accordion extends Component {
         Api.getTasting()
           .then(tast =>
             this.setState(state => {
+              let tastingSection = {
+                id: -1,
+                category_color: '#64206f',
+                category_name: 'tasting',
+                isTasting: true,
+                products: this.addIsTastingProperty(tast)
+              };
+              
               if (!state || !state.sections) {
-                return { sections: [{ id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }] }
+                return { sections: [tastingSection] }
               }
-              return {
-                sections: [...state.sections, { id: -1, category_color: '#64206f', category_name: 'tasting', isTasting: true, products: this.addIsTastingProperty(tast) }]
-              }
+              return { sections: [...state.sections, tastingSection] }
             }
             ))
           .catch(x => { alert('Tasting\n' + x.message); });
       })
       .catch(x => {
         this.setState({ ready: true, error: true });
-        console.log(x);
         alert('Categories\n' + x.message);
       });
   }
