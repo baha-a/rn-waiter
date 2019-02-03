@@ -147,6 +147,16 @@ export default class TableMenu extends Component {
                     services.find(y => y.service_number == this.state.selectedService).products.push(x);
 
                 this.setState({ services: services, selectedTab: 1, selectedSubTab: 1 });
+
+                if (this.props.id) {
+                    Api.addProducts(this.props.id,
+                        this.state.selectedService, this.buildProductDataToSend(x, this.props.selectedClient))
+                        .then(x => { })
+                        .catch(x => {
+                            alert("can't add item, try again");
+                            this.deleteItemFromFrontEndOnly(x.dish_number);
+                        });
+                }
             }
         };
 

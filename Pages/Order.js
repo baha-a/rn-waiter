@@ -213,26 +213,28 @@ export default class Order extends Component {
 
           </View>
           <View style={{ flex: 0.4, padding: 10 }}>
-            <TableMenu id={this.props.id} selectedClient={this.state.selectedClient} clients={this.state.clients} />
+            <TableMenu id={this.props.id} selectedClient={this.state.selectedClient} />
           </View>
         </View>
         {this.renderOverl()}
         <View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <TouchableOpacity style={{ backgroundColor: '#dc3545', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
-              onPress={() => Actions.replace('bill')}>
-              <Text style={{ color: '#fff' }}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
-              onPress={() => {
-                TableMenu.PostTheOrder()
-                  .then(x => Actions.replace('bill'))
-                  .catch(x => alert(x));
-              }}>
-              <Text style={{ color: '#fff' }}>Save</Text>
-            </TouchableOpacity>
-          </View>
+          {
+            this.props.id &&
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+              <TouchableOpacity style={{ backgroundColor: '#dc3545', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
+                onPress={() => Actions.replace('bill')}>
+                <Text style={{ color: '#fff' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
+                onPress={() => {
+                  TableMenu.PostTheOrder()
+                    .then(x => Actions.replace('bill'))
+                    .catch(x => alert(x));
+                }}>
+                <Text style={{ color: '#fff' }}>Save</Text>
+              </TouchableOpacity>
+            </View>}
         </View>
       </Container>
     )
