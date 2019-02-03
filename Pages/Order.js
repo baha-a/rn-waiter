@@ -220,7 +220,7 @@ export default class Order extends Component {
         <View>
 
           {
-            this.props.id &&
+            !this.props.id &&
             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
               <TouchableOpacity style={{ backgroundColor: '#dc3545', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
                 onPress={() => Actions.replace('bill')}>
