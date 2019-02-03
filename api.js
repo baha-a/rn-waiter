@@ -37,7 +37,7 @@ export default class Api {
         return deleteData(`order/${orderId}/delete/details`, { deleted_details: uniqueIdArray });
     }
     static addProducts(orderId, service_number, products) {
-        return postData(`order/${orderId}/addDetails`, { service_number, products });
+        return postData(`order/${orderId}/addDetails`, { service_number:service_number, products:products });
     }
     static editNoteOrTableNumber(orderId, data) {
         return postData(`order/${orderId}`, data , 'PUT');

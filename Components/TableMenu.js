@@ -149,8 +149,7 @@ export default class TableMenu extends Component {
                 this.setState({ services: services, selectedTab: 1, selectedSubTab: 1 });
 
                 if (this.props.id) {
-                    Api.addProducts(this.props.id,
-                        this.state.selectedService, this.buildProductDataToSend(x, this.props.selectedClient))
+                    Api.addProducts(this.props.id,this.state.selectedService, [this.buildProductDataToSend(x, this.props.selectedClient)])
                         .then(x => { })
                         .catch(x => {
                             alert("can't add item, try again");
@@ -669,8 +668,8 @@ export default class TableMenu extends Component {
     }
 
     deleteItem(dish_number) {
-        if (this.props.id) {
-            let item = this.getProductByDishNumber(dish_number);
+        let item = this.getProductByDishNumber(dish_number);
+        if (this.props.id && item.unique_id) {
             if (item) {
                 Api.deleteProducts(this.props.id, [item.unique_id])
                     .then(x => this.deleteItemFromFrontEndOnly(dish_number))

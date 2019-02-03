@@ -48,7 +48,7 @@ export default class Accordion extends Component {
               let tastingSection = {
                 id: -1,
                 category_color: '#64206f',
-                category_name: 'tasting',
+                category_name: 'Tasting',
                 isTasting: true,
                 products: this.addIsTastingProperty(tast)
               };
