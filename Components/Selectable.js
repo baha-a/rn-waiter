@@ -4,30 +4,19 @@ import { View, Text, TouchableOpacity } from 'react-native'
 export default class Selectable extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            selected: false,
-        };
         this.toggleSelection = this.toggleSelection.bind(this);
     }
 
-    componentDidMount() {
-        if (this.props.selected) {
-            this.setState({ selected: true });
-        }
-    }
-
     toggleSelection() {
-        let newSeleted = !this.state.selected;
-        this.setState({ selected: newSeleted });
         if (this.props.onSelect) {
-            this.props.onSelect(newSeleted);
+            this.props.onSelect(!this.props.selected);
         }
     }
 
     render() {
         let color = this.props.disabled == true
             ? { backgroundColor: 'rgba(0,0,0,0.2)' }
-            : { backgroundColor: this.state.selected ? '#007bff' : '#fff' };
+            : { backgroundColor: this.props.selected ? '#007bff' : '#fff' };
 
         return (
             <TouchableOpacity
@@ -37,12 +26,12 @@ export default class Selectable extends Component {
                     margin: 4,
                     padding: 10,
                     borderWidth: 1,
-                    borderColor: this.state.selected ? '#007bff' : 'rgba(0, 0, 0, .125)',
+                    borderColor: this.props.selected ? '#007bff' : 'rgba(0, 0, 0, .125)',
                     ...color, 
                     ...this.props.style
                 }}
             >
-                <Text style={{ color: this.state.selected ? '#fff' : '#212121' }}> {this.props.title} </Text>
+                <Text style={{ color: this.props.selected ? '#fff' : '#212121' }}> {this.props.title} </Text>
             </TouchableOpacity>
         )
     }

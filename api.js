@@ -1,28 +1,27 @@
 const baseUrl = 'http://damas55.upos.ca/public/api/';
 
-const fetchData = (url, config = null) => {
-    return fetch(baseUrl + url, config)
-        .then(response => {
-            if (response.ok || (response.status >= 200 && response.status < 300))
-                return response.json();
+const fetchData = (url, config = null) => fetch(baseUrl + url, config)
+    .then(response => {
+        if (response.ok || (response.status >= 200 && response.status < 300))
+            return response.json();
 
-            console.log(response);
+        console.log(response);
 
-            throw `error ${response.status}, ${response.statusText}`;
-        })
-    //.catch(error => { throw error.message; });
-};
+        throw `error ${response.status}, ${response.statusText}`;
+    })
+//.catch(error => { throw error.message; });
 
-const postData = (url, data) => {
-    return fetchData(url, {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-    });
-};
+const postData = (url, data, method = 'POST') => fetchData(url, {
+    method: method,
+    headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
+});
+
+const deleteData = (url, data) => postData(url, data, 'delete');
+
 
 export default class Api {
     static getTableNumbers() {
@@ -33,6 +32,21 @@ export default class Api {
                 return [];
             });
     }
+
+    static deleteProducts(orderId, uniqueIdArray) {
+        return deleteData(`order/${orderId}/delete/details`, { deleted_details: uniqueIdArray });
+    }
+    static addProducts(orderId, service_number, products) {
+        return postData(`order/${orderId}/addDetails`, { service_number, products });
+    }
+    static editNoteOrTableNumber(orderId, data) {
+        return postData(`order/${orderId}`, data , 'PUT');
+    }
+    static editClientOptionsCustomizes(uniqueId, data) {
+        return postData(`orderDetails/${uniqueId}`, data , 'PUT');
+    }
+
+
 
     static getCategories() {
         return fetchData('categories');

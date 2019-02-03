@@ -371,7 +371,29 @@ export default class TableMenu extends Component {
     }
 
     customizeTastingItem(item) {
+        if (!item.newReplace && !item.quantity)
+            return;
 
+        let services = this.state.services.slice();
+        for (const s of services) {
+            let old = s.products.find(p => p.dish_number == item.item.dish_number);
+            if (old) {
+                if (item.newReplace) {
+                    let rep = item.item.replacement.find(x => x.id == item.newReplace);
+                    old.id = rep.id;
+                    old.en_name = rep.en_name;
+                    old.tasting_name = rep.tasting_name;
+                    old.price = rep.price;
+                }
+
+                if (item.quantity) {
+                    old.quantity = item.quantity;
+                }
+
+                break;
+            }
+            this.setState({ services: services });
+        }
     }
 
     customizeItem(item, type) {
@@ -383,7 +405,7 @@ export default class TableMenu extends Component {
                     product_unique_id: item.item.unique_id,
                     new_order_id: item.newTable.id
                 }).then(x => {
-                    this.deleteItem(dish_number);
+                    this.deleteItemFromFrontEndOnly(dish_number);
                     alert('move item to table #' + item.newTable.table_number);
                 });
                 return;
@@ -633,6 +655,31 @@ export default class TableMenu extends Component {
     }
 
     deleteItem(dish_number) {
+        if (this.props.id) {
+            let item = this.getProductByDishNumber(dish_number);
+            if (item) {
+                Api.deleteProducts(this.props.id, [item.unique_id])
+                    .then(x => this.deleteItemFromFrontEndOnly(dish_number))
+                    .catch(x => alert("can't delete item, try again"));
+            }
+        }
+        else {
+            this.deleteItemFromFrontEndOnly(dish_number);
+        }
+    }
+    getProductByDishNumber(dish_number) {
+        let item = this.state.barItems.filter(x => x.dish_number != dish_number);
+        if (!item) {
+            for (const s of this.state.services) {
+                item = s.products.find(x => x.dish_number == dish_number);
+                if (item)
+                    break;
+            }
+        }
+        return item;
+    }
+
+    deleteItemFromFrontEndOnly(dish_number) {
         if (this.state.barItems.findIndex(x => x.dish_number == dish_number) != -1) {
             this.setState({ barItems: this.state.barItems.filter(x => x.dish_number != dish_number) });
         }
@@ -763,7 +810,7 @@ export default class TableMenu extends Component {
                     service_number: x.service_number,
                     products: this.buildProducts(x.products.filter(y => !y.isTasting))
                 }))
-            .filter(x => x.products && x.products.length > 0),
+                .filter(x => x.products && x.products.length > 0),
         };
 
 
@@ -778,7 +825,7 @@ export default class TableMenu extends Component {
                     service_status: 'ToBeCall',
                     products: this.buildProducts(x.products.filter(y => y.isTasting))
                 }))
-            .filter(x => x.products && x.products.length > 0),
+                .filter(x => x.products && x.products.length > 0),
         }
 
         if (this.props.id) {

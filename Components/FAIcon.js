@@ -30,6 +30,8 @@ export default class FAIcon extends Component {
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf255;</Text>;
             case 'plus':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf067;</Text>;
+            case 'minus':
+                return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf068;</Text>;
             case 'dollar-sign':
                 return <Text style={{ ...this.props.style, fontFamily: 'FontAwesomeSolid' }}>&#xf155;</Text>;
             case 'cc-visa':
