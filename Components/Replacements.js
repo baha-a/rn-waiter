@@ -65,21 +65,25 @@ export default class Replacements extends Component {
                         </View>
                         <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 6 }} />
 
-                        <View style={{ marginHorizontal: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'stretch' }}>
-                            <TouchableOpacity
-                                style={{ padding: 10, backgroundColor: '#999' }}
-                                onPress={() => this.setState(state => ({ quantity: state.quantity + 1 }))}
-                            >
-                                <FAIcon name='plus' style={{ justifyContent: 'center', alignItems: 'center', color: '#fff' }} />
-                            </TouchableOpacity>
-                            <Text style={{ justifyContent: 'center', alignItems: 'center' }}>{this.state.quantity}</Text>
-                            <TouchableOpacity
-                                style={{ padding: 10, backgroundColor: '#999' }}
-                                onPress={() => this.state.quantity > 1 && this.setState(state => ({ quantity: state.quantity - 1 }))}
-                            >
-                                <FAIcon name='minus' style={{ justifyContent: 'center', alignItems: 'center', color: '#fff' }} />
-                            </TouchableOpacity>
+                        <View>
+                            <Text> Quantity</Text>
+                            <View style={{ marginHorizontal: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'stretch' }}>
+                                <TouchableOpacity
+                                    style={{ padding: 10, backgroundColor: '#999' }}
+                                    onPress={() => this.setState(state => ({ quantity: state.quantity + 1 }))}
+                                >
+                                    <FAIcon name='plus' style={{ justifyContent: 'center', alignItems: 'center', color: '#fff' }} />
+                                </TouchableOpacity>
+                                <Text style={{ justifyContent: 'center', alignItems: 'center' }}>{this.state.quantity}</Text>
+                                <TouchableOpacity
+                                    style={{ padding: 10, backgroundColor: '#999' }}
+                                    onPress={() => this.state.quantity > 0 && this.setState(state => ({ quantity: state.quantity - 1 }))}
+                                >
+                                    <FAIcon name='minus' style={{ justifyContent: 'center', alignItems: 'center', color: '#fff' }} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
+
 
                         <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 6 }} />
 
@@ -123,8 +127,8 @@ export default class Replacements extends Component {
     getFinalResult() {
         return {
             newReplace: this.state.selectedReplacement,
-            quantity: this.state.item.quantity == this.state.quantity ? null : this.state.quantity,
-            item: this.state.item,
+            quantity: this.props.item.quantity == this.state.quantity ? null : this.state.quantity,
+            item: this.props.item,
         };
     }
 

@@ -381,7 +381,7 @@ export default class TableMenu extends Component {
     }
 
     customizeTastingItem(item) {
-        if (!item.newReplace && !item.quantity)
+        if (!item.newReplace && item.quantity == null)
             return;
 
         let services = this.state.services.slice();
@@ -396,13 +396,17 @@ export default class TableMenu extends Component {
                     old.price = rep.price;
                 }
 
-                if (item.quantity) {
+                if (item.quantity && item.quantity != 0) {
                     old.quantity = item.quantity;
+                } 
+                else if(item.quantity == 0){
+                    this.deleteItem(item.item.dish_number);
+                    return;
                 }
 
+                this.setState({ services: services });
                 break;
             }
-            this.setState({ services: services });
         }
     }
 
