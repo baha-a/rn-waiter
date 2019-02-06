@@ -1,6 +1,6 @@
 import React from 'react';
 import Expo from 'expo';
-import { ActivityIndicator, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
 import { Router, Stack, Scene } from 'react-native-router-flux';
 import { Container } from 'native-base';
 
@@ -10,16 +10,13 @@ import BillInfo from './Pages/BillInfo';
 import Customize from './Pages/Customize';
 import Socket from './Socket';
 import Replacements from './Components/Replacements';
+import Loader from './Components/Loader';
 
 export default class App extends React.Component 
 {
   constructor(props) {
     super(props);
-    this.state = { 
-      loading: true 
-    };
-
-    //Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.LANDSCAPE);
+    this.state = {  loading: true  };
     Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.ALL);
   }
 
@@ -37,7 +34,7 @@ export default class App extends React.Component
 
   render() {
     if (this.state.loading) {
-      return <ActivityIndicator />;
+      return <Loader />;
     }
 
     return (

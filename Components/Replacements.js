@@ -8,7 +8,6 @@ import { Actions } from 'react-native-router-flux';
 import FAIcon from './FAIcon';
 
 export default class Replacements extends Component {
-
     constructor(props) {
         super(props);
 
@@ -19,6 +18,9 @@ export default class Replacements extends Component {
 
             ready: false,
             error: false,
+
+            services: [1, 2, 3, 4, 5],
+            selectedService: 1,
         };
     }
 
@@ -61,12 +63,13 @@ export default class Replacements extends Component {
                 <ScrollView>
                     <View style={{ padding: 10 }}>
                         <View style={{ paddingVertical: 10, }}>
-                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{this.state.product.en_name} Customize</Text>
+                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Replace Items</Text>
                         </View>
-                        <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 6 }} />
 
-                        <View>
-                            <Text> Quantity</Text>
+                        {/* <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 6 }} /> */}
+
+                        {/* <View>
+                            <Text>Quantity</Text>
                             <View style={{ marginHorizontal: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'stretch' }}>
                                 <TouchableOpacity
                                     style={{ padding: 10, backgroundColor: '#999' }}
@@ -82,30 +85,15 @@ export default class Replacements extends Component {
                                     <FAIcon name='minus' style={{ justifyContent: 'center', alignItems: 'center', color: '#fff' }} />
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </View> */}
 
 
-                        <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 6 }} />
+                        {/* <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 6 }} /> */}
 
-                        <Text>Replacements:</Text>
-                        <View style={{ padding: 10 }}>
-                            {this.state.product.replacement.map(r =>
-                                <Selectable key={r.id}
-                                    title={r.en_name}
-                                    onSelect={v => {
-                                        if (v) {
-                                            this.setState({ selectedReplacement: r.id });
-                                        }
-                                        else {
-                                            if (this.state.selectedReplacement == r.id) {
-                                                this.setState({ selectedReplacement: null });
-                                            }
-                                        }
-                                    }}
-                                    selected={this.state.selectedReplacement == r.id}
-                                />)}
-                        </View>
+                        {/* <Text>Replacements:</Text> */}
 
+                        {this.renderTabRow()}
+                        {this.renderContent()}
                         {this.renderSaveAndCancel()}
                     </View>
                 </ScrollView>
@@ -132,6 +120,26 @@ export default class Replacements extends Component {
         };
     }
 
+    renderContent() {
+        return (
+            <View style={{ padding: 10 }}>
+                {this.state.product.replacement.map(r =>
+                    <Selectable key={r.id}
+                        title={r.en_name}
+                        onSelect={v => {
+                            if (v) {
+                                this.setState({ selectedReplacement: r.id });
+                            }
+                            else {
+                                if (this.state.selectedReplacement == r.id) {
+                                    this.setState({ selectedReplacement: null });
+                                }
+                            }
+                        }}
+                        selected={this.state.selectedReplacement == r.id}
+                    />)}
+            </View>);
+    }
     renderSaveAndCancel() {
         return (<View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
             <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
@@ -143,5 +151,38 @@ export default class Replacements extends Component {
                 <Text style={{ color: '#fff' }}>Save</Text>
             </TouchableOpacity>
         </View>);
+    }
+
+    renderTabRow() {
+        return (<View style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+            alignItems: 'flex-start',
+            borderBottomColor: '#eee',
+            borderBottomWidth: 1,
+            paddingHorizontal: 10
+        }}>
+            {this.state.services.map(s => this.tabBtn(s))}
+        </View>);
+    }
+
+    tabBtn(number) {
+        let style = {};
+        if (this.state.selectedService == number) {
+            style = {
+                borderWidth: 1,
+                borderColor: '#eee',
+                backgroundColor: '#eee',
+                borderBottomWidth: 0,
+            };
+        }
+        return (
+            <TouchableOpacity key={number} style={[{
+                padding: 10,
+                paddingHorizontal: 16,
+            }, style]}
+                onPress={() => this.setState({ selectedService: number })}>
+                <Text>SRV #{number}</Text>
+            </TouchableOpacity>);
     }
 }
