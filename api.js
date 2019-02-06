@@ -33,19 +33,23 @@ export default class Api {
             });
     }
 
-    static deleteProducts(orderId, uniqueIdArray) {
-        return deleteData(`order/${orderId}/delete/details`, { deleted_details: uniqueIdArray });
-    }
-    static addProducts(orderId, service_number, products) {
-        return postData(`order/${orderId}/addDetails`, { service_number:service_number, products:products });
-    }
-    static editNoteOrTableNumber(orderId, data) {
-        return postData(`order/${orderId}`, data , 'PUT');
-    }
-    static editClientOptionsCustomizes(uniqueId, data) {
-        return postData(`orderDetails/${uniqueId}`, data , 'PUT');
-    }
+    // static deleteProducts(orderId, uniqueIdArray) {
+    //     return deleteData(`order/${orderId}/delete/details`, { deleted_details: uniqueIdArray });
+    // }
+    // static addProducts(orderId, service_number, products) {
+    //     return postData(`order/${orderId}/addDetails`, { service_number:service_number, products:products });
+    // }
+    // static editNoteOrTableNumber(orderId, data) {
+    //     return postData(`order/${orderId}`, data , 'PUT');
+    // }
+    // static editClientOptionsCustomizes(uniqueId, data) {
+    //     return postData(`orderDetails/${uniqueId}`, data , 'PUT');
+    // }
 
+
+    static editOrder(orderId, data){
+        return postData(`orders/${orderId}`, data , 'PUT');
+    }
 
 
     static getCategories() {

@@ -170,14 +170,14 @@ export default class TableMenu extends Component {
 
                 this.setState({ services: services, selectedTab: 1, selectedSubTab: 1 });
 
-                if (this.props.id) {
-                    Api.addProducts(this.props.id, this.state.selectedService, [this.buildProductDataToSend(x, this.props.selectedClient)])
-                        .then(x => { })
-                        .catch(x => {
-                            alert("can't add item, try again");
-                            this.deleteItemFromFrontEndOnly(x.dish_number);
-                        });
-                }
+                // if (this.props.id) {
+                //     Api.addProducts(this.props.id, this.state.selectedService, [this.buildProductDataToSend(x, this.props.selectedClient)])
+                //         .then(x => { })
+                //         .catch(x => {
+                //             alert("can't add item, try again");
+                //             this.deleteItemFromFrontEndOnly(x.dish_number);
+                //         });
+                // }
             }
         };
 
@@ -216,8 +216,9 @@ export default class TableMenu extends Component {
         return products;
     }
 
-    static samilarityBreakerConditions = [
+    static unsimilarityRules = [
         (p1, p2) => p1.id != p2.id,
+        (p1, p2) => p1.discount != p2.discount,
         (p1, p2) => p1.isTasting != p2.isTasting,
         (p1, p2) => p1.isBar != p2.isBar,
         (p1, p2) => !((p1.product_customizes && p2.product_customizes) || (!p1.product_customizes && !p2.product_customizes)),
@@ -235,10 +236,9 @@ export default class TableMenu extends Component {
     ];
 
     isSameProducts(p1, p2) {
-        for (const con of TableMenu.samilarityBreakerConditions)
-            if (con(p1, p2))
-                return false;
-        return true;
+        return TableMenu.unsimilarityRules.findIndex(rule => rule(p1, p2)) == -1;
+        // for (const rule of TableMenu.unsimilarityRules) if (rule(p1, p2)) return false;
+        // return true;
 
         // if (p1.id != p2.id)
         //     return false;
@@ -733,15 +733,17 @@ export default class TableMenu extends Component {
     deleteItem(dish_number) {
         let item = this.getProductByDishNumber(dish_number);
         if (this.props.id && item.unique_id) {
-            if (item) {
-                Api.deleteProducts(this.props.id, [item.unique_id])
-                    .then(x => this.deleteItemFromFrontEndOnly(dish_number))
-                    .catch(x => alert("can't delete item, try again"));
-            }
+
+            this.setState({ delete_items: [...this.state.delete_items, item.unique_id] });
+
+            // if (item) {
+            //     Api.deleteProducts(this.props.id, [item.unique_id])
+            //         .then(x => this.deleteItemFromFrontEndOnly(dish_number))
+            //         .catch(x => alert("can't delete item, try again"));
+            // }
         }
-        else {
-            this.deleteItemFromFrontEndOnly(dish_number);
-        }
+
+        this.deleteItemFromFrontEndOnly(dish_number);
     }
     getProductByDishNumber(dish_number) {
         let item = this.state.barItems.filter(x => x.dish_number != dish_number);
@@ -820,9 +822,9 @@ export default class TableMenu extends Component {
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                 {
                                                     this.state.tastingItems.filter(t => t.services.findIndex(i => i == s.service_number) != -1)
-                                                    .map(t =>
-                                                        <Text key={t.id} style={{ paddingHorizontal: 3 }}>{t.quantity + ' ' + t.tasting_name}</Text>
-                                                    )
+                                                        .map(t =>
+                                                            <Text key={t.id} style={{ paddingHorizontal: 3 }}>{t.quantity + ' ' + t.tasting_name}</Text>
+                                                        )
                                                 }
                                             </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
@@ -868,9 +870,9 @@ export default class TableMenu extends Component {
     }
 
     postOrder() {
-        if (this.props.id) {
-            return new Promise(() => { throw 'edit order not supported yet' });
-        }
+        // if (this.props.id) {
+        //     return new Promise(() => { throw 'edit order not supported yet' });
+        // }
         if (!this.state.tableNumber) {
             return new Promise(() => { throw 'choose table number first' });
         }
@@ -908,17 +910,19 @@ export default class TableMenu extends Component {
                 .filter(x => x.products && x.products.length > 0),
         }
 
-        if (this.props.id) {
-            order.id = this.props.id;
-            tastingOrder.id = this.props.id;
-        }
-
         let promises = [];
         if (tastingOrder.services && tastingOrder.services.length > 0) {
-            promises.push(Api.postOrder(tastingOrder));
+            if (this.props.id)
+                promises.push(Api.editOrder(this.props.id, tastingOrder));
+            else
+                promises.push(Api.postOrder(tastingOrder));
         }
+
         if ((order.services && order.services.length > 0) || (order.bar && order.bar.length > 0)) {
-            promises.push(Api.postOrder(order));
+            if (this.props.id)
+                promises.push(Api.editOrder(this.props.id, order));
+            else
+                promises.push(Api.postOrder(order));
         }
 
         console.log('---------------- order --')
@@ -941,14 +945,7 @@ export default class TableMenu extends Component {
 
         products.forEach(p => {
             if (p.clients && p.clients.length > 0) {
-                p.clients.forEach(c => {
-                    this.handelQuantityIfProductDataToSend(p, c, result);
-                    let count = p.quantity || 1;
-                    while (count > 0) {
-                        result.push(this.buildProductDataToSend(p, c));
-                        count--;
-                    }
-                });
+                p.clients.forEach(c => this.handelQuantityIfProductDataToSend(p, c, result));
             } else {
                 this.handelQuantityIfProductDataToSend(p, null, result);
             }
@@ -979,6 +976,10 @@ export default class TableMenu extends Component {
             }
         }
 
+        let unique_idObj = {};
+        if (this.props.id) {
+            unique_idObj = { unique_id: product.unique_id };
+        }
         return {
             product_id: product.id,
             client_number: client,
@@ -987,6 +988,8 @@ export default class TableMenu extends Component {
             isTasting: product.isTasting || false,
             product_customizes: cstm,
             product_optionals: optnl,
+
+            ...unique_idObj
         };
     }
 
@@ -1008,12 +1011,7 @@ export default class TableMenu extends Component {
                             }} >#{x.service_number}</Text>)
                     }
                     <TouchableOpacity style={{ padding: 2, backgroundColor: '#fff' }}
-                        onPress={() => {
-                            this.setState(state => ({
-                                services: [...state.services, { service_number: state.services.length + 1, products: [] }],
-                                selectedService: state.services.length + 1,
-                            }));
-                        }}>
+                        onPress={() => this.addNewService()}>
                         <FAIcon name='plus' />
                     </TouchableOpacity>
                 </View>
@@ -1049,6 +1047,26 @@ export default class TableMenu extends Component {
                 </View>
             </View>
         )
+    }
+
+    addNewService() {
+        this.setState(state => {
+            let isNewObj = {};
+            if (this.props.id) {
+                isNewObj = { isNew: true };
+            }
+
+            return {
+                services: [
+                    ...state.services,
+                    {
+                        service_number: state.services.length + 1,
+                        products: [],
+                        ...isNewObj
+                    }],
+                selectedService: state.services.length + 1,
+            }
+        });
     }
 
     renderTotal() {

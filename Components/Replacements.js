@@ -6,6 +6,7 @@ import ReloadBtn from './ReloadBtn';
 import Selectable from './Selectable';
 import { Actions } from 'react-native-router-flux';
 import FAIcon from './FAIcon';
+import ItemButton from './ItemButton';
 
 export default class Replacements extends Component {
     constructor(props) {
@@ -119,27 +120,6 @@ export default class Replacements extends Component {
             item: this.props.item,
         };
     }
-
-    renderContent() {
-        return (
-            <View style={{ padding: 10 }}>
-                {this.state.product.replacement.map(r =>
-                    <Selectable key={r.id}
-                        title={r.en_name}
-                        onSelect={v => {
-                            if (v) {
-                                this.setState({ selectedReplacement: r.id });
-                            }
-                            else {
-                                if (this.state.selectedReplacement == r.id) {
-                                    this.setState({ selectedReplacement: null });
-                                }
-                            }
-                        }}
-                        selected={this.state.selectedReplacement == r.id}
-                    />)}
-            </View>);
-    }
     renderSaveAndCancel() {
         return (<View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
             <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
@@ -152,6 +132,20 @@ export default class Replacements extends Component {
             </TouchableOpacity>
         </View>);
     }
+
+    renderContent() {
+        let ss = this.state.selectedService;
+        return (<View style={{ padding: 10, }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', }}>
+                <Text><Text style={{fontWeight:'bold'}}>2</Text>Kosher</Text>
+                <Text><Text style={{fontWeight:'bold'}}>7</Text>Tasting</Text>
+            </View>
+            <View style={{ flexDirection:'row',justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap:'wrap'}}>
+            <ItemButton />
+            </View>
+        </View>);
+    }
+
 
     renderTabRow() {
         return (<View style={{

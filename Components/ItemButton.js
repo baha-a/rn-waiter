@@ -11,7 +11,6 @@ export default class ItemButton extends Component {
 
         this.removeItem = this.removeItem.bind(this);
         this.addItem = this.addItem.bind(this);
-
         this.pressMid = this.pressMid.bind(this);
     }
 
@@ -94,7 +93,7 @@ export default class ItemButton extends Component {
                             {
                                 (addAndRemove || showCount) &&
                                 <Text style={{ color: '#fff' }}>
-                                    {this.props.quantity == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold' }}>{this.props.quantity}</Text>}
+                                    {quantity == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold' }}>{quantity}</Text>}
                                 </Text>
                             }
                             <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
