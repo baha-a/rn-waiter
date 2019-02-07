@@ -60,7 +60,7 @@ export default class Bill extends Component {
     this.setState({ ready: false, error: false, });
     Api.getOrders()
       .then(orders => {
-        console.log(orders);
+        //console.log(orders);
         this.setState({ invoiceData: orders, ready: true, error: false, });
       })
       .catch(x => {

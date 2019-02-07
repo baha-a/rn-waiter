@@ -125,6 +125,7 @@ export default class TableMenu extends Component {
                             p.dish_number = TableMenu.dish_number++;
                             p.tastingCategoryName = x.tasting_name;
                             p.clients = [this.props.selectedClient];
+                            
                             service.products = [p, ...service.products];
                         }
                     });
@@ -785,14 +786,14 @@ export default class TableMenu extends Component {
                                             </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                 {
-                                                    groupBy(s.products.filter(x => x.isTasting), x => x.tastingCategoryName)
-                                                        .map(t =>
-                                                            <View key={t.key} style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                                                    // groupBy(s.products.filter(x => x.isTasting), x => x.tastingCategoryName)
+                                                    //     .map(t =>
+                                                    //         <View key={t.key} style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                                    {t.values.map(x => this.renderProduct(x, 'service', s.service_number))}
+                                                                    {/*t.values*/s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
                                                                 </View>
-                                                            </View>
-                                                        )
+                                                        //     </View>
+                                                        // )
                                                 }
                                             </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>

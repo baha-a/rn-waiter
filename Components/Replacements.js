@@ -109,12 +109,10 @@ export default class Replacements extends Component {
                     this.getSelectedService().map(s =>
                         s.products.map(p => {
                             let style = p.dish_number != this.state.selectedItem ? {} : {
-                                borderColor: 'cyan',
+                                borderColor: '#4286f4',
                                 borderRadius: 4,
-                                borderWidth: 1,
+                                borderWidth: 2,
                                 borderStyle: 'dotted',
-                                margin: 2,
-                                padding: 2,
                             };
 
                             return <View style={style}>
@@ -124,7 +122,7 @@ export default class Replacements extends Component {
                                     title={p.tasting_name}
                                     quantity={p.quantity}
                                     showCount
-                                    onPressMid={() => this.setState({ selectedItem: p.dish_number })}
+                                    onPressMid={() => this.setState({ selectedItem: p.id })}
                                 />
                             </View>;
                         })
@@ -135,7 +133,7 @@ export default class Replacements extends Component {
                 {
                     this.getSelectedItemReplacements().map(r => <ItemButton
                         key={r.id}
-                        color={r.color}
+                        color='#66c4ff'
                         title={r.tasting_name}
                         onPressMid={() => this.replaceSelectedItem(r)}
                     />)
@@ -155,17 +153,36 @@ export default class Replacements extends Component {
         return this.state.services.filter(s => s.service_number == this.state.selectedService);
     }
     getSelectedItemReplacements() {
-        let res = this.getSelectedService();
-        console.log('1');
-        if (res) {
-            console.log('2');
-            let item = res[0].products.find(p => p.dish_number == this.state.selectedItem);
-            if (item) {
-                console.log('3');
-                return item.replacement;
+        for (const t of this.getSelectedTastingItems()) {
+            for (const s of t.services) {
+                let pr = s.products.find(p => p.id == this.state.selectedItem);
+                if (pr) {
+                    return pr.replacement;
+                }
             }
         }
         return [];
+        // let res = this.getSelectedService();
+        // if (res) {
+        //     let item = res[0].products.find(p => p.dish_number == this.state.selectedItem);
+        //     if (item) {
+        //         //this.state.tastingItems.find()
+        //         return [{
+        //             id: 45,
+        //             branch_id: 3,
+        //             en_name: "S-Humus",
+        //             tasting_name: "SHS",
+        //             limit_quantity: null,
+        //             limit_discount: null,
+        //             description: null,
+        //             cost: "1",
+        //             price: "7",
+        //             delivery_price: "7",
+        //         }];
+        //         return item.replacement;
+        //     }
+        // }
+        // return [];
     }
     renderTabRow() {
         return (<ScrollView
