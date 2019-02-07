@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import { Text, View, ScrollView, TouchableOpacity, TextInput, RefreshControl } from 'react-native'
 import { Container, Input } from 'native-base';
 import Navbar from '../Components/Navbar';
 import Invoice from '../Components/Invoice';
@@ -49,6 +49,7 @@ export default class Bill extends Component {
     }
 
     this.handelSelectInvoice = this.handelSelectInvoice.bind(this);
+    this.fetchData = this.fetchData.bind(this);
   }
 
   componentDidMount() {
@@ -56,37 +57,40 @@ export default class Bill extends Component {
   }
 
   fetchData() {
+    this.setState({ ready: false, error: false, });
     Api.getOrders()
-      .then(orders => this.setState({ invoiceData: orders, ready: true, error: false }))
+      .then(orders => {
+        console.log(orders);
+        this.setState({ invoiceData: orders, ready: true, error: false, });
+      })
       .catch(x => {
         alert('Orders\n' + x.message);
-        this.setState({ ready: true, error: true });
+        this.setState({ ready: true, error: true, });
       });
   }
 
   render() {
     let content = null;
-    if (this.state.ready == false) {
-      content = <Loader />;
-    } else if (this.state.error) {
-      content = <ReloadBtn onReload={() => { this.setState({ ready: false }); this.fetchData(); }} />;
+    if (this.state.error) {
+      content = <ReloadBtn onReload={this.fetchData} />;
     } else {
-      content = (
-        <ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}>
-          <CardView>
-            {this.renderSearchAndCombinBar()}
-          </CardView>
-
-          <CardView>
-            {this.renderInvoices()}
-          </CardView>
-        </ScrollView>);
+      content = this.renderInvoices();
     }
 
     return (
       <Container>
         <Navbar />
-        {content}
+        <ScrollView style={{ backgroundColor: '#eee' }} contentContainerStyle={{ padding: 10, }}
+          refreshControl={<RefreshControl refreshing={this.state.ready == false} onRefresh={this.fetchData} />}
+        >
+          <CardView>
+            {this.renderSearchAndCombinBar()}
+          </CardView>
+
+          <CardView>
+            {content}
+          </CardView>
+        </ScrollView>
       </Container>
     )
   }
@@ -161,7 +165,7 @@ export default class Bill extends Component {
 
   renderInvoices() {
     if (!this.state.invoiceData) {
-      return <ReloadBtn title='no bills' onReload={() => { this.setState({ ready: false, error: false }); this.fetchData(); }} />;
+      return <ReloadBtn title='no bills' onReload={this.fetchData} />;
     }
 
     return (<View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>

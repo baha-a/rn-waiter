@@ -39,32 +39,36 @@ export default class Accordion extends Component {
       .then(cat => {
         this.addIsBarProperty(cat);
         this.addCategoryInfoIntoProducts(cat);
-        this.setState({ sections: cat, ready: true, error: false });
-      }).then(() => {
-
-        Api.getTasting()
-          .then(tast =>
-            this.setState(state => {
-              let tastingSection = {
-                id: -1,
-                category_color: '#64206f',
-                category_name: 'Tasting',
-                isTasting: true,
-                products: this.addIsTastingProperty(tast)
-              };
-              
-              if (!state || !state.sections) {
-                return { sections: [tastingSection] }
-              }
-              return { sections: [...state.sections, tastingSection] }
-            }
-            ))
-          .catch(x => { alert('Tasting\n' + x.message); });
-      })
-      .catch(x => {
+        this.setState(state => {
+          return {
+            sections: [...cat, ...state.sections],
+            ready: true,
+            error: false
+          };
+        });
+      }).catch(x => {
         this.setState({ ready: true, error: true });
         alert('Categories\n' + x.message);
       });
+
+    Api.getTasting()
+      .then(tast =>
+        this.setState(state => {
+          let tastingSection = {
+            id: -1,
+            category_color: '#64206f',
+            category_name: 'Tasting',
+            isTasting: true,
+            products: this.addIsTastingProperty(tast)
+          };
+
+          if (!state || !state.sections) {
+            return { sections: [tastingSection] }
+          }
+          return { sections: [...state.sections, tastingSection] }
+        }
+        ))
+      .catch(x => { alert('Tasting\n' + x.message); });
   }
 
   addIsTastingProperty(tasts) {
