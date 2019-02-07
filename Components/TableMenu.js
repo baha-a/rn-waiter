@@ -51,7 +51,7 @@ export default class TableMenu extends Component {
 
             note: '',
 
-            delete_items: [],
+            deleted_items: [],
         };
 
         this.postOrder = this.postOrder.bind(this);
@@ -174,12 +174,14 @@ export default class TableMenu extends Component {
             }
         };
 
-        if (this.props.id && this.props.id != 0) {
+        if (this.props.id) {
             Api.getOrder(this.props.id)
                 .then(x => {
-                    if (x.services) {
+                    if (x.services)
                         x.services.forEach(s => s.products = this.fixListProducts(s.products, x.type == 'tasting'));
-                    }
+
+                    console.log('-=-=-=--=-=-=-=-=-=-=-=--');
+                    console.log(x.services);
 
                     this.setState({
                         ready: true,
@@ -697,14 +699,15 @@ export default class TableMenu extends Component {
 
     deleteItem(dish_number) {
         let item = this.getProductByDishNumber(dish_number);
+        console.log(item);
         if (this.props.id && item.uniques) {
-            this.setState({ delete_items: [...this.state.delete_items, ...item.uniques] });
+            this.setState({ deleted_items: [...this.state.deleted_items, ...item.uniques] });
         }
 
         this.deleteItemFromFrontEndOnly(dish_number);
     }
     getProductByDishNumber(dish_number) {
-        let item = this.state.barItems.filter(x => x.dish_number != dish_number);
+        let item = this.state.barItems.find(x => x.dish_number == dish_number);
         if (!item) {
             for (const s of this.state.services) {
                 item = s.products.find(x => x.dish_number == dish_number);
@@ -873,20 +876,20 @@ export default class TableMenu extends Component {
         let promises = [];
         if (tastingOrder.services && tastingOrder.services.length > 0) {
             if (this.props.id)
-                promises.push(Api.editOrder(this.props.id, { ...tastingOrder, delete_items: [...this.state.delete_items] }));
+                promises.push(Api.editOrder(this.props.id, { ...tastingOrder, deleted_items: [...this.state.deleted_items] }));
             else
                 promises.push(Api.postOrder(tastingOrder));
         }
 
         if ((order.services && order.services.length > 0) || (order.bar && order.bar.length > 0)) {
             if (this.props.id)
-                promises.push(Api.editOrder(this.props.id, { ...order, delete_items: [...this.state.delete_items] }));
+                promises.push(Api.editOrder(this.props.id, { ...order, deleted_items: [...this.state.deleted_items] }));
             else
                 promises.push(Api.postOrder(order));
         }
 
         console.log('---------------- order --')
-        console.log({order, delete_items: [...this.state.delete_items]});
+        console.log({ order, deleted_items: [...this.state.deleted_items] });
         console.log('---------------- tasting order --')
         console.log(tastingOrder);
         console.log('------------------')
@@ -929,7 +932,7 @@ export default class TableMenu extends Component {
         }
 
         if (product.uniques && uniquesCounter < product.uniques.length) {
-            this.setState({ delete_items: [...this.state.delete_items, product.uniques.slice(uniquesCounter)] });
+            this.setState({ deleted_items: [...this.state.deleted_items, product.uniques.slice(uniquesCounter)] });
         }
     }
     buildProductDataToSend(product, client, unique_id = null) {
