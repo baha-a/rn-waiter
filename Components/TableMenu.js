@@ -40,11 +40,11 @@ export default class TableMenu extends Component {
 
             tastingItems: [],
             services: [
-                { service_number: 1, products: [] },
-                { service_number: 2, products: [] },
-                { service_number: 3, products: [] },
-                { service_number: 4, products: [] },
-                { service_number: 5, products: [] },
+                { service_number: 1, isNew: true, products: [] },
+                { service_number: 2, isNew: true, products: [] },
+                { service_number: 3, isNew: true, products: [] },
+                { service_number: 4, isNew: true, products: [] },
+                { service_number: 5, isNew: true, products: [] },
             ],
 
             selectedItemsForArrange: [],
@@ -116,7 +116,7 @@ export default class TableMenu extends Component {
                         let found = service.products.find(x => x.isTasting && x.id == p.id);
                         if (found) {
                             found.quantity++;
-                            //found.clients = [...found.clients, this.props.selectedClient];
+                            found.clients = [...found.clients, this.props.selectedClient];
                         }
                         else {
                             p.isTasting = true;
@@ -124,26 +124,18 @@ export default class TableMenu extends Component {
                             p.quantity = 1;
                             p.dish_number = TableMenu.dish_number++;
                             p.tastingCategoryName = x.tasting_name;
-                            //p.clients = [this.props.selectedClient];
+                            p.clients = [this.props.selectedClient];
                             service.products = [p, ...service.products];
                         }
                     });
                 });
 
 
-                let tastingItems = this.state.tastingItems.slice();
+                let tastingItems = [...this.state.tastingItems];
                 let tast = tastingItems.find(t => t.id == x.id);
                 if (tast) { tast.quantity++; }
                 else {
-                    tastingItems = [
-                        ...tastingItems,
-                        {
-                            id: x.id,
-                            tasting_name: x.tasting_name,
-                            quantity: 1,
-                            services: x.services.map(s => s.service_number)
-                        }
-                    ];
+                    tastingItems = [...tastingItems, { ...x, quantity: 1, }];
                 }
 
                 this.setState({
@@ -528,6 +520,9 @@ export default class TableMenu extends Component {
                             if (!this.state.arrangeItems) {
                                 Actions.replacements({
                                     item: { ...x },
+                                    tastingItems: [...this.state.tastingItems],
+                                    tastingServices: this.state.services.map(s => ({ service_number: s.service_number, products: s.products.filter(x => x.isTasting) })),
+                                    selectedService: serviceNumber,
                                     onSave: item => this.customizeTastingItem(item),
                                 });
                             }
@@ -782,9 +777,9 @@ export default class TableMenu extends Component {
                                             </View>
                                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                 {
-                                                    this.state.tastingItems.filter(t => t.services.findIndex(i => i == s.service_number) != -1)
+                                                    this.state.tastingItems.filter(t => t.services.findIndex(i => i.service_number == s.service_number) != -1)
                                                         .map(t =>
-                                                            <Text key={t.id} style={{ paddingHorizontal: 3 }}>{t.quantity + ' ' + t.tasting_name}</Text>
+                                                            <Text key={t.id} style={{ paddingHorizontal: 3 }}><Text style={{ fontWeight: 'bold' }}>{t.quantity}</Text>{' ' + t.tasting_name},</Text>
                                                         )
                                                 }
                                             </View>
@@ -794,7 +789,7 @@ export default class TableMenu extends Component {
                                                         .map(t =>
                                                             <View key={t.key} style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                                    {t.values.map(x => this.renderProduct(x, 'service'))}
+                                                                    {t.values.map(x => this.renderProduct(x, 'service', s.service_number))}
                                                                 </View>
                                                             </View>
                                                         )
