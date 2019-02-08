@@ -108,7 +108,7 @@ export default class Replacements extends Component {
                 {
                     this.getSelectedService().map(s =>
                         s.products.map(p => {
-                            let style = p.dish_number != this.state.selectedItem ? {} : {
+                            let style = p.id != this.state.selectedItem ? {} : {
                                 borderColor: '#4286f4',
                                 borderRadius: 4,
                                 borderWidth: 2,
@@ -122,7 +122,14 @@ export default class Replacements extends Component {
                                     title={p.tasting_name}
                                     quantity={p.quantity}
                                     showCount
-                                    onPressMid={() => this.setState({ selectedItem: p.id })}
+                                    onPressMid={() => {
+                                        if (this.state.selectedItem == p.id) {
+                                            this.setState({ selectedItem: null });
+                                        }
+                                        else {
+                                            this.setState({ selectedItem: p.id });
+                                        }
+                                    }}
                                 />
                             </View>;
                         })
@@ -153,6 +160,32 @@ export default class Replacements extends Component {
         return this.state.services.filter(s => s.service_number == this.state.selectedService);
     }
     getSelectedItemReplacements() {
+        return [{
+            id: 45,
+            en_name: "S-Humus",
+            tasting_name: "SHS",
+            price: "1",
+        }, {
+            id: 4,
+            en_name: "S-Humus",
+            tasting_name: "SH2",
+            price: "2",
+        }, {
+            id: 454,
+            en_name: "S-Humus",
+            tasting_name: "SH3",
+            price: "3",
+        }, {
+            id: 455,
+            en_name: "S-Humus",
+            tasting_name: "SS",
+            price: "4",
+        }, {
+            id: 43,
+            en_name: "S-Humus",
+            tasting_name: "Sv",
+            price: "70",
+        }];
         for (const t of this.getSelectedTastingItems()) {
             for (const s of t.services) {
                 let pr = s.products.find(p => p.id == this.state.selectedItem);
@@ -169,15 +202,11 @@ export default class Replacements extends Component {
         //         //this.state.tastingItems.find()
         //         return [{
         //             id: 45,
-        //             branch_id: 3,
-        //             en_name: "S-Humus",
+        //             branch_id: 3,    //             en_name: "S-Humus",
         //             tasting_name: "SHS",
-        //             limit_quantity: null,
-        //             limit_discount: null,
-        //             description: null,
-        //             cost: "1",
+    
         //             price: "7",
-        //             delivery_price: "7",
+    
         //         }];
         //         return item.replacement;
         //     }
