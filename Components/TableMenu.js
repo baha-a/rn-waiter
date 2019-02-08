@@ -92,60 +92,12 @@ export default class TableMenu extends Component {
     }
 
     componentDidMount() {
-        // if (!this.props.id)
-        //     return;
-
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
         TableMenu.addItemEvt = (item) => {
             let x = { ...item };
             if (x.isTasting) {
-                let services = this.state.services.slice();
-                if (!services || services.length == 0)
-                    services = [];
-
-                x.services.forEach(s => {
-                    let service = services.find(y => y.service_number == s.service_number);
-                    if (!service) {
-                        service = { service_number: s.service_number, products: [] };
-                        services.push(service);
-                    }
-                    s.products.forEach(pr => {
-                        let p = { ...pr };
-
-                        let found = service.products.find(x => x.isTasting && x.id == p.id);
-                        if (found) {
-                            found.quantity++;
-                            found.clients = [...found.clients, this.props.selectedClient];
-                        }
-                        else {
-                            p.isTasting = true;
-                            p.color = x.color;
-                            p.quantity = 1;
-                            p.dish_number = TableMenu.dish_number++;
-                            p.tastingCategoryName = x.tasting_name;
-                            p.clients = [this.props.selectedClient];
-                            
-                            service.products = [p, ...service.products];
-                        }
-                    });
-                });
-
-
-                let tastingItems = [...this.state.tastingItems];
-                let tast = tastingItems.find(t => t.id == x.id);
-                if (tast) { tast.quantity++; }
-                else {
-                    tastingItems = [...tastingItems, { ...x, quantity: 1, }];
-                }
-
-                this.setState({
-                    services: services,
-                    selectedTab: 1,
-                    selectedSubTab: 1,
-                    tastingItems: tastingItems
-                });
-
+                this.handleAddTastingItem(x);
                 return;
             }
 
@@ -168,22 +120,7 @@ export default class TableMenu extends Component {
         };
 
         if (this.props.id) {
-            Api.getOrder(this.props.id)
-                .then(x => {
-                    if (x.services)
-                        x.services.forEach(s => s.products = this.fixListProducts(s.products, x.type == 'tasting'));
-
-                    console.log('-=-=-=--=-=-=-=-=-=-=-=--');
-                    console.log(x.services);
-
-                    this.setState({
-                        ready: true,
-                        tableNumber: x.table_number,
-                        note: x.note,
-                        services: x.services,
-                        barItems: this.fixListProducts(x.bar),
-                    });
-                }).catch(error => alert('Order\n' + error.message));
+            this.fetchData();
         }
         else {
             this.setState({
@@ -193,6 +130,88 @@ export default class TableMenu extends Component {
         }
     }
 
+    handleAddTastingItem(item) {
+        let services = this.state.services.slice();
+        if (!services || services.length == 0)
+            services = [];
+
+        item.services.forEach(s => {
+            let service = services.find(y => y.service_number == s.service_number);
+            if (!service) {
+                service = { service_number: s.service_number, products: [] };
+                services.push(service);
+            }
+            s.products.forEach(pr => {
+                let p = { ...pr };
+
+                let found = service.products.find(x => x.isTasting && x.product_id == p.product_id);
+                if (found) {
+                    found.quantity++;
+                    found.clients = [...found.clients, this.props.selectedClient];
+                }
+                else {
+                    p.isTasting = true;
+                    p.color = item.color;
+                    p.quantity = 1;
+                    p.dish_number = TableMenu.dish_number++;
+                    p.tastingCategoryName = item.tasting_name;
+                    p.clients = [this.props.selectedClient];
+
+                    service.products = [p, ...service.products];
+                }
+            });
+        });
+
+
+        let tastingItems = [...this.state.tastingItems];
+        let tast = tastingItems.find(t => t.id == item.id);
+        if (tast) { tast.quantity++; }
+        else {
+            tastingItems = [...tastingItems, { ...item, quantity: 1, }];
+        }
+
+        this.setState({
+            services: services,
+            selectedTab: 1,
+            selectedSubTab: 1,
+            tastingItems: tastingItems
+        });
+    }
+
+    fetchData() {
+        Api.getOrder(this.props.id)
+            .then(x => {
+                if (!x.services) x.services = [];
+
+                x.services.forEach(s => s.products = this.fixListProducts(s.products));
+
+                if (x.tastings_services) {
+                    for (const ts of x.tastings_services) {
+                        let service = x.services.find(s => s.service_number == ts.service_number);
+                        if (!service) {
+                            service = { service_number: ts.service_number, products: [] };
+                            x.services.push(service)
+                        }
+                        service.products = this.fixListProducts(ts.products, true);
+                    }
+                }
+
+                let tastingItems = x.tastings_header.map(x => ({
+                    id: x.tasting_id,
+                    tasting_name: x.tasting_name,
+                    quantity: x.tasting_count || 1,
+                }));
+
+                this.setState({
+                    ready: true,
+                    tableNumber: x.table_number,
+                    note: x.note,
+                    services: x.services,
+                    barItems: this.fixListProducts(x.bar),
+                    tastingItems: tastingItems,
+                });
+            }).catch(error => alert('Order\n' + error.message));
+    }
 
     fixListProducts(list, isTasting = false) {
         if (!list || list.length == 0)
@@ -207,6 +226,7 @@ export default class TableMenu extends Component {
 
     static unsimilarityRules = [
         (p1, p2) => p1.id != p2.id,
+        (p1, p2) => p1.product_id != p2.product_id,
         (p1, p2) => p1.discount != p2.discount,
         (p1, p2) => p1.isTasting != p2.isTasting,
         (p1, p2) => p1.isBar != p2.isBar,
@@ -513,7 +533,7 @@ export default class TableMenu extends Component {
             return (
                 <View key={x.dish_number} style={{ width: '30%' }}>
                     <ItemButton
-                        title={x.tasting_name}
+                        title={x.product_name}
                         quantity={x.quantity}
                         showCount
                         color={x.color || x.category_color}
@@ -789,11 +809,11 @@ export default class TableMenu extends Component {
                                                     // groupBy(s.products.filter(x => x.isTasting), x => x.tastingCategoryName)
                                                     //     .map(t =>
                                                     //         <View key={t.key} style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                                    {/*t.values*/s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
-                                                                </View>
-                                                        //     </View>
-                                                        // )
+                                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                                                        {/*t.values*/s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
+                                                    </View>
+                                                    //     </View>
+                                                    // )
                                                 }
                                             </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
@@ -851,52 +871,46 @@ export default class TableMenu extends Component {
                     service_number: ++serivcecounter, //x.service_number,
                     products: this.buildProducts(x.products.filter(y => !y.isTasting)),
                     isNew: x.isNew == true,
-                }))
-        };
+                })),
 
-        serivcecounter = 0;
-        let tastingOrder = {
-            table_number: this.state.tableNumber,
-            status: status,
-            type: 'tasting',
-            note: this.state.note,
-            services: this.state.services
-                .filter(x => x.products && x.products.length > 0 && x.products.filter(y => y.isTasting).length > 0)
-                .map(x => ({
-                    service_number: ++serivcecounter, //x.service_number,
-                    products: this.buildProducts(x.products.filter(y => y.isTasting)),
-                    isNew: x.isNew == true,
-                }))
-        }
 
-        let promises = [];
-        if (tastingOrder.services && tastingOrder.services.length > 0) {
-            if (this.props.id)
-                promises.push(Api.editOrder(this.props.id, { ...tastingOrder, deleted_items: [...this.state.deleted_items] }));
-            else
-                promises.push(Api.postOrder(tastingOrder));
-        }
-
-        if ((order.services && order.services.length > 0) || (order.bar && order.bar.length > 0)) {
-            if (this.props.id)
-                promises.push(Api.editOrder(this.props.id, { ...order, deleted_items: [...this.state.deleted_items] }));
-            else
-                promises.push(Api.postOrder(order));
+            tasting: this.buildTastingProduct(this.state.tastingItems),
+            // this.state.services
+            //     .filter(x => x.products && x.products.length > 0 && x.products.filter(y => y.isTasting).length > 0)
+            //     .map(x => ({
+            //         service_number: ++serivcecounter, //x.service_number,
+            //         products: this.buildProducts(x.products.filter(y => y.isTasting)),
+            //         isNew: x.isNew == true,
+            //     }))
         }
 
         console.log('---------------- order --')
         console.log({ order, deleted_items: [...this.state.deleted_items] });
-        console.log('---------------- tasting order --')
-        console.log(tastingOrder);
         console.log('------------------')
 
-        if (promises.length == 0) {
-            return new Promise(() => { throw 'add items to the order first' });
-        } else {
-            //return new Promise(() => { throw 'mock api' });
+        //return new Promise(() => { throw 'mock api' });
 
-            return Promise.all(promises).then(x => alert('order successfully saved'));
+        if ((order.services && order.services.length > 0) ||
+            (order.bar && order.bar.length > 0) ||
+            (order.tasting && order.tasting.length > 0)) {
+
+            if (this.props.id)
+                return Api.editOrder(this.props.id, { ...order, deleted_items: [...this.state.deleted_items] })
+                    .then(x => alert('order successfully saved'));
+            else
+                return Api.postOrder(order).then(x => alert('order successfully saved'));
         }
+        else {
+            return new Promise(() => { throw 'add items to the order first' });
+        }
+    }
+
+    buildTastingProduct(tastings) {
+        return tastings.map(x => ({
+            tasting_id: x.id,
+            tastings_count: x.quantity,
+            replacements: [], //    	replacements : [{7 : 42},{8 : 45},{15 : 27}]
+        }));
     }
 
     buildProducts(products) {

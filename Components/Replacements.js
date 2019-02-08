@@ -125,8 +125,7 @@ export default class Replacements extends Component {
                                     onPressMid={() => {
                                         if (this.state.selectedItem == p.id) {
                                             this.setState({ selectedItem: null });
-                                        }
-                                        else {
+                                        } else {
                                             this.setState({ selectedItem: p.id });
                                         }
                                     }}
