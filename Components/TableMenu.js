@@ -546,6 +546,7 @@ export default class TableMenu extends Component {
                                     tastingItems: [...this.state.tastingItems],
                                     tastingServices: this.state.services.map(s => ({ service_number: s.service_number, products: s.products.filter(x => x.isTasting) })),
                                     selectedService: serviceNumber,
+                                    selectedItem: x,
                                     onSave: item => this.customizeTastingItem(item),
                                 });
                             }

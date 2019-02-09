@@ -47,10 +47,20 @@ export default class Replacements extends Component {
                     }
                 }
 
+                let selectedItem = null;
+                if (this.props.selectedItem && this.props.selectedService) {
+                    try {
+                        selectedItem = services.find(x => x.service_number == this.props.selectedService).products.find(p => p.product_id == this.props.selectedItem.product_id);
+                    } catch (ex) {
+
+                    }
+                }
+
                 this.setState({
                     services: services,
                     tastingItems: this.props.tastingItems,
                     selectedService: this.props.selectedService,
+                    selectedItem: selectedItem,
                     ready: true,
                     error: false
                 });
