@@ -21,20 +21,17 @@ export default class ItemButton extends Component {
 
     removeItem() {
         let v = this.props.quantity - 1;
-        if (v > 0) {
-            if (this.props.onAddOrRemove)
-                this.props.onAddOrRemove(v, -1);
-        }
-        else {
-            if (this.props.onDelete) {
-                this.props.onDelete();
-            }
-        }
+
+        if (this.props.onAddOrRemove)
+            this.props.onAddOrRemove(v);
+
+        if (v <= 0 && this.props.onDelete)
+            this.props.onDelete();
     }
 
     addItem() {
         if (this.props.onAddOrRemove)
-            this.props.onAddOrRemove(this.props.quantity + 1, +1);
+            this.props.onAddOrRemove(this.props.quantity + 1);
     }
 
     render() {
