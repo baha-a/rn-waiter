@@ -10,17 +10,14 @@ export default class Replacements extends Component {
         super(props);
 
         this.state = {
-            product: null,
-            quantity: 1,
-
             ready: false,
             error: false,
 
             services: [],
+            tastingItems: [],
+
             selectedService: null,
             selectedItem: null,
-
-            tastingItems: [],
         };
 
         this.getQuantityOfItemMinusReplacement = this.getQuantityOfItemMinusReplacement.bind(this);
@@ -51,8 +48,6 @@ export default class Replacements extends Component {
                 }
 
                 this.setState({
-                    product: this.props.item,
-                    quantity: this.props.item.quantity,
                     services: services,
                     tastingItems: this.props.tastingItems,
                     selectedService: this.props.selectedService,
@@ -97,7 +92,6 @@ export default class Replacements extends Component {
 
     getFinalResult() {
         return {
-            quantity: this.props.item.quantity == this.state.quantity ? null : this.state.quantity,
             item: this.props.item,
         };
     }
@@ -127,16 +121,24 @@ export default class Replacements extends Component {
                     this.getSelectedService().map(s =>
                         s.products.map(p => {
                             let isSelected = s.service_number == this.state.selectedService &&
-                                this.state.selectedItem &&
-                                this.state.selectedItem.product_id == p.product_id;
+                                this.state.selectedItem && this.state.selectedItem.product_id == p.product_id;
 
-                            let style = !isSelected ? {} : {
+                            let style = isSelected ? {
                                 borderColor: '#66c4ff',
                                 borderRadius: 1,
                                 borderWidth: 2,
                                 borderStyle: 'dotted',
-                            };
+                            } : {};
 
+                            let choosenReplacements = p.replacements.filter(r => r.quantity && r.quantity > 0)
+                                .map(r => <ItemButton
+                                    key={p.product_id + '-' + r.id}
+                                    color={p.color}
+                                    title={r.product_name}
+                                    quantity={r.quantity}
+                                    showCount
+                                    isSelected
+                                />);
 
                             return [<View style={style} key={p.product_id}>
                                 <ItemButton
@@ -153,14 +155,7 @@ export default class Replacements extends Component {
                                     }}
                                 />
                             </View>,
-                            ...p.replacements.filter(r => r.quantity && r.quantity > 0).map(r => <ItemButton
-                                key={p.product_id + '-' + r.id}
-                                color={p.color}
-                                title={r.product_name}
-                                quantity={r.quantity}
-                                showCount
-                                isSelected
-                            />)
+                            ...choosenReplacements
                             ];
                         })
                     )
@@ -170,18 +165,21 @@ export default class Replacements extends Component {
             <View style={{ height: 1, backgroundColor: '#ddd', margin: 6 }} />
 
             {
-                this.getSelectedItemReplacements().length > 0 &&
+                this.state.selectedItem && this.state.selectedItem.replacements &&
+                this.state.selectedItem.replacements.length > 0 &&
                 <View>
                     <Text>Replacments:</Text>
                     <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                         {
-                            this.getSelectedItemReplacements().map(r => <ItemButton
+                            this.state.selectedItem && this.state.selectedItem.replacements &&
+                            this.state.selectedItem.replacements.length > 0 &&
+                            this.state.selectedItem.replacements.map(r => <ItemButton
                                 key={r.id}
                                 color='#66c4ff'
                                 title={r.product_name}
                                 addAndRemove
-                                onAddOrRemove={(value) => {
-                                    this.handleChangeQuantityOfReplacment(value, r)
+                                onAddOrRemove={(value, factor) => {
+                                    this.handleChangeQuantityOfReplacment(r, value, factor)
                                 }}
                                 showCount
                                 quantity={r.quantity || 0}
@@ -193,7 +191,7 @@ export default class Replacements extends Component {
         </View>);
     }
 
-    handleChangeQuantityOfReplacment(value, replacement) {
+    handleChangeQuantityOfReplacment(replacement, value, factor = 1) {
         let
             itemX = this.state.selectedItem,
             selectedService = this.state.selectedService;
@@ -205,7 +203,7 @@ export default class Replacements extends Component {
         if (value < 0) {
             value = quantityLimit + replacement.quantity;
         }
-        else if (quantityLimit == 0) {
+        else if (quantityLimit == 0 && factor != -1) {
             value = 0;
         }
 
@@ -234,12 +232,6 @@ export default class Replacements extends Component {
     }
     getSelectedService() {
         return this.state.services.filter(s => s.service_number == this.state.selectedService);
-    }
-
-    getSelectedItemReplacements() {
-        if (this.state.selectedItem == null)
-            return [];
-        return this.state.selectedItem.replacements;
     }
 
     renderTabRow() {
@@ -277,7 +269,7 @@ export default class Replacements extends Component {
                 padding: 10,
                 paddingHorizontal: 16,
             }, style]}
-                onPress={() => this.setState({ selectedService: number })}>
+                onPress={() => this.setState({ selectedService: number, selectedItem: null })}>
                 <Text>SRV #{number}</Text>
             </TouchableOpacity>);
     }

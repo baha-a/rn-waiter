@@ -23,7 +23,7 @@ export default class ItemButton extends Component {
         let v = this.props.quantity - 1;
 
         if (this.props.onAddOrRemove)
-            this.props.onAddOrRemove(v);
+            this.props.onAddOrRemove(v, -1);
 
         if (v <= 0 && this.props.onDelete)
             this.props.onDelete();
@@ -31,7 +31,7 @@ export default class ItemButton extends Component {
 
     addItem() {
         if (this.props.onAddOrRemove)
-            this.props.onAddOrRemove(this.props.quantity + 1);
+            this.props.onAddOrRemove(this.props.quantity + 1, +1);
     }
 
     render() {
