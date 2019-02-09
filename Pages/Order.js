@@ -142,7 +142,7 @@ export default class Order extends Component {
   }
 
   renderHeader() {
-    if (!this.props.id)
+    //if (!this.props.id)
       return null;
 
     return (

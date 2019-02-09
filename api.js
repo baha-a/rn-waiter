@@ -41,7 +41,7 @@ export default class Api {
     }
 
     static getCustomizes(id) {
-        return fetchData('items/customizes/' + id);
+        return fetchData('items/customizes/' + id, cacheConfig);
     }
 
     static getTasting(id = '') {

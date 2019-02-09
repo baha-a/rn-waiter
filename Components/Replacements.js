@@ -2,10 +2,7 @@ import React, { Component } from 'react'
 import { Text, View, TouchableOpacity, ScrollView } from 'react-native'
 import Api from '../api';
 import Loader from './Loader';
-import ReloadBtn from './ReloadBtn';
-import Selectable from './Selectable';
 import { Actions } from 'react-native-router-flux';
-import FAIcon from './FAIcon';
 import ItemButton from './ItemButton';
 
 export default class Replacements extends Component {
@@ -35,15 +32,30 @@ export default class Replacements extends Component {
     fetchDate() {
         this.setState({ ready: false, error: false });
 
-        this.setState({
-            product: this.props.item,
-            quantity: this.props.item.quantity,
-            services: this.props.tastingServices,
-            tastingItems: this.props.tastingItems,
-            selectedService: this.props.selectedService,
-            ready: true,
-            error: false
-        });
+        Api.getTasting()
+            .then(tastings => {
+
+                let services = [...this.props.tastingServices];
+                for (const t of tastings) {
+                    for (const s of t.services) {
+                        for (const p of s.products) {
+                            let product = services.find(x => x.service_number == s.service_number)
+                                .products.find(x => x.product_id == p.product_id);
+                            product.replacements = [...p.replacements];
+                        }
+                    }
+                }
+
+                this.setState({
+                    product: this.props.item,
+                    quantity: this.props.item.quantity,
+                    services: services,
+                    tastingItems: this.props.tastingItems,
+                    selectedService: this.props.selectedService,
+                    ready: true,
+                    error: false
+                });
+            }).catch(x => this.setState({ ready: true, error: true, }));
     }
 
     render() {
@@ -108,25 +120,24 @@ export default class Replacements extends Component {
                 {
                     this.getSelectedService().map(s =>
                         s.products.map(p => {
-                            let style = p.id != this.state.selectedItem ? {} : {
-                                borderColor: '#4286f4',
-                                borderRadius: 4,
+                            let style = !this.state.selectedItem || this.state.selectedItem.product_id != p.product_id ? {} : {
+                                borderColor: '#66c4ff',
+                                borderRadius: 1,
                                 borderWidth: 2,
                                 borderStyle: 'dotted',
                             };
 
-                            return <View style={style}>
+                            return <View style={style} key={p.product_id}>
                                 <ItemButton
-                                    key={p.dish_number}
                                     color={p.color}
-                                    title={p.tasting_name}
-                                    quantity={p.quantity}
+                                    title={p.product_name}
+                                    quantity={this.getQuantityOfItemMinusReplacement(p)}
                                     showCount
                                     onPressMid={() => {
-                                        if (this.state.selectedItem == p.id) {
+                                        if (this.state.selectedItem && this.state.selectedItem.product_id == p.product_id) {
                                             this.setState({ selectedItem: null });
                                         } else {
-                                            this.setState({ selectedItem: p.id });
+                                            this.setState({ selectedItem: p });
                                         }
                                     }}
                                 />
@@ -135,21 +146,72 @@ export default class Replacements extends Component {
                     )
                 }
             </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                {
-                    this.getSelectedItemReplacements().map(r => <ItemButton
-                        key={r.id}
-                        color='#66c4ff'
-                        title={r.tasting_name}
-                        onPressMid={() => this.replaceSelectedItem(r)}
-                    />)
-                }
-            </View>
+
+            <View style={{ height: 1, backgroundColor: '#ddd', margin: 6 }} />
+
+            {
+                this.getSelectedItemReplacements().length > 0 &&
+                <View>
+                    <Text>Replacments:</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                        {
+                            this.getSelectedItemReplacements().map(r => <ItemButton
+                                key={r.id}
+                                color='#66c4ff'
+                                title={r.tasting_name}
+                                addAndRemove
+                                onAddOrRemove={(value) => {
+                                    this.handleChangeQuantityOfReplacment(value, r, this.state.selectedItem, this.state.selectedService)
+                                }}
+                                showCount
+                                quantity={r.quantity}
+                            />)
+                        }
+                    </View>
+                </View>
+            }
         </View>);
     }
 
-    replaceSelectedItem(r) {
-        alert(r.tasting_name);
+    handleChangeQuantityOfReplacment(value, replacement, itemX, selectedService) {
+        let services = [...this.state.services];
+
+        let item = services.find(i => i.service_number == selectedService).products.find(x => x.product_id == itemX.product_id);
+        if (!item.selectedReplacement) {
+            item.selectedReplacement = [];
+        }
+
+        console.log(item.selectedReplacement);
+        let quantityLimit = this.getQuantityOfItemMinusReplacement(item);
+        console.log(quantityLimit);
+        value = value % (quantityLimit + 1);
+        if (value < 0) {
+            value = quantityLimit;
+        }
+        console.log(value);
+
+        let rep = item.selectedReplacement.find(x => x.id == replacement.Id);
+        if (!rep) {
+            rep = { ...replacement, quantity: value };
+            item.selectedReplacement.push(rep);
+        } else {
+            rep.quantity = value;
+        }
+        console.log(item.selectedReplacement);
+
+        this.setState({ services: services });
+    }
+
+    getQuantityOfItemMinusReplacement(item) {
+        if (!item.selectedReplacement) {
+            return item.quantity;
+        }
+
+        let sum = 0;
+        for (const r of item.selectedReplacement) {
+            sum += r.quantity || 0;
+        }
+        return item.quantity - sum;
     }
 
     getSelectedTastingItems() {
@@ -159,35 +221,38 @@ export default class Replacements extends Component {
         return this.state.services.filter(s => s.service_number == this.state.selectedService);
     }
     getSelectedItemReplacements() {
-        return [{
-            id: 45,
-            en_name: "S-Humus",
-            tasting_name: "SHS",
-            price: "1",
-        }, {
-            id: 4,
-            en_name: "S-Humus",
-            tasting_name: "SH2",
-            price: "2",
-        }, {
-            id: 454,
-            en_name: "S-Humus",
-            tasting_name: "SH3",
-            price: "3",
-        }, {
-            id: 455,
-            en_name: "S-Humus",
-            tasting_name: "SS",
-            price: "4",
-        }, {
-            id: 43,
-            en_name: "S-Humus",
-            tasting_name: "Sv",
-            price: "70",
-        }];
+        if (this.state.selectedItem == null)
+            return [];
+        return this.state.selectedItem.replacements;
+        // return [{
+        //     id: 45,
+        //     en_name: "S-Humus",
+        //     tasting_name: "SHS",
+        //     price: "1",
+        // }, {
+        //     id: 4,
+        //     en_name: "S-Humus",
+        //     tasting_name: "SH2",
+        //     price: "2",
+        // }, {
+        //     id: 454,
+        //     en_name: "S-Humus",
+        //     tasting_name: "SH3",
+        //     price: "3",
+        // }, {
+        //     id: 455,
+        //     en_name: "S-Humus",
+        //     tasting_name: "SS",
+        //     price: "4",
+        // }, {
+        //     id: 43,
+        //     en_name: "S-Humus",
+        //     tasting_name: "Sv",
+        //     price: "70",
+        // }];
         for (const t of this.getSelectedTastingItems()) {
             for (const s of t.services) {
-                let pr = s.products.find(p => p.id == this.state.selectedItem);
+                let pr = s.products.find(p => p.id == this.state.selectedItem.product_id);
                 if (pr) {
                     return pr.replacement;
                 }
@@ -203,9 +268,9 @@ export default class Replacements extends Component {
         //             id: 45,
         //             branch_id: 3,    //             en_name: "S-Humus",
         //             tasting_name: "SHS",
-    
+
         //             price: "7",
-    
+
         //         }];
         //         return item.replacement;
         //     }

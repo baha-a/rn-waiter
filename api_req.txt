@@ -1,0 +1,6 @@
+- make 'product_optionals' & 'product_customizes' array of object
+  ex product_customizes: [ { id:1, name:'name' }, ...]
+
+- add note to each products in get api/order/1
+
+- fix count and clients

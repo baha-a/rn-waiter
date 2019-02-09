@@ -92,6 +92,7 @@ export default class TableMenu extends Component {
     }
 
     componentDidMount() {
+
         TableMenu.postOrderEvt = () => { return this.postOrder(); };
 
         TableMenu.addItemEvt = (item) => {
@@ -227,15 +228,16 @@ export default class TableMenu extends Component {
     static unsimilarityRules = [
         (p1, p2) => p1.id != p2.id,
         (p1, p2) => p1.product_id != p2.product_id,
+        (p1, p2) => p1.note != p2.note,
         (p1, p2) => p1.discount != p2.discount,
         (p1, p2) => p1.isTasting != p2.isTasting,
         (p1, p2) => p1.isBar != p2.isBar,
         (p1, p2) => !((p1.product_customizes && p2.product_customizes) || (!p1.product_customizes && !p2.product_customizes)),
         (p1, p2) => !((p1.product_optionals && p2.product_optionals) || (!p1.product_optionals && !p2.product_optionals)),
-        (p1, p2) => p1.product_customizes && p2.product_customizes && p1.product_customizes.length != p2.product_customizes.length,
-        (p1, p2) => p1.product_customizes && p2.product_customizes && p1.product_customizes.findIndex(c => p2.product_customizes.findIndex(x => x == c) == -1) != -1,
-        (p1, p2) => p1.product_optionals && p2.product_optionals && p1.product_optionals.length != p2.product_optionals.length,
-        (p1, p2) => p1.product_optionals && p2.product_optionals && p1.product_optionals.findIndex(c => p2.product_optionals.findIndex(x => x == c) == -1) != -1,
+        (p1, p2) => p1.product_customizes && p2.product_customizes &&
+            (p1.product_customizes.length != p2.product_customizes.length || p1.product_customizes.findIndex(c => p2.product_customizes.findIndex(x => x == c) == -1) != -1),
+        (p1, p2) => p1.product_optionals && p2.product_optionals &&
+            (p1.product_optionals.length != p2.product_optionals.length || p1.product_optionals.findIndex(c => p2.product_optionals.findIndex(x => x == c) == -1) != -1),
     ];
 
     isSameProducts(p1, p2) {
@@ -575,6 +577,13 @@ export default class TableMenu extends Component {
             }
         }
 
+        if (x.product_optionals) {
+            try {
+                x.product_customizes.forEach(x => details.push(x));
+            } catch (e) { }
+        }
+
+
         if (x.note)
             details.push(x.note);
 
@@ -873,7 +882,6 @@ export default class TableMenu extends Component {
                     isNew: x.isNew == true,
                 })),
 
-
             tasting: this.buildTastingProduct(this.state.tastingItems),
             // this.state.services
             //     .filter(x => x.products && x.products.length > 0 && x.products.filter(y => y.isTasting).length > 0)
@@ -922,29 +930,31 @@ export default class TableMenu extends Component {
             } else {
                 this.handelQuantityForProduct(p, null, result);
             }
+
+
+            if (p.uniques && p.uniques.length > 0) {
+                this.setState({ deleted_items: [...this.state.deleted_items, ...p.uniques] });
+            }
         });
 
         return result;
     }
+    
     handelQuantityForProduct(product, client, resultList) {
         let count = product.quantity || 1,
-            uniquesCounter = 0,
             unique_id = null;
+            
         while (count > 0) {
-            if (product.uniques && uniquesCounter < product.uniques.length) {
-                unique_id = product.uniques[uniquesCounter];
+            if (product.uniques) {
+                unique_id = product.uniques.pop();
             } else {
                 unique_id = null;
             }
             resultList.push(this.buildProductDataToSend(product, client, unique_id));
             count--;
-            uniquesCounter++;
-        }
-
-        if (product.uniques && uniquesCounter < product.uniques.length) {
-            this.setState({ deleted_items: [...this.state.deleted_items, product.uniques.slice(uniquesCounter)] });
         }
     }
+
     buildProductDataToSend(product, client, unique_id = null) {
         let cstm = [];
         let optnl = [];
