@@ -142,41 +142,42 @@ export default class Order extends Component {
   }
 
   renderHeader() {
-    //if (!this.props.id)
+    //if (!this.props.id){
       return null;
+    //}
 
-    return (
-      <View style={{ flexDirection: 'column', justifyContent: 'flex-start', }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 6, paddingHorizontal: 16 }}>
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Inv No#<Text style={{ color: '#6c757d' }}>{' ' + this.props.id}</Text></Text>
-          </View>
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Waiter:<Text style={{ color: '#6c757d' }}>{' ' + this.props.waiter}</Text></Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <DiscountInput
-              placeholder='discount value'
-              value={this.state.discount}
-              type={this.state.discountType}
-              onValueChange={v => this.setState({ discount: v })}
-              onTypeChange={v => this.setState({ discountType: v })}
-            />
-          </View>
-        </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', padding: 10, paddingTop: 0 }}>
-          <TouchableOpacity style={{ backgroundColor: '#6c757d', flex: 1, padding: 10, }} onPress={() => this.handelSplit()}>
-            <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#fff' }}>Split</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={{ backgroundColor: '#f8f9fa', flex: 1, padding: 10, }} onPress={() => this.handelFlip()}>
-            <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#000' }}>Flip</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, padding: 10, }} onPress={() => this.handelPay()}>
-            <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#fff' }}>Pay</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+    // return (
+    //   <View style={{ flexDirection: 'column', justifyContent: 'flex-start', }}>
+    //     <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 6, paddingHorizontal: 16 }}>
+    //       <View style={{ flex: 1, justifyContent: 'center' }}>
+    //         <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Inv No#<Text style={{ color: '#6c757d' }}>{' ' + this.props.id}</Text></Text>
+    //       </View>
+    //       <View style={{ flex: 1, justifyContent: 'center' }}>
+    //         <Text style={{ fontSize: 18, textAlignVertical: 'center' }}>Waiter:<Text style={{ color: '#6c757d' }}>{' ' + this.props.waiter}</Text></Text>
+    //       </View>
+    //       <View style={{ flex: 1 }}>
+    //         <DiscountInput
+    //           placeholder='discount value'
+    //           value={this.state.discount}
+    //           type={this.state.discountType}
+    //           onValueChange={v => this.setState({ discount: v })}
+    //           onTypeChange={v => this.setState({ discountType: v })}
+    //         />
+    //       </View>
+    //     </View>
+    //     <View style={{ flexDirection: 'row', justifyContent: 'flex-start', padding: 10, paddingTop: 0 }}>
+    //       <TouchableOpacity style={{ backgroundColor: '#6c757d', flex: 1, padding: 10, }} onPress={() => this.handelSplit()}>
+    //         <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#fff' }}>Split</Text>
+    //       </TouchableOpacity>
+    //       <TouchableOpacity style={{ backgroundColor: '#f8f9fa', flex: 1, padding: 10, }} onPress={() => this.handelFlip()}>
+    //         <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#000' }}>Flip</Text>
+    //       </TouchableOpacity>
+    //       <TouchableOpacity style={{ backgroundColor: '#1e7e34', flex: 1, padding: 10, }} onPress={() => this.handelPay()}>
+    //         <Text style={{ textAlign: 'center', textAlignVertical: 'center', color: '#fff' }}>Pay</Text>
+    //       </TouchableOpacity>
+    //     </View>
+    //   </View>
+    // );
   }
 
   render() {

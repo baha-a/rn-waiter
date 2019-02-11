@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Text, View, TouchableOpacity, ScrollView } from 'react-native'
-import Api from '../api';
 import Loader from './Loader';
 import { Actions } from 'react-native-router-flux';
 import ItemButton from './ItemButton';
@@ -29,44 +28,27 @@ export default class Replacements extends Component {
     fetchDate() {
         this.setState({ ready: false, error: false });
 
-        Api.getTasting()
-            .then(tastings => {
-                let services = [...this.props.tastingServices];
-                for (const t of tastings) {
-                    for (const s of t.services) {
-                        let service = services.find(x => x.service_number == s.service_number)
-                        if (!service)
-                            continue;
-                        for (const p of s.products) {
-                            let product = service.products.find(x => x.product_id == p.product_id);
-                            if (product) {
-                                product.replacements = [...p.replacements];
-                            }
-                        }
-                    }
-                }
+        let selectedItem = null;
+        if (this.props.selectedItem && this.props.selectedService) {
+            try {
+                selectedItem = this.props.tastingServices
+                    .find(x => x.service_number == this.props.selectedService)
+                    .products
+                    .find(p => p.product_id == this.props.selectedItem.product_id);
+            } catch (ex) {
 
-                let selectedItem = null;
-                if (this.props.selectedItem && this.props.selectedService) {
-                    try {
-                        selectedItem = services.find(x => x.service_number == this.props.selectedService).products.find(p => p.product_id == this.props.selectedItem.product_id);
-                    } catch (ex) {
+            }
+        }
 
-                    }
-                }
+        this.setState({
+            services: this.props.tastingServices,
+            tastingItems: this.props.tastingItems,
+            selectedService: this.props.selectedService,
+            selectedItem: selectedItem,
+            ready: true,
+            error: false
+        });
 
-                this.setState({
-                    services: services,
-                    tastingItems: this.props.tastingItems,
-                    selectedService: this.props.selectedService,
-                    selectedItem: selectedItem,
-                    ready: true,
-                    error: false
-                });
-            }).catch(x => {
-                alert(x);
-                this.setState({ ready: true, error: true, });
-            });
     }
 
     render() {

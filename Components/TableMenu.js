@@ -182,13 +182,14 @@ export default class TableMenu extends Component {
 
     fetchData() {
         Api.getOrder(this.props.id)
-            .then(x => {
+            .then(async x => {
                 if (!x.services) x.services = [];
 
                 x.services.forEach(s => s.products = this.fixListProducts(s.products));
 
                 if (x.tastings_services) {
-                    for (const ts of x.tastings_services) {
+                    let tastingItemsServices = await Api.getTasting();
+                    for (const ts of this.addMissingPropertiesToTastingItem(tastingItemsServices, x.tastings_services)) {
                         let service = x.services.find(s => s.service_number == ts.service_number);
                         if (!service) {
                             service = { service_number: ts.service_number, products: [] };
@@ -213,6 +214,24 @@ export default class TableMenu extends Component {
                     tastingItems: tastingItems,
                 });
             }).catch(error => alert('Order\n' + error.message));
+    }
+
+    addMissingPropertiesToTastingItem(rawTastingServicesFromApi, servicesWithtastingItemsFromOrder) {
+        let services = [...servicesWithtastingItemsFromOrder];
+        for (const t of rawTastingServicesFromApi) {
+            for (const s of t.services) {
+                let service = services.find(x => x.service_number == s.service_number)
+                if (!service)
+                    continue;
+                for (const p of s.products) {
+                    let product = service.products.find(x => x.product_id == p.product_id);
+                    if (product) {
+                        product.replacements = [...p.replacements];
+                    }
+                }
+            }
+        }
+        return services;
     }
 
     fixListProducts(list, isTasting = false) {
