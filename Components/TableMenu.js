@@ -241,6 +241,9 @@ export default class TableMenu extends Component {
         let products = [];
         list.forEach(p => {
             p.isTasting = isTasting;
+            let product_optionals = [];
+            p.product_optionals.forEach(x => x.forEach(y => product_optionals.push({ ...y })));
+            p.product_optionals = product_optionals;
             this.fillMissingDateForProducts(p, products);
         });
         return products;
@@ -260,30 +263,47 @@ export default class TableMenu extends Component {
         (p1, p2) => !((p1.product_optionals && p2.product_optionals) || (!p1.product_optionals && !p2.product_optionals)),
         (p1, p2) => p1.product_optionals && p2.product_optionals && (
             p1.product_optionals.length != p2.product_optionals.length ||
-            p1.product_optionals.findIndex(c => p2.product_optionals.findIndex(x => x == c) == -1) != -1
+            p1.product_optionals.findIndex(c => p2.product_optionals.findIndex(x => x.id == c.id) == -1) != -1
+        ),
+
+        (p1, p2) => !((p1.product_customizes && p2.product_customizes) || (!p1.product_customizes && !p2.product_customizes)),
+        (p1, p2) => p1.product_customizes && p2.product_customizes && (
+            p1.product_customizes.length != p2.product_customizes.length ||
+            p1.product_customizes.findIndex(c => p2.product_customizes.findIndex(x => x.id == c.id) == -1) != -1
         ),
     ];
 
     isSameProducts(p1, p2) {
-        let res = TableMenu.unsimilarityRules.findIndex(rule => rule(p1, p2)) == -1;
-        if (res == true) {
-            let list1 = helper.nestedListExtractor(p1.product_customizes, x => x.id)
-            let list2 = helper.nestedListExtractor(p2.product_customizes, x => x.id)
-            if (list1.length != list2.length || list1.findIndex(c => list2.findIndex(x => x == c) == -1) != -1) {
+        let couter = 0;
+        for (const rule of TableMenu.unsimilarityRules) {
+            if (rule(p1, p2)) {
+                console.log(couter);
                 return false;
             }
+            couter++;
         }
-        return res;
+
+        // let list1 = p1.product_customizes.map(x => x.id);
+        // let list2 = p2.product_customizes.map(x => x.id);
+        // if (list1.length != list2.length || list1.findIndex(c => list2.findIndex(x => x == c) == -1) != -1) {
+        //     return false;
+        // }
+        return true;
     }
 
     fillMissingDateForProducts(p, products) {
-        let pt = products.find(x => this.isSameProducts(x, p));
+        let pt = products.find(x => x.unique_id != p.unique_id && this.isSameProducts(x, p));
         if (pt) {
             pt.quantity++;
             pt.uniques = [...pt.uniques, p.unique_id];
         }
         else {
-            products.push({ ...p, dish_number: Api.guid(), quantity: 1, uniques: [p.unique_id] });
+            products.push({
+                ...p,
+                dish_number: Api.guid(),
+                quantity: 1,
+                uniques: [p.unique_id],
+            });
         }
     }
 
@@ -564,7 +584,7 @@ export default class TableMenu extends Component {
             details.push(x.discountType + '' + x.discount + ' off');
 
         if (x.product_customizes) {
-            details = [...details, ...helper.nestedListExtractor(x.product_customizes, c => c.custom_name)];
+            details = [...details, ...x.product_customizes.map(c => c.custom_name)];
         }
 
         if (x.product_optionals) {
@@ -996,17 +1016,22 @@ export default class TableMenu extends Component {
     buildProductDataToSend(product, unique_id = null) {
         let product_customizes = [];
         if (product.product_customizes) {
-            product.product_customizes.forEach(c => c.forEach(x => product_customizes.push(x.id)));
+            product.product_customizes.forEach(c => product_customizes.push(c.id));
+        }
+
+        let product_optionals = [];
+        if (product.product_optionals) {
+            product.product_optionals.forEach(c => product_optionals.push(c.id));
         }
 
         return {
             product_id: product.id,
-            client_number: [product.client_number],
+            client_number: [...product.client_number],
             note: product.note || '',
             discount: product.discount || 0,
             isTasting: product.isTasting || false,
             product_customizes: product_customizes,
-            product_optionals: product.product_optionals ? product.product_optionals.map(x => x.id) : [],
+            product_optionals: product_optionals,
 
             ...(!unique_id ? {} : { unique_id })
         };

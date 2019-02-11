@@ -8,14 +8,16 @@ import ReloadBtn from '../Components/ReloadBtn';
 import OptionPad from '../Components/OptionPad';
 import FAIcon from '../Components/FAIcon';
 import { Picker } from 'native-base';
+import helper from '../helper';
 
 export default class Customize extends Component {
     constructor(props) {
         super(props);
 
         let {
-            clients = [],
-            product_customizes,
+            client_number = [],
+            product_customizes = [],
+            product_optionals = [],
             discount = 0,
             discountType = '%',
             isBar = false,
@@ -23,32 +25,14 @@ export default class Customize extends Component {
             description = '',
         } = props.item;
 
-        let product_customizesRawText = null;
-
-        if (props.item.product_customizes) {
-            product_customizes.customizes = props.item.product_customizes.customizes ? [...props.item.product_customizes.customizes] : [];
-            product_customizes.optional = props.item.product_customizes.optional ? [...props.item.product_customizes.optional] : [];
-            product_customizes.cookWays = props.item.product_customizes.cookWays ? props.item.product_customizes.cookWays.id : null;
-
-            if (typeof props.item.product_customizes.length > 0)
-                product_customizesRawText = props.item.product_customizes.slice();
-        }
-        else {
-            product_customizes = {
-                customizes: [],
-                optional: [],
-                cookWays: null,
-            };
-        }
-
         let {
             selectedService,
             table = 0,
         } = props;
 
         let allClients = [];
-        if (clients && clients.length > 1) {
-            let max = clients[clients.length - 1];
+        if (client_number && client_number.length > 1) {
+            let max = client_number[client_number.length - 1];
             for (let i = 1; i <= max; i++) {
                 allClients.push(i);
             }
@@ -61,13 +45,10 @@ export default class Customize extends Component {
         this.state = {
             isBar: isBar,
 
-            selectedOptional: product_customizes.optional || [],
-            selectedCustomize: product_customizes.customizes || [],
-            selectedCookWays: product_customizes.cookWays,
+            selectedOptional: product_optionals,
+            selectedCustomize: product_customizes,
 
-            product_customizesRawText: product_customizesRawText,
-
-            selectedClient: clients.map(x => ({ id: x })),
+            selectedClient: client_number.map(x => ({ id: x })),
             clients: allClients.map(x => ({ id: x })),
             options: [],
 
@@ -96,12 +77,10 @@ export default class Customize extends Component {
         this.isSelectedForClient = this.isSelectedForClient.bind(this);
         this.isSelectedForCustomize = this.isSelectedForCustomize.bind(this);
         this.isSelectedForOptional = this.isSelectedForOptional.bind(this);
-        //this.isSelectedForCG = this.isSelectedForCG.bind(this);
         this.isSelectedFor = this.isSelectedFor.bind(this);
         this.toggleSelectForClient = this.toggleSelectForClient.bind(this);
         this.toggleSelectForCustomize = this.toggleSelectForCustomize.bind(this);
         this.toggleSelectForOptional = this.toggleSelectForOptional.bind(this);
-        //this.toggleSelectForCG = this.toggleSelectForCG.bind(this);
         this.toggleSelectFor = this.toggleSelectFor.bind(this);
     }
 
@@ -112,29 +91,7 @@ export default class Customize extends Component {
         Api.getCustomizes(this.props.item.id)
             .then(options => {
                 if (options) {
-                    let selectedCustomize = this.state.selectedCustomize.slice();
-                    let selectedCookWays = this.state.selectedCookWays;
-
-                    if (this.state.product_customizesRawText) {
-                        this.state.product_customizesRawText.forEach(x => {
-                            let t = this.mapCustomTextToObject(options.customizes, x);
-                            if (t) { selectedCustomize.push(t); }
-                            else {
-                                t = this.mapCustomTextToObject(options.cookWays, x);
-                                if (t) {
-                                    selectedCookWays = t.id;
-                                }
-                            }
-                        });
-                    }
-
-                    this.setState({
-                        options: options,
-                        selectedCustomize: selectedCustomize,
-                        selectedCookWays: selectedCookWays,
-                        ready: true,
-                        error: false
-                    });
+                    this.setState({ options: options, ready: true, error: false });
                 }
             })
             .catch(x => {
@@ -143,24 +100,6 @@ export default class Customize extends Component {
             });
 
         Api.getTableNumbers().then(x => this.setState({ tables: x }));
-    }
-
-    mapCustomTextToObject(optionslist, text) {
-        let ans = null;
-        if (optionslist && optionslist.length > 0) {
-            for (const x of optionslist) {
-                for (const i of x.items) {
-                    if (i.custom_name == text) {
-                        ans = i;
-                        break;
-                    }
-                }
-
-                if (ans)
-                    break;
-            }
-        }
-        return ans;
     }
 
     isSelectedForClient(x) {
@@ -211,16 +150,33 @@ export default class Customize extends Component {
     }
 
     getSelectedCookWakObject() {
-        if (this.state.options.cookWays) {
-            let obj = null;
-            for (const i of this.state.options.cookWays) {
-                obj = i.items.find(x => x.id == this.state.selectedCookWays);
-                if (obj) {
-                    return obj;
-                }
+        for (const i of this.state.selectedCustomize) {
+            if (this.state.options.cookWays.findIndex(x => x.items.findIndex(y => y.id == i.id) != -1) != -1) {
+                return i;
             }
         }
         return null;
+    }
+
+    selectCookWay(cw) {
+        let res = [];
+        console.log('====');
+        console.log(this.getSelectedCookWakObject());
+
+        for (const i of this.state.selectedCustomize) {
+            if (this.state.options.cookWays.findIndex(x => x.items.findIndex(y => y.id == i.id) != -1) != -1) {
+
+            }
+            else {
+                res.push(i);
+            }
+        }
+        res.push(cw);
+
+        console.log('------------');
+        console.log(res);
+
+        this.setState({ selectedCustomize: res });
     }
 
     save() {
@@ -232,7 +188,7 @@ export default class Customize extends Component {
 
     getFinalResult() {
         return {
-            clients: this.state.selectedClient.map(x => x.id),
+            client_number: this.state.selectedClient.map(x => x.id),
 
             discountType: this.state.discountType,
             discount: this.state.discount,
@@ -240,11 +196,9 @@ export default class Customize extends Component {
             service: this.state.selectedService,
             note: this.state.note,
             newTable: this.state.newTable,
-            product_customizes: {
-                optional: this.state.selectedOptional.slice() || [],
-                customizes: this.state.selectedCustomize.slice() || [],
-                cookWays: this.getSelectedCookWakObject(),
-            },
+
+            product_customizes: [...this.state.selectedCustomize],
+            product_optionals: [...this.state.selectedOptional],
 
             item: this.props.item,
         };
@@ -390,14 +344,14 @@ export default class Customize extends Component {
                             <View style={{ flex: 0.3, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch', padding: 10, }}>
                                 <View>
                                     <Picker
-                                        selectedValue={this.state.selectedCookWays}
+                                        selectedValue={this.getSelectedCookWakObject()}
                                         mode='dropdown'
                                         style={{ backgroundColor: '#ffc107', borderColor: '#eee', borderWidth: 1, margin: 6, borderRadius: 6 }}
-                                        onValueChange={(value, index) => this.setState({ selectedCookWays: value })}>
+                                        onValueChange={(value, index) => this.selectCookWay(value)}>
                                         <Picker.Item key={-1} label='select cook way' value={null} />
                                         {
                                             this.state.options.cookWays.map(y =>
-                                                y.items.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x.id} />)
+                                                y.items.map(x => <Picker.Item key={x.id} label={x.custom_name} value={x} />)
                                             )
                                         }
                                     </Picker>
