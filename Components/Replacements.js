@@ -4,6 +4,7 @@ import Api from '../api';
 import Loader from './Loader';
 import { Actions } from 'react-native-router-flux';
 import ItemButton from './ItemButton';
+import helper from '../helper';
 
 export default class Replacements extends Component {
     constructor(props) {
@@ -19,8 +20,6 @@ export default class Replacements extends Component {
             selectedService: null,
             selectedItem: null,
         };
-
-        this.getQuantityOfItemMinusReplacement = this.getQuantityOfItemMinusReplacement.bind(this);
     }
 
     componentDidMount() {
@@ -95,16 +94,13 @@ export default class Replacements extends Component {
 
     save() {
         if (this.props.onSave) {
-            this.props.onSave(this.getFinalResult());
+            this.props.onSave({
+                services: [...this.state.services]
+            });
         }
         Actions.pop();
     }
 
-    getFinalResult() {
-        return {
-            item: this.props.item,
-        };
-    }
     renderSaveAndCancel() {
         return (<View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10, borderTopWidth: 1, borderTopColor: '#eee' }}>
             <TouchableOpacity style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10, }}
@@ -154,7 +150,7 @@ export default class Replacements extends Component {
                                 <ItemButton
                                     color={p.color}
                                     title={p.product_name}
-                                    quantity={this.getQuantityOfItemMinusReplacement(p)}
+                                    quantity={helper.getQuantityOfItemMinusReplacement(p)}
                                     showCount
                                     onPressMid={() => {
                                         if (this.state.selectedItem && this.state.selectedItem.product_id == p.product_id) {
@@ -209,7 +205,7 @@ export default class Replacements extends Component {
         let services = [...this.state.services];
         let item = services.find(i => i.service_number == selectedService).products.find(x => x.product_id == itemX.product_id);
 
-        let quantityLimit = this.getQuantityOfItemMinusReplacement(item);
+        let quantityLimit = helper.getQuantityOfItemMinusReplacement(item);
         if (value < 0) {
             value = quantityLimit + replacement.quantity;
         }
@@ -223,18 +219,6 @@ export default class Replacements extends Component {
         }
 
         this.setState({ services: services });
-    }
-
-    getQuantityOfItemMinusReplacement(item) {
-        if (!item.replacements || item.replacements.length == 0) {
-            return item.quantity;
-        }
-
-        let sum = 0;
-        for (const r of item.replacements) {
-            sum += r.quantity || 0;
-        }
-        return item.quantity - sum;
     }
 
     getSelectedTastingItems() {

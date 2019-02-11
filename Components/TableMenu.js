@@ -7,6 +7,7 @@ import ItemButton from './ItemButton';
 import Api from '../api';
 import Loader from './Loader';
 import { Actions } from 'react-native-router-flux';
+import helper from '../helper';
 
 const groupBy = (list, key) => list.reduce(function (rv, x) {
     let v = key instanceof Function ? key(x) : x[key];
@@ -56,7 +57,7 @@ export default class TableMenu extends Component {
 
         this.postOrder = this.postOrder.bind(this);
         this.customizeItem = this.customizeItem.bind(this);
-        this.customizeTastingItem = this.customizeTastingItem.bind(this);
+        this.replacementTastingItem = this.replacementTastingItem.bind(this);
         this.onProductLayout = this.onProductLayout.bind(this);
         this.handelServiceLayout = this.handelServiceLayout.bind(this);
     }
@@ -425,34 +426,43 @@ export default class TableMenu extends Component {
         }
     }
 
-    customizeTastingItem(item) {
-        if (!item.newReplace && item.quantity == null)
-            return;
-
+    replacementTastingItem(item) {
         let services = this.state.services.slice();
-        for (const s of services) {
-            let old = s.products.find(p => p.dish_number == item.item.dish_number);
-            if (old) {
-                if (item.newReplace) {
-                    let rep = item.item.replacement.find(x => x.id == item.newReplace);
-                    old.id = rep.id;
-                    old.en_name = rep.en_name;
-                    old.tasting_name = rep.tasting_name;
-                    old.price = rep.price;
-                }
 
-                if (item.quantity && item.quantity != 0) {
-                    old.quantity = item.quantity;
-                }
-                else if (item.quantity == 0) {
-                    this.deleteItem(item.item.dish_number);
-                    return;
-                }
-
-                this.setState({ services: services });
-                break;
+        for (const ns of item.services) {
+            let os = services.find(x => x.service_number == ns.service_number);
+            for (const p of ns.products) {
+                let oldP = os.products.find(x => x.product_id == p.product_id);
+                oldP.quantity = p.quantity;
+                oldP.replacements = [...p.replacements];
             }
         }
+
+        this.setState({ services: services });
+
+        // for (const s of services) {
+        //     let old = s.products.find(p => p.dish_number == item.item.dish_number);
+        //     if (old) {
+        //         if (item.newReplace) {
+        //             let rep = item.item.replacement.find(x => x.id == item.newReplace);
+        //             old.id = rep.id;
+        //             old.en_name = rep.en_name;
+        //             old.tasting_name = rep.tasting_name;
+        //             old.price = rep.price;
+        //         }
+
+        //         if (item.quantity && item.quantity != 0) {
+        //             old.quantity = item.quantity;
+        //         }
+        //         else if (item.quantity == 0) {
+        //             this.deleteItem(item.item.dish_number);
+        //             return;
+        //         }
+
+        //         this.setState({ services: services });
+        //         break;
+        //     }
+        // }
     }
 
     customizeItem(item, type) {
@@ -532,28 +542,7 @@ export default class TableMenu extends Component {
 
     renderProduct(x, type, serviceNumber) {
         if (x.isTasting) {
-            return (
-                <View key={x.dish_number} style={{ width: '30%' }}>
-                    <ItemButton
-                        title={x.product_name}
-                        quantity={x.quantity}
-                        showCount
-                        color={x.color || x.category_color}
-                        onPressMid={() => {
-                            if (!this.state.arrangeItems) {
-                                Actions.replacements({
-                                    item: { ...x },
-                                    tastingItems: [...this.state.tastingItems],
-                                    tastingServices: this.state.services.map(s => ({ service_number: s.service_number, products: s.products.filter(x => x.isTasting) })),
-                                    selectedService: serviceNumber,
-                                    selectedItem: x,
-                                    onSave: item => this.customizeTastingItem(item),
-                                });
-                            }
-                        }}
-                    />
-                </View>
-            )
+            return this.renderTastingItemWithReplacements(x, serviceNumber);
         }
 
         let details = [];
@@ -621,6 +610,56 @@ export default class TableMenu extends Component {
                 }
             }}
         />;
+    }
+
+    renderTastingItemWithReplacements(x, serviceNumber) {
+        let tastingItems = [];
+
+        let xquantity = helper.getQuantityOfItemMinusReplacement(x);
+        if (xquantity > 0) {
+            tastingItems = [
+                <View key={x.dish_number} style={{ width: '30%' }}>
+                    <ItemButton
+                        title={x.product_name}
+                        quantity={xquantity}
+                        showCount
+                        color={x.color || x.category_color}
+                        onPressMid={() => this.handelTastingItemPress(x, serviceNumber)}
+                    />
+                </View>
+            ];
+        }
+
+        if (x.replacements) {
+            for (const r of x.replacements.filter(y => y.quantity && y.quantity > 0)) {
+                tastingItems.push(
+                    <View key={x.dish_number + '-' + r.id} style={{ width: '30%' }}>
+                        <ItemButton
+                            title={r.product_name}
+                            quantity={r.quantity}
+                            showCount
+                            color={x.color || x.category_color}
+                            isSelected
+                            onPressMid={() => this.handelTastingItemPress(x, serviceNumber)}
+                        />
+                    </View>)
+            }
+        }
+
+        return tastingItems;
+    }
+
+    handelTastingItemPress(x, serviceNumber) {
+        if (!this.state.arrangeItems) {
+            Actions.replacements({
+                item: { ...x },
+                tastingItems: [...this.state.tastingItems],
+                tastingServices: this.state.services.map(s => ({ service_number: s.service_number, products: s.products.filter(x => x.isTasting) })),
+                selectedService: serviceNumber,
+                selectedItem: x,
+                onSave: item => this.replacementTastingItem(item),
+            });
+        }
     }
 
     unselectItem(dish_number) {
@@ -940,11 +979,11 @@ export default class TableMenu extends Component {
 
         return result;
     }
-    
+
     handelQuantityForProduct(product, client, resultList) {
         let count = product.quantity || 1,
             unique_id = null;
-            
+
         while (count > 0) {
             if (product.uniques) {
                 unique_id = product.uniques.pop();
