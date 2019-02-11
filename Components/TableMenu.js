@@ -274,20 +274,11 @@ export default class TableMenu extends Component {
     ];
 
     isSameProducts(p1, p2) {
-        let couter = 0;
         for (const rule of TableMenu.unsimilarityRules) {
             if (rule(p1, p2)) {
-                console.log(couter);
                 return false;
             }
-            couter++;
         }
-
-        // let list1 = p1.product_customizes.map(x => x.id);
-        // let list2 = p2.product_customizes.map(x => x.id);
-        // if (list1.length != list2.length || list1.findIndex(c => list2.findIndex(x => x == c) == -1) != -1) {
-        //     return false;
-        // }
         return true;
     }
 
@@ -486,30 +477,6 @@ export default class TableMenu extends Component {
         }
 
         this.setState({ services: services });
-
-        // for (const s of services) {
-        //     let old = s.products.find(p => p.dish_number == item.item.dish_number);
-        //     if (old) {
-        //         if (item.newReplace) {
-        //             let rep = item.item.replacement.find(x => x.id == item.newReplace);
-        //             old.id = rep.id;
-        //             old.en_name = rep.en_name;
-        //             old.tasting_name = rep.tasting_name;
-        //             old.price = rep.price;
-        //         }
-
-        //         if (item.quantity && item.quantity != 0) {
-        //             old.quantity = item.quantity;
-        //         }
-        //         else if (item.quantity == 0) {
-        //             this.deleteItem(item.item.dish_number);
-        //             return;
-        //         }
-
-        //         this.setState({ services: services });
-        //         break;
-        //     }
-        // }
     }
 
     customizeItem(item, type) {
@@ -769,8 +736,6 @@ export default class TableMenu extends Component {
         } else {
             this.serviceScrollViewLayout.push({ service_number, offest: y })
         }
-        // console.log('______________')
-        // console.log(this.serviceScrollViewLayout);
     }
 
     getServiceNumberOfProduct(dish_number) {
@@ -873,14 +838,9 @@ export default class TableMenu extends Component {
                                             </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                 {
-                                                    // groupBy(s.products.filter(x => x.isTasting), x => x.tastingCategoryName)
-                                                    //     .map(t =>
-                                                    //         <View key={t.key} style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                        {/*t.values*/s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
+                                                        {s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
                                                     </View>
-                                                    //     </View>
-                                                    // )
                                                 }
                                             </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
@@ -914,9 +874,6 @@ export default class TableMenu extends Component {
     }
 
     postOrder() {
-        // if (this.props.id) {
-        //     return new Promise(() => { throw 'edit order not supported yet' });
-        // }
         if (!this.state.tableNumber) {
             return new Promise(() => { throw 'choose table number first' });
         }
@@ -941,13 +898,6 @@ export default class TableMenu extends Component {
                 })),
 
             tasting: this.buildTastingProduct(this.state.tasting_header),
-            // this.state.services
-            //     .filter(x => x.products && x.products.length > 0 && x.products.filter(y => y.isTasting).length > 0)
-            //     .map(x => ({
-            //         service_number: ++serivcecounter, //x.service_number,
-            //         products: this.buildProducts(x.products.filter(y => y.isTasting)),
-            //         isNew: x.isNew == true,
-            //     }))
         }
 
         console.log('---------------- order --')
@@ -983,11 +933,6 @@ export default class TableMenu extends Component {
         let result = [];
 
         products.forEach(p => {
-            // if (p.client_number && p.client_number.length > 0) {
-            //     p.client_number.forEach(c => this.handelQuantityForProduct(p, c, result));
-            // } else {
-            //     this.handelQuantityForProduct(p, null, result);
-            // }
             this.handelQuantityForProduct(p, result);
 
             if (p.uniques && p.uniques.length > 0) {

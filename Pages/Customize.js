@@ -111,9 +111,6 @@ export default class Customize extends Component {
     isSelectedForOptional(x) {
         return this.isSelectedFor(x, 'Optional')
     }
-    // isSelectedForCG(x) {
-    //     return this.isSelectedFor(x, 'CG')
-    // }
     isSelectedFor(x, type) {
         return this.state['selected' + type].findIndex(y => y.id == x.id) != -1;
     }
@@ -127,9 +124,6 @@ export default class Customize extends Component {
     toggleSelectForOptional(x, value) {
         this.setState({ selectedOptional: this.toggleSelectFor(x, value, 'Optional') })
     }
-    // toggleSelectForCG(x, value) {
-    //     this.setState({ selectedCG: this.toggleSelectFor(x, value, 'CG') })
-    // }
     toggleSelectFor(x, value, type) {
         let list = this.state['selected' + type].slice();
         if (value) {
