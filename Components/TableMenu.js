@@ -759,7 +759,6 @@ export default class TableMenu extends Component {
 
     deleteItem(dish_number) {
         let item = this.getProductByDishNumber(dish_number);
-        console.log(item);
         if (this.props.id && item.uniques) {
             this.setState({ deleted_items: [...this.state.deleted_items, ...item.uniques] });
         }
@@ -917,7 +916,7 @@ export default class TableMenu extends Component {
         console.log({ deleted_items: [...this.deleted_items], order });
         console.log('------------------');
 
-        return new Promise(() => { throw 'mock api' });
+        //return new Promise(() => { throw 'mock api' });
 
         if ((order.services && order.services.length > 0) ||
             (order.bar && order.bar.length > 0) ||
