@@ -1130,12 +1130,19 @@ export default class TableMenu extends Component {
 
         this.state.services.forEach(s => {
             s.products.forEach(p => {
-                subtotal += (parseInt(p.price) * parseInt(p.quantity > 0 ? p.quantity : 1));
+                if (!p.isTasting) {
+                    subtotal += (parseInt(p.price || 0) * parseInt(p.quantity > 0 ? p.quantity : 1));
+                }
             });
         });
         this.state.barItems.forEach(p => {
-            subtotal += (parseInt(p.price) * parseInt(p.quantity > 0 ? p.quantity : 1));
+            subtotal += (parseInt(p.price || 0) * parseInt(p.quantity > 0 ? p.quantity : 1));
         });
+
+        this.state.tasting_header.forEach(p => {
+            subtotal += (parseInt(p.price || 0) * parseInt(p.quantity > 0 ? p.quantity : 1));
+        });
+
 
         return (<View style={{
             backgroundColor: 'rgba(0,0,0,.03)', borderColor: 'rgba(0,0,0,.125)', borderWidth: 1,
