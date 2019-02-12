@@ -8,12 +8,15 @@ import Api from '../api';
 import Loader from './Loader';
 import { Actions } from 'react-native-router-flux';
 import helper from '../helper';
+import ReloadBtn from './ReloadBtn';
 
 export default class TableMenu extends Component {
     constructor(props) {
         super(props);
         this.state = {
             ready: false,
+            error: false,
+
             arrangeItems: false,
             selectedTab: 1,
 
@@ -104,6 +107,7 @@ export default class TableMenu extends Component {
         else {
             this.setState({
                 ready: true,
+                error: false,
                 tableNumber: '',
             });
         }
@@ -177,9 +181,13 @@ export default class TableMenu extends Component {
     }
 
     fetchData() {
+        this.setState({ ready: false, error: false });
+
         Api.getOrder(this.props.id)
             .then(async x => {
-                if (!x.services) x.services = [];
+                if (!x.services) {
+                    x.services = [];
+                }
 
                 x.services.forEach(s => s.products = this.fixListProducts(s.products));
 
@@ -208,13 +216,17 @@ export default class TableMenu extends Component {
 
                 this.setState({
                     ready: true,
+                    error: false,
                     tableNumber: x.table_number,
                     note: x.note,
                     services: x.services,
                     barItems: this.fixListProducts(x.bar),
                     tasting_header: tasting_header,
                 });
-            }).catch(error => alert('Order\n' + error.message));
+            }).catch(error => {
+                alert('Order\n' + error.message);
+                this.setState({ ready: true, error: true });
+            });
     }
 
     addMissingPropertiesToTastingItem(rawTastingServicesFromApi, servicesWithtastingItemsFromOrder) {
@@ -880,6 +892,7 @@ export default class TableMenu extends Component {
 
         let status = this.state.hold ? 'hold' : 'active';
 
+        this.deleted_items = [];
         let serivcecounter = 0;
         let order = {
             table_number: this.state.tableNumber,
@@ -899,19 +912,19 @@ export default class TableMenu extends Component {
 
             tasting: this.buildTastingProduct(this.state.tasting_header),
         }
-
+        this.deleted_items = [...this.deleted_items, ...this.state.deleted_items];
         console.log('---------------- order --')
-        console.log({ order, deleted_items: [...this.state.deleted_items] });
-        console.log('------------------')
+        console.log({ deleted_items: [...this.deleted_items], order });
+        console.log('------------------');
 
-        //return new Promise(() => { throw 'mock api' });
+        return new Promise(() => { throw 'mock api' });
 
         if ((order.services && order.services.length > 0) ||
             (order.bar && order.bar.length > 0) ||
             (order.tasting && order.tasting.length > 0)) {
 
             if (this.props.id)
-                return Api.editOrder(this.props.id, { ...order, deleted_items: [...this.state.deleted_items] })
+                return Api.editOrder(this.props.id, { deleted_items: [...this.deleted_items], ...order })
                     .then(x => alert('order successfully saved'));
             else
                 return Api.postOrder(order).then(x => alert('order successfully saved'));
@@ -929,33 +942,28 @@ export default class TableMenu extends Component {
         }));
     }
 
+    deleted_items = [];
     buildProducts(products) {
         let result = [];
 
         products.forEach(p => {
-            this.handelQuantityForProduct(p, result);
-
-            if (p.uniques && p.uniques.length > 0) {
-                this.setState({ deleted_items: [...this.state.deleted_items, ...p.uniques] });
+            let uniqueStack = this.handelQuantityForProduct(p, result, [...p.uniques]);
+            
+            if (uniqueStack && uniqueStack.length > 0) {
+                this.deleted_items = [...this.deleted_items, ...uniqueStack];
             }
         });
-
+        
         return result;
     }
 
-    handelQuantityForProduct(product, resultList) {
-        let count = product.quantity || 1,
-            unique_id = null;
-
+    handelQuantityForProduct(product, resultList, uniqueStack) {
+        let count = product.quantity || 1;
         while (count > 0) {
-            if (product.uniques) {
-                unique_id = product.uniques.pop();
-            } else {
-                unique_id = null;
-            }
-            resultList.push(this.buildProductDataToSend(product, unique_id));
+            resultList.push(this.buildProductDataToSend(product, [uniqueStack.shift() || null]));
             count--;
         }
+        return uniqueStack;
     }
 
     buildProductDataToSend(product, unique_id = null) {
@@ -984,8 +992,13 @@ export default class TableMenu extends Component {
 
     render() {
 
-        if (this.state.ready == false)
-            return <Loader />
+        if (this.state.ready == false) {
+            return <Loader />;
+        }
+
+        if (this.state.error == true) {
+            return <ReloadBtn onReload={() => this.fetchData()} />;
+        }
 
         let arrangeItemsColor = this.state.arrangeItems ? '#bbb' : '#dae0e5';
         return (
