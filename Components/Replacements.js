@@ -121,7 +121,7 @@ export default class Replacements extends Component {
                             let choosenReplacements = p.replacements.filter(r => r.quantity && r.quantity > 0)
                                 .map(r => <ItemButton
                                     key={p.product_id + '-' + r.id}
-                                    color={p.color}
+                                    color={'#66c4ff'}
                                     title={r.product_name}
                                     quantity={r.quantity}
                                     showCount

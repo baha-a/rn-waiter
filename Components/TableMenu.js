@@ -113,6 +113,52 @@ export default class TableMenu extends Component {
         }
     }
 
+    removeTastingItem(item) {
+        let services = this.state.services.slice();
+        item.services.forEach(s => {
+            let service = services.find(y => y.service_number == s.service_number);
+            if (service) {
+                s.products.forEach(p => {
+                    let found = service.products.find(x => x.isTasting && x.product_id == p.product_id);
+                    if (found) {
+                        if (helper.getQuantityOfItemMinusReplacement(found) <= 0) {
+                            found.replacements.find(x => x.quantity > 0).quantity--;
+                        }
+                        if (found.quantity > 1) {
+                            found.quantity--;
+                            // found.client_number = found.client_number.filter(x => x == this.selectedClient);
+                            // add unique ids to deleted_items array
+                        } else {
+                            service.products = service.products.filter(x => x.product_id != p.product_id);
+                            // add unique ids to deleted_items array
+                        }
+                    }
+                });
+            }
+        });
+
+
+        let tasting_header = [...this.state.tasting_header];
+        let tast = tasting_header.find(t => t.id == item.id);
+        if (tast) {
+            if (tast.quantity > 1) {
+                tast.quantity--;
+                // add unique ids to deleted_items array
+            }
+            else {
+                tasting_header = tasting_header.filter(t => t.id != item.id);
+                // add unique ids to deleted_items array
+            }
+        }
+
+        this.setState({
+            services: services,
+            selectedTab: 1,
+            selectedSubTab: 1,
+            tasting_header: tasting_header
+        });
+    }
+
     handleAddTastingItem(item) {
         let services = this.state.services.slice();
         if (!services || services.length == 0)
@@ -635,7 +681,7 @@ export default class TableMenu extends Component {
                             title={r.product_name || r.tasting_name}
                             quantity={r.quantity}
                             showCount
-                            color={x.color || x.category_color}
+                            color={'#66c4ff'}
                             onPressMid={() => this.handelTastingItemPress(x, serviceNumber)}
                             isSelected
                         />
@@ -812,6 +858,26 @@ export default class TableMenu extends Component {
                 {
                     this.state.selectedSubTab == 1 ?
                         <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                                {
+                                    this.state.tasting_header.map(t => <ItemButton key={t.id}
+                                        quantity={t.quantity}
+                                        showCount
+                                        addAndRemove
+                                        onAddOrRemove={(v, factor) => {
+                                            if (factor == +1) {
+                                                this.handleAddTastingItem(t);
+                                            }
+                                            else {
+                                                this.removeTastingItem(t);
+                                            }
+                                        }}
+                                        title={t.tasting_name}
+                                        color={t.color}
+                                    />
+                                    )
+                                }
+                            </View>
                             {
                                 this.state.services.map(s => {
                                     return (
@@ -837,14 +903,6 @@ export default class TableMenu extends Component {
                                                         onPress={() => this.toggleSelectionForItemOfService(s.service_number)}>
                                                         <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center', fontSize: 12 }}>Select All</Text>
                                                     </TouchableOpacity>
-                                                }
-                                            </View>
-                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                {
-                                                    this.state.tasting_header.filter(t => t.services.findIndex(i => i.service_number == s.service_number) != -1)
-                                                        .map(t =>
-                                                            <Text key={t.id} style={{ paddingHorizontal: 3 }}><Text style={{ fontWeight: 'bold' }}>{t.quantity}</Text>{' ' + t.tasting_name},</Text>
-                                                        )
                                                 }
                                             </View>
                                             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
@@ -947,12 +1005,12 @@ export default class TableMenu extends Component {
 
         products.forEach(p => {
             let uniqueStack = this.handelQuantityForProduct(p, result, [...p.uniques]);
-            
+
             if (uniqueStack && uniqueStack.length > 0) {
                 this.deleted_items = [...this.deleted_items, ...uniqueStack];
             }
         });
-        
+
         return result;
     }
 
