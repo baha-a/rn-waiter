@@ -283,8 +283,12 @@ export default class TableMenu extends Component {
                 if (!service)
                     continue;
                 for (const p of s.products) {
-                    let product = service.products.find(x => x.product_id == p.product_id);
+                    let product = service.products.find(x => x.id == p.product_id);
                     if (product) {
+                        product.product_id = product.id;
+                        product.color = product.category_color;
+                        product.product_name = product.tasting_name;
+                        product.unique_id = p.unique_id,
                         product.replacements = [...p.replacements];
                     }
                 }
@@ -960,14 +964,14 @@ export default class TableMenu extends Component {
             bar: this.buildProducts(this.state.barItems),
 
             services: this.state.services
-                .filter(x => x.products && x.products.length > 0 && x.products.filter(y => !y.isTasting).length > 0)
+                //.filter(x => x.products && x.products.length > 0 && x.products.filter(y => !y.isTasting).length > 0)
                 .map(x => ({
                     service_number: ++serivcecounter, //x.service_number,
                     products: this.buildProducts(x.products.filter(y => !y.isTasting)),
                     isNew: x.isNew == true,
                 })),
 
-            tasting: this.buildTastingProduct(this.state.tasting_header),
+            tastings: this.buildTastingProduct(this.state.tasting_header),
         }
         this.deleted_items = [...this.deleted_items, ...this.state.deleted_items];
         console.log('---------------- order --')
@@ -978,7 +982,7 @@ export default class TableMenu extends Component {
 
         if ((order.services && order.services.length > 0) ||
             (order.bar && order.bar.length > 0) ||
-            (order.tasting && order.tasting.length > 0)) {
+            (order.tastings && order.tastings.length > 0)) {
 
             if (this.props.id)
                 return Api.editOrder(this.props.id, { deleted_items: [...this.deleted_items], ...order })
@@ -994,9 +998,26 @@ export default class TableMenu extends Component {
     buildTastingProduct(tastings) {
         return tastings.map(x => ({
             tasting_id: x.id,
-            tastings_count: x.quantity,
-            replacements: [], //    	replacements : [{7 : 42},{8 : 45},{15 : 27}]
+            //tastings_count: x.quantity,
+            replacements: this.buildReplacementOfTastingProduct(x), //    	replacements : [{7 : 42},{8 : 45},{15 : 27}]
         }));
+    }
+
+    buildReplacementOfTastingProduct(item) {
+        let replacements = [];
+        item.services.forEach(s => {
+            let service = this.state.services.find(x => x.service_number == s.service_number);
+            s.products.forEach(p => {
+                let product = service.products.find(x => x.isTasting == true && x.product_id == p.product_id);
+                let choosenReplacements = product.replacements.filter(x => x.quantity > 0) || [];
+                choosenReplacements.forEach(r => {
+                    for (let i = 1; i <= r.quantity; i++) {
+                        replacements.push(JSON.parse('{"' + p.unique_id + '":' + r.id + '}'));
+                    }
+                });
+            });
+        });
+        return replacements;
     }
 
     deleted_items = [];
@@ -1004,7 +1025,7 @@ export default class TableMenu extends Component {
         let result = [];
 
         products.forEach(p => {
-            let uniqueStack = this.handelQuantityForProduct(p, result, [...p.uniques]);
+            let uniqueStack = this.handelQuantityForProduct(p, result, [...(p.uniques || [])]);
 
             if (uniqueStack && uniqueStack.length > 0) {
                 this.deleted_items = [...this.deleted_items, ...uniqueStack];
@@ -1017,7 +1038,7 @@ export default class TableMenu extends Component {
     handelQuantityForProduct(product, resultList, uniqueStack) {
         let count = product.quantity || 1;
         while (count > 0) {
-            resultList.push(this.buildProductDataToSend(product, [uniqueStack.shift() || null]));
+            resultList.push(this.buildProductDataToSend(product, uniqueStack.shift() || null));
             count--;
         }
         return uniqueStack;
@@ -1034,17 +1055,21 @@ export default class TableMenu extends Component {
             product.product_optionals.forEach(c => product_optionals.push(c.id));
         }
 
-        return {
+        let obj = {
             product_id: product.id,
             client_number: [...product.client_number],
             note: product.note || '',
-            discount: product.discount || 0,
-            isTasting: product.isTasting || false,
+            // discount: product.discount || 0,
+            // isTasting: product.isTasting || false,
             product_customizes: product_customizes,
             product_optionals: product_optionals,
-
-            ...(!unique_id ? {} : { unique_id })
         };
+
+        if (unique_id && unique_id > 0) {
+            obj.unique_id = unique_id;
+        }
+
+        return obj;
     }
 
     render() {

@@ -35,40 +35,39 @@ export default class Accordion extends Component {
   }
 
   fetchData() {
-    Api.getCategories()
-      .then(cat => {
-        this.addIsBarProperty(cat);
-        this.addCategoryInfoIntoProducts(cat);
-        this.setState(state => {
-          return {
-            sections: [...cat, ...state.sections],
-            ready: true,
-            error: false
-          };
-        });
-      }).catch(x => {
+    this.setState({ ready: false, error: false });
+
+    let promises = [
+      Api.getCategories()
+        .then(sections => {
+          console.log('getCategories ok');
+          this.addIsBarProperty(sections);
+          this.addCategoryInfoIntoProducts(sections);
+          this.setState(state => ({ sections: [...sections, ...state.sections] }));
+        })
+      ,
+      Api.getTasting()
+        .then(tast =>{
+          console.log('getTasting ok');
+          this.setState(state => {
+            let tastingSection = {
+              id: -1,
+              category_color: '#64206f',
+              category_name: 'Tasting',
+              isTasting: true,
+              products: this.addIsTastingProperty(tast)
+            };
+            return { sections: [...state.sections, tastingSection] }
+          });
+        })
+    ]
+
+    Promise.all(promises)
+      .then(() => this.setState({ ready: true, error: false }))
+      .catch(x => {
         this.setState({ ready: true, error: true });
-        alert('Categories\n' + x.message);
+        alert('Categories\n' + (x.message || 'error'));
       });
-
-    Api.getTasting()
-      .then(tast =>
-        this.setState(state => {
-          let tastingSection = {
-            id: -1,
-            category_color: '#64206f',
-            category_name: 'Tasting',
-            isTasting: true,
-            products: this.addIsTastingProperty(tast)
-          };
-
-          if (!state || !state.sections) {
-            return { sections: [tastingSection] }
-          }
-          return { sections: [...state.sections, tastingSection] }
-        }
-        ))
-      .catch(x => { alert('Tasting\n' + x.message); });
   }
 
   addIsTastingProperty(tasts) {
@@ -271,7 +270,7 @@ export default class Accordion extends Component {
     }
 
     if (this.state.error || !this.state.sections || this.state.sections.length == 0) {
-      return <ReloadBtn title='no categories' onReload={() => { this.setState({ ready: false, error: false }); this.fetchData(); }} />;
+      return <ReloadBtn onReload={() => this.fetchData()} />;
     }
 
     return <Acc dataArray={this.state.sections} renderHeader={this._head} renderContent={this._body} />;
