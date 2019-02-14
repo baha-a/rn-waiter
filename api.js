@@ -4,7 +4,13 @@ const fetchData = (url, config = null) => fetch(baseUrl + url, config)
     .then(response => {
         if (response.ok || (response.status >= 200 && response.status < 300))
             return response.json();
-        console.log({ response, config });
+        try {
+            if (response.status == 422) {
+                console.log('error object is:' + response.json().error);
+            }
+        } catch (ex) {
+            console.log({ response, config });
+        }
         throw `error ${response.status}, ${response.statusText}`;
     });
 
@@ -21,7 +27,8 @@ const cacheConfig = {
 export default class Api {
 
     static getTableNumbers() {
-        return fetchData('orders').then(x => !x ? [] : x.map(y => ({ id: y.id, table_number: y.table_number, })));
+        return fetchData('orders')
+            .then(x => !x ? [] : x.map(y => ({ id: y.id, table_number: y.table_number, })));
     }
 
     static editOrder(orderId, data) {

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Switch, Text, View, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import FAIcon from './FAIcon';
 import Selectable from './Selectable';
-import { Input, Item, Radio, Tab } from 'native-base';
+import { Input, Radio } from 'native-base';
 import ItemButton from './ItemButton';
 import Api from '../api';
 import Loader from './Loader';
@@ -964,7 +964,7 @@ export default class TableMenu extends Component {
             bar: this.buildProducts(this.state.barItems),
 
             services: this.state.services
-                //.filter(x => x.products && x.products.length > 0 && x.products.filter(y => !y.isTasting).length > 0)
+                .filter(x => x.products && x.products.length > 0 && x.products.filter(y => !y.isTasting).length > 0)
                 .map(x => ({
                     service_number: ++serivcecounter, //x.service_number,
                     products: this.buildProducts(x.products.filter(y => !y.isTasting)),
