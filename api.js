@@ -1,16 +1,23 @@
 const baseUrl = 'http://damas55.upos.ca/public/api/';
 
 const fetchData = (url, config = null) => fetch(baseUrl + url, config)
-    .then(response => {
+    .then(async response => {
         if (response.ok || (response.status >= 200 && response.status < 300))
             return response.json();
-        try {
-            if (response.status == 422) {
-                console.log('error object is:' + response.json().error);
-            }
-        } catch (ex) {
-            console.log({ response, config });
+
+        if (response.status == 422) {
+            let errMsg = '';
+            try {
+                let err = JSON.parse(await response.text()).error;
+                for (const key in err) {
+                    if (err.hasOwnProperty(key)) {
+                        errMsg += err[key].join('\n - ');
+                    }
+                }
+            } catch (ex) {}
+            throw errMsg != '' ? errMsg : `error ${response.status}, ${response.statusText}`;
         }
+
         throw `error ${response.status}, ${response.statusText}`;
     });
 

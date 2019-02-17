@@ -1135,15 +1135,21 @@ export default class TableMenu extends Component {
 
     addNewService() {
         this.setState(state => {
+
+            let nextServiceNo = 1;
+            if(state.services.length > 0){
+                nextServiceNo = state.services[state.services.length -1].service_number + 1;
+            }
+            
             return {
                 services: [
                     ...state.services,
                     {
-                        service_number: state.services.length + 1,
+                        service_number: nextServiceNo,
                         products: [],
                         isNew: true,
                     }],
-                selectedService: state.services.length + 1,
+                selectedService: nextServiceNo,
             }
         });
     }
