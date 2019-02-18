@@ -127,10 +127,8 @@ export default class TableMenu extends Component {
                         if (found.quantity > 1) {
                             found.quantity--;
                             // found.client_number = found.client_number.filter(x => x == this.selectedClient);
-                            // add unique ids to deleted_items array
                         } else {
                             service.products = service.products.filter(x => x.product_id != p.product_id);
-                            // add unique ids to deleted_items array
                         }
                     }
                 });
@@ -140,14 +138,16 @@ export default class TableMenu extends Component {
 
         let tasting_header = [...this.state.tasting_header];
         let tast = tasting_header.find(t => t.id == item.id);
+        let deletedTastingHeader = [...this.state.deletedTastingHeader];
         if (tast) {
             if (tast.quantity > 1) {
                 tast.quantity--;
-                // add unique ids to deleted_items array
             }
             else {
+                if (tast.oldQuantity > 0) {
+                    deletedTastingHeader = [...deletedTastingHeader, tasting_header]
+                }
                 tasting_header = tasting_header.filter(t => t.id != item.id);
-                // add unique ids to deleted_items array
             }
         }
 
@@ -194,9 +194,11 @@ export default class TableMenu extends Component {
 
         let tasting_header = [...this.state.tasting_header];
         let tast = tasting_header.find(t => t.id == item.id);
-        if (tast) { tast.quantity++; }
+        if (tast) {
+            tast.quantity++;
+        }
         else {
-            tasting_header = [...tasting_header, { ...item, quantity: 1, }];
+            tasting_header = [...tasting_header, { ...item, quantity: 1, oldQuantity: 0 }];
         }
 
         this.setState({
@@ -289,7 +291,7 @@ export default class TableMenu extends Component {
                         product.color = product.category_color;
                         product.product_name = product.tasting_name;
                         product.unique_id = p.unique_id,
-                        product.replacements = [...p.replacements];
+                            product.replacements = [...p.replacements];
                     }
                 }
             }
@@ -890,17 +892,44 @@ export default class TableMenu extends Component {
                                         >
 
                                             <View style={{ margin: 6 }}>
-                                                <TouchableOpacity style={{ backgroundColor: '#f5f5f5', padding: 8, justifyContent: 'center', alignItems: 'center' }}
-                                                    onPress={() => {
-                                                        if (arrangeItemsEnable) {
-                                                            this.moveSelectedItemToSerivce(s.service_number);
-                                                        } else {
-                                                            this.setState({ selectedService: s.service_number })
-                                                        }
-                                                    }}>
-                                                    <Text style={{ fontWeight: 'bold', alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>Service #{s.service_number}</Text>
-                                                </TouchableOpacity>
+                                                <View style={{ backgroundColor: '#f5f5f5', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
+                                                    <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10 }}
+                                                        onPress={() => {
+                                                            if (arrangeItemsEnable) {
+                                                                this.moveSelectedItemToSerivce(s.service_number);
+                                                            } else {
+                                                                this.setState({ selectedService: s.service_number })
+                                                            }
+                                                        }}>
+                                                        <Text style={{ fontWeight: 'bold', alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>Service #{s.service_number}</Text>
+                                                    </TouchableOpacity>
+                                                    {
+                                                        s.service_status == 'ToBeCall' &&
+                                                        <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}
+                                                            onPress={() => {
+                                                                Api.callService(this.props.id, s.service_number)
+                                                                    .then(ok => {
+                                                                        let services = [...this.state.services];
+                                                                        let service = services.find(x => x.service_number == s.service_number);
+                                                                        service.service_status = 'Called';
+                                                                        service.call_date = new Date(Date.now()).toString();
 
+                                                                        this.setState({ services });
+                                                                    })
+                                                                    .catch(error => alert(error.message))
+                                                            }}>
+                                                            <FAIcon name='concierge-bell' style={{ color: '#28a745' }} />
+                                                        </TouchableOpacity>
+                                                    }
+                                                    {
+                                                        s.service_status == 'Called' &&
+                                                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}>
+                                                            <Text style={{ color: '#28a745' }}>
+                                                                {s.call_date ? s.call_date.split(' ')[1] : 'Called'}
+                                                            </Text>
+                                                        </View>
+                                                    }
+                                                </View>
                                                 {
                                                     arrangeItemsEnable &&
                                                     <TouchableOpacity style={{ backgroundColor: '#ddd', padding: 6, justifyContent: 'center', alignItems: 'center' }}
@@ -954,7 +983,6 @@ export default class TableMenu extends Component {
         let status = this.state.hold ? 'hold' : 'active';
 
         this.deleted_items = [];
-        let serivcecounter = 0;
         let order = {
             table_number: this.state.tableNumber,
             status: status,
@@ -964,9 +992,9 @@ export default class TableMenu extends Component {
             bar: this.buildProducts(this.state.barItems),
 
             services: this.state.services
-                .filter(x => x.products && x.products.length > 0 && x.products.filter(y => !y.isTasting).length > 0)
+                //.filter(x => x.products && x.products.length > 0 && x.products.filter(y => !y.isTasting).length > 0)
                 .map(x => ({
-                    service_number: ++serivcecounter, //x.service_number,
+                    service_number: x.service_number,
                     products: this.buildProducts(x.products.filter(y => !y.isTasting)),
                     isNew: x.isNew == true,
                 })),
@@ -998,8 +1026,10 @@ export default class TableMenu extends Component {
     buildTastingProduct(tastings) {
         return tastings.map(x => ({
             tasting_id: x.id,
+            // isNew: false,
+            // isDeleted: true,
             //tastings_count: x.quantity,
-            replacements: this.buildReplacementOfTastingProduct(x), //    	replacements : [{7 : 42},{8 : 45},{15 : 27}]
+            replacements: this.buildReplacementOfTastingProduct(x),
         }));
     }
 
@@ -1137,10 +1167,10 @@ export default class TableMenu extends Component {
         this.setState(state => {
 
             let nextServiceNo = 1;
-            if(state.services.length > 0){
-                nextServiceNo = state.services[state.services.length -1].service_number + 1;
+            if (state.services.length > 0) {
+                nextServiceNo = state.services[state.services.length - 1].service_number + 1;
             }
-            
+
             return {
                 services: [
                     ...state.services,

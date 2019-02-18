@@ -14,7 +14,7 @@ const fetchData = (url, config = null) => fetch(baseUrl + url, config)
                         errMsg += err[key].join('\n - ');
                     }
                 }
-            } catch (ex) {}
+            } catch (ex) { }
             throw errMsg != '' ? errMsg : `error ${response.status}, ${response.statusText}`;
         }
 
@@ -64,6 +64,10 @@ export default class Api {
 
     static postOrder(order) {
         return postData('orders', order);
+    }
+
+    static callService(order_id, service_number, isTasting = false) {
+        return postData('order/switch', { order_id, service_number, isTasting });
     }
 
     static moveItemToTable(data) {
