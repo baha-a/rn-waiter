@@ -39,7 +39,6 @@ export default class ItemButton extends Component {
             color,
             title,
 
-            addAndRemove,
             showCount,
             quantity,
 
@@ -51,8 +50,13 @@ export default class ItemButton extends Component {
 
             style = {},
 
-            isSelected = false
+            isSelected = false,
+
+            showRecall = false,
+            onRecall,
         } = this.props;
+
+        let addAndRemove = this.props.onAddOrRemove ? true : false;
 
         let padding = 6, radius = 3;
 
@@ -110,20 +114,23 @@ export default class ItemButton extends Component {
                             </TouchableOpacity>
                         }
 
-                        {
-                            addAndRemove &&
-                            <TouchableOpacity style={{
-                                padding: padding,
-                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                borderTopRightRadius: radius,
-                                borderBottomRightRadius: radius,
-                            }}
-                                onPress={this.addItem}
-                            >
-                                <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />
-                            </TouchableOpacity>
-                        }
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', borderTopRightRadius: radius, borderBottomRightRadius: radius, }}>
+                            {
+                                addAndRemove &&
+                                <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }}
+                                    onPress={this.addItem}>
+                                    <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />
+                                </TouchableOpacity>
+                            }
 
+                            {
+                                showRecall &&
+                                <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }}
+                                    onPress={onRecall}>
+                                    <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='redo' />
+                                </TouchableOpacity>
+                            }
+                        </View>
 
                     </View>
 

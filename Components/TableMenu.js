@@ -258,6 +258,7 @@ export default class TableMenu extends Component {
                         return {
                             ...item,
                             quantity: x.tasting_count || 1,
+                            oldQuantity: x.tasting_count || 1,
                         }
                     });
                 }
@@ -627,38 +628,62 @@ export default class TableMenu extends Component {
             details.push(x.note);
 
         let isFound = type == 'service' && this.isItemSelected(x.dish_number);
+        let isServed = x.isServed && x.isServed != 0;
+        let served_date = isServed || x.served_date == null ? '' : ' - ' + helper.getTime(x.served_date);
 
         return <ItemButton
             key={x.dish_number}
             ref={ref => this.lastProductAdd = ref}
             onLayout={event => this.onProductLayout(event, type == 'service' ? serviceNumber : null)}
-            title={x.en_name}
+            title={x.en_name + served_date}
             details={details}
             clients={x.client_number || []}
-            addAndRemove
-            onAddOrRemove={(v) => this.changeItemQuantity(x.dish_number, v)}
+            onAddOrRemove={v => {
+                if (isServed)
+                    return;
+                this.changeItemQuantity(x.dish_number, v);
+            }}
+
+            showRecall={isServed}
+            orRecall={this.onRecallItemPress.bind(this, x, type, serviceNumber)}
+
             quantity={x.quantity}
             color={x.color || x.category_color}
             onDelete={() => this.deleteItem(x.dish_number)}
-            isSelected={isFound}
-            onPressMid={() => {
-                if (type == 'service' && this.state.arrangeItems == true) {
-                    if (isFound) {
-                        this.unselectItem(x.dish_number);
-                    } else {
-                        this.selectItem(x.dish_number);
-                    }
-                } else {
-                    Actions.customize({
-                        item: { ...x },
-                        services: this.state.services.map(x => x.service_number),
-                        selectedService: this.getServiceNumberOfProduct(x.dish_number),
-                        table: this.state.tableNumber,
-                        onSave: (item) => this.customizeItem(item, type)
-                    });
-                }
-            }}
+            isSelected={isFound || isServed}
+            onPressMid={this.onItemPressMid.bind(this, x, isFound, type)}
         />;
+    }
+    onItemPressMid(x, isFound, type) {
+        if (x.isServed && x.isServed != 0)
+            return;
+
+        if (type == 'service' && this.state.arrangeItems == true) {
+            if (isFound) {
+                this.unselectItem(x.dish_number);
+            } else {
+                this.selectItem(x.dish_number);
+            }
+        } else {
+            Actions.customize({
+                item: { ...x },
+                services: this.state.services.map(x => x.service_number),
+                selectedService: this.getServiceNumberOfProduct(x.dish_number),
+                table: this.state.tableNumber,
+                onSave: (item) => this.customizeItem(item, type)
+            });
+        }
+    }
+    onRecallItemPress(item, type, serviceNumber) {
+        if (type == 'service') {
+            let services = [...this.state.services];
+            let service = services.find(x => x.service_number == serviceNumber);
+            service.push({ ...item });
+            this.setState({ services });
+        }
+        else if (type == 'bar') {
+            this.setState({ barItems: [...this.state.barItems, { ...item }] });
+        }
     }
 
     renderTastingItemWithReplacements(x, serviceNumber) {
@@ -844,9 +869,6 @@ export default class TableMenu extends Component {
         let color1 = 1 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
         let color2 = 2 == this.state.selectedSubTab ? '#bbb' : '#dae0e5';
 
-        let arrangeItemsEnable = this.state.arrangeItems == true;
-        let dashedBorderStyle = arrangeItemsEnable ? { borderStyle: 'dashed', borderColor: '#eee', borderWidth: 3, margin: 4 } : {};
-
         return (
             <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
                 <View style={{ marginVertical: 8, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -869,7 +891,6 @@ export default class TableMenu extends Component {
                                     this.state.tasting_header.map(t => <ItemButton key={t.id}
                                         quantity={t.quantity}
                                         showCount
-                                        addAndRemove
                                         onAddOrRemove={(v, factor) => {
                                             if (factor == +1) {
                                                 this.handleAddTastingItem(t);
@@ -884,74 +905,7 @@ export default class TableMenu extends Component {
                                     )
                                 }
                             </View>
-                            {
-                                this.state.services.map(s => {
-                                    return (
-                                        <View style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}
-                                            key={s.service_number} onLayout={event => this.handelServiceLayout(s.service_number, event)}
-                                        >
-
-                                            <View style={{ margin: 6 }}>
-                                                <View style={{ backgroundColor: '#f5f5f5', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
-                                                    <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10 }}
-                                                        onPress={() => {
-                                                            if (arrangeItemsEnable) {
-                                                                this.moveSelectedItemToSerivce(s.service_number);
-                                                            } else {
-                                                                this.setState({ selectedService: s.service_number })
-                                                            }
-                                                        }}>
-                                                        <Text style={{ fontWeight: 'bold', alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>Service #{s.service_number}</Text>
-                                                    </TouchableOpacity>
-                                                    {
-                                                        s.service_status == 'ToBeCall' &&
-                                                        <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}
-                                                            onPress={() => {
-                                                                Api.callService(this.props.id, s.service_number)
-                                                                    .then(ok => {
-                                                                        let services = [...this.state.services];
-                                                                        let service = services.find(x => x.service_number == s.service_number);
-                                                                        service.service_status = 'Called';
-                                                                        service.call_date = new Date(Date.now()).toString();
-
-                                                                        this.setState({ services });
-                                                                    })
-                                                                    .catch(error => alert(error.message))
-                                                            }}>
-                                                            <FAIcon name='concierge-bell' style={{ color: '#28a745' }} />
-                                                        </TouchableOpacity>
-                                                    }
-                                                    {
-                                                        s.service_status == 'Called' &&
-                                                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}>
-                                                            <Text style={{ color: '#28a745' }}>
-                                                                {s.call_date ? s.call_date.split(' ')[1] : 'Called'}
-                                                            </Text>
-                                                        </View>
-                                                    }
-                                                </View>
-                                                {
-                                                    arrangeItemsEnable &&
-                                                    <TouchableOpacity style={{ backgroundColor: '#ddd', padding: 6, justifyContent: 'center', alignItems: 'center' }}
-                                                        onPress={() => this.toggleSelectionForItemOfService(s.service_number)}>
-                                                        <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center', fontSize: 12 }}>Select All</Text>
-                                                    </TouchableOpacity>
-                                                }
-                                            </View>
-                                            <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                {
-                                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                                        {s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
-                                                    </View>
-                                                }
-                                            </View>
-                                            <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
-                                                {s.products.filter(x => !x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
-                                            </View>
-                                        </View>
-                                    )
-                                })
-                            }
+                            {this.renderServices(this.state.services)}
                         </View>
                         :
                         <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
@@ -960,6 +914,109 @@ export default class TableMenu extends Component {
                 }
             </View>
         );
+    }
+
+    changeServiceCallStatusToCalled(service_number) {
+        let services = [...this.state.services];
+        let service = services.find(x => x.service_number == service_number);
+
+
+        service.service_status = 'Called';
+        service.call_date = 'dd-mm-yyyy ' + new Date(Date.now()).toTimeString();
+
+        this.setState({ services });
+    }
+    changeServiceCallStatusToCalledForAll(service_number) {
+        let services = [...this.state.services];
+        for (const service of services) {
+            if (service.service_number > service_number || service.service_status == 'Called') {
+                continue;
+            }
+            service.service_status = 'Called';
+            service.call_date = 'dd-mm-yyyy ' + new Date(Date.now()).toTimeString();
+            if (service.service_number == service_number) {
+                break
+            }
+        }
+        this.setState({ services });
+    }
+    callServiceClicked(service_number) {
+        Api.callService(this.props.id, service_number)
+            .then(ok => this.changeServiceCallStatusToCalled(service_number))
+            .catch(error => alert(error.message))
+    }
+    mergeServiceClicked(service_number) {
+        Api.callService(this.props.id, service_number)
+            .then(ok => this.changeServiceCallStatusToCalledForAll(service_number))
+            .catch(error => alert(error.message))
+    }
+
+    renderServices(services) {
+        let arrangeItemsEnable = this.state.arrangeItems == true;
+        let dashedBorderStyle = arrangeItemsEnable ? { borderStyle: 'dashed', borderColor: '#eee', borderWidth: 3, margin: 4 } : {};
+
+        return services.map(s => {
+            return (
+                <View style={{ ...dashedBorderStyle, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}
+                    key={s.service_number} onLayout={event => this.handelServiceLayout(s.service_number, event)}
+                >
+
+                    <View style={{ margin: 6 }}>
+                        <View style={{ backgroundColor: '#f5f5f5', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
+                            {
+                                s.service_status == 'ToBeCall' &&
+                                <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}
+                                    onPress={this.mergeServiceClicked.bind(this, s.service_number)}>
+                                    <FAIcon name='concierge-bell' style={{ color: '#eea236' }} />
+                                </TouchableOpacity>
+                            }
+                            <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10 }}
+                                onPress={() => {
+                                    if (arrangeItemsEnable) {
+                                        this.moveSelectedItemToSerivce(s.service_number);
+                                    } else {
+                                        this.setState({ selectedService: s.service_number })
+                                    }
+                                }}>
+                                <Text style={{ fontWeight: 'bold', alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>Service #{s.service_number}</Text>
+                            </TouchableOpacity>
+                            {
+                                s.service_status == 'ToBeCall' &&
+                                <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}
+                                    onPress={this.callServiceClicked.bind(this, s.service_number)}>
+                                    <FAIcon name='concierge-bell' style={{ color: '#28a745' }} />
+                                </TouchableOpacity>
+                            }
+                            {
+                                s.service_status == 'Called' &&
+                                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}>
+                                    <Text style={{ color: '#28a745' }}>
+                                        {s.call_date ? helper.getTime(s.call_date) : 'Called'}
+                                    </Text>
+                                </View>
+                            }
+                        </View>
+                        {
+                            arrangeItemsEnable &&
+                            <TouchableOpacity style={{ backgroundColor: '#ddd', padding: 6, justifyContent: 'center', alignItems: 'center' }}
+                                onPress={() => this.toggleSelectionForItemOfService(s.service_number)}>
+                                <Text style={{ alignContent: 'center', justifyContent: 'center', alignItems: 'center', fontSize: 12 }}>Select All</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+                    <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                        {
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                                {s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
+                            </View>
+                        }
+                    </View>
+                    <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
+                        {s.products.filter(x => !x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
+                    </View>
+                </View>
+            )
+        })
     }
 
     renderTabContent() {
@@ -1028,7 +1085,7 @@ export default class TableMenu extends Component {
             tasting_id: x.id,
             // isNew: false,
             // isDeleted: true,
-            //tastings_count: x.quantity,
+            tastings_count: x.quantity,
             replacements: this.buildReplacementOfTastingProduct(x),
         }));
     }

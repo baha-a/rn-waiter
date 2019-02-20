@@ -165,7 +165,6 @@ export default class Replacements extends Component {
                                 key={r.id}
                                 color='#66c4ff'
                                 title={r.product_name}
-                                addAndRemove
                                 onAddOrRemove={(value, factor) => {
                                     this.handleChangeQuantityOfReplacment(r, value, factor)
                                 }}
