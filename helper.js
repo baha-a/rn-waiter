@@ -32,7 +32,7 @@ export default class helper {
     static getTime(date) {
         try {
             let d = date.split(' ')[1];
-            return d.split(':')[0] + ':' + de.split(':')[1]
+            return d.split(':')[0] + ':' + d.split(':')[1]
         } catch(ex){
             return date;
         }

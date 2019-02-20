@@ -628,8 +628,9 @@ export default class TableMenu extends Component {
             details.push(x.note);
 
         let isFound = type == 'service' && this.isItemSelected(x.dish_number);
-        let isServed = x.isServed && x.isServed != 0;
-        let served_date = isServed || x.served_date == null ? '' : ' - ' + helper.getTime(x.served_date);
+
+        let isServed = x.isServed != 0;
+        let served_date = isServed == false || x.served_date == null ? '' : ' - ' + helper.getTime(x.served_date);
 
         return <ItemButton
             key={x.dish_number}
@@ -638,14 +639,9 @@ export default class TableMenu extends Component {
             title={x.en_name + served_date}
             details={details}
             clients={x.client_number || []}
-            onAddOrRemove={v => {
-                if (isServed)
-                    return;
-                this.changeItemQuantity(x.dish_number, v);
-            }}
+            onAddOrRemove={isServed ? null : v => this.changeItemQuantity(x.dish_number, v)}
 
-            showRecall={isServed}
-            orRecall={this.onRecallItemPress.bind(this, x, type, serviceNumber)}
+            onRecall={isServed ? this.onRecallItemPress.bind(this, x, type, serviceNumber) : null}
 
             quantity={x.quantity}
             color={x.color || x.category_color}
@@ -675,14 +671,21 @@ export default class TableMenu extends Component {
         }
     }
     onRecallItemPress(item, type, serviceNumber) {
+        let newItem = {
+            ...item,
+            dish_number: Api.guid(),
+            isServed: 0,
+            served_date: null,
+        };
+
         if (type == 'service') {
             let services = [...this.state.services];
             let service = services.find(x => x.service_number == serviceNumber);
-            service.push({ ...item });
+            service.products.push(newItem);
             this.setState({ services });
         }
         else if (type == 'bar') {
-            this.setState({ barItems: [...this.state.barItems, { ...item }] });
+            this.setState({ barItems: [...this.state.barItems, newItem] });
         }
     }
 
@@ -965,12 +968,12 @@ export default class TableMenu extends Component {
                         <View style={{ backgroundColor: '#f5f5f5', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
                             {
                                 s.service_status == 'ToBeCall' &&
-                                <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', padding: 10 }}
+                                <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 10 }}
                                     onPress={this.mergeServiceClicked.bind(this, s.service_number)}>
-                                    <FAIcon name='concierge-bell' style={{ color: '#eea236' }} />
+                                    <FAIcon name='plus' style={{ color: '#eea236' }} />
                                 </TouchableOpacity>
                             }
-                            <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 10 }}
+                            <TouchableOpacity style={{ flex: 2, justifyContent: 'center', alignItems: 'center', padding: 10 }}
                                 onPress={() => {
                                     if (arrangeItemsEnable) {
                                         this.moveSelectedItemToSerivce(s.service_number);
@@ -1005,11 +1008,9 @@ export default class TableMenu extends Component {
                         }
                     </View>
                     <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                        {
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                {s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
-                            </View>
-                        }
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                            {s.products.filter(x => x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}
+                        </View>
                     </View>
                     <View style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', alignContent: 'flex-start' }}>
                         {s.products.filter(x => !x.isTasting).map(x => this.renderProduct(x, 'service', s.service_number))}

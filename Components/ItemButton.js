@@ -52,8 +52,7 @@ export default class ItemButton extends Component {
 
             isSelected = false,
 
-            showRecall = false,
-            onRecall,
+            onRecall = null,
         } = this.props;
 
         let addAndRemove = this.props.onAddOrRemove ? true : false;
@@ -70,17 +69,18 @@ export default class ItemButton extends Component {
                 <View style={overlyOpacity}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         {
-                            addAndRemove &&
-                            <TouchableOpacity style={{
-                                padding: padding,
-                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                borderTopLeftRadius: radius,
-                                borderBottomLeftRadius: radius,
-                            }}
-                                onPress={this.removeItem}
-                            >
-                                <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-remove' />
-                            </TouchableOpacity>
+                            addAndRemove ?
+                                <TouchableOpacity style={{
+                                    padding: padding,
+                                    backgroundColor: 'rgba(0,0,0,0.1)',
+                                    borderTopLeftRadius: radius,
+                                    borderBottomLeftRadius: radius,
+                                }}
+                                    onPress={this.removeItem}
+                                >
+                                    <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-remove' />
+                                </TouchableOpacity>
+                                : null
                         }
 
                         <TouchableOpacity style={{
@@ -92,10 +92,11 @@ export default class ItemButton extends Component {
                             onPress={this.pressMid}
                         >
                             {
-                                (addAndRemove || showCount) &&
-                                <Text style={{ color: '#fff' }}>
-                                    {quantity == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold' }}>{quantity}</Text>}
-                                </Text>
+                                (addAndRemove || showCount) ?
+                                    <Text style={{ color: '#fff' }}>
+                                        {quantity == -1 ? <FAIcon name='infinity' /> : <Text style={{ fontWeight: 'bold' }}>{quantity}</Text>}
+                                    </Text>
+                                    : null
                             }
                             <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
                         </TouchableOpacity>
@@ -116,22 +117,23 @@ export default class ItemButton extends Component {
 
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', borderTopRightRadius: radius, borderBottomRightRadius: radius, }}>
                             {
-                                addAndRemove &&
-                                <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }}
-                                    onPress={this.addItem}>
-                                    <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />
-                                </TouchableOpacity>
+                                addAndRemove ?
+                                    <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }}
+                                        onPress={this.addItem}>
+                                        <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='ios-add' />
+                                    </TouchableOpacity>
+                                    : null
                             }
 
                             {
-                                showRecall &&
-                                <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }}
-                                    onPress={onRecall}>
-                                    <Icon style={{ color: '#fff', fontWeight: 'bold' }} name='redo' />
-                                </TouchableOpacity>
+                                onRecall ?
+                                    <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }}
+                                        onPress={onRecall}>
+                                        <FAIcon style={{ color: '#fff' }} name='redo' />
+                                    </TouchableOpacity>
+                                    : null
                             }
                         </View>
-
                     </View>
 
                     <View style={{
@@ -145,18 +147,19 @@ export default class ItemButton extends Component {
                     </View>
 
                     {
-                        details &&
-                        <View style={{
-                            flexDirection: 'column',
-                            justifyContent: 'flex-start',
-                            alignItems: 'flex-start',
-                            borderTopColor: 'rgba(0,0,0,0.1)',
-                            borderTopWidth: 1,
-                            paddingLeft: 4,
-                        }}
-                        >
-                            {details.map(x => <Text key={x} style={{ color: '#fff', marginVertical: 2, }}>-{x}</Text>)}
-                        </View>
+                        details ?
+                            <View style={{
+                                flexDirection: 'column',
+                                justifyContent: 'flex-start',
+                                alignItems: 'flex-start',
+                                borderTopColor: 'rgba(0,0,0,0.1)',
+                                borderTopWidth: 1,
+                                paddingLeft: 4,
+                            }}
+                            >
+                                {details.map(x => <Text key={x} style={{ color: '#fff', marginVertical: 2, }}>-{x}</Text>)}
+                            </View>
+                            : null
                     }
                 </View>
             </View>
