@@ -629,7 +629,7 @@ export default class TableMenu extends Component {
 
         let isFound = type == 'service' && this.isItemSelected(x.dish_number);
 
-        let isServed = x.isServed != 0;
+        let isServed = x.isServed > 0;
         let served_date = isServed == false || x.served_date == null ? '' : ' - ' + helper.getTime(x.served_date);
 
         return <ItemButton
@@ -651,7 +651,7 @@ export default class TableMenu extends Component {
         />;
     }
     onItemPressMid(x, isFound, type) {
-        if (x.isServed && x.isServed != 0)
+        if (x.isServed > 0)
             return;
 
         if (type == 'service' && this.state.arrangeItems == true) {
