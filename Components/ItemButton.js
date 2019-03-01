@@ -4,7 +4,6 @@ import { Icon } from 'native-base';
 import Api from '../api';
 import FAIcon from './FAIcon';
 
-
 export default class ItemButton extends Component {
     constructor(props) {
         super(props);
@@ -101,21 +100,14 @@ export default class ItemButton extends Component {
                             <Text numberOfLines={1} lineBreakMode='tail' style={{ color: '#fff' }}> {title} </Text>
                         </TouchableOpacity>
 
-                        {
-                            price &&
-                            <TouchableOpacity style={{
-                                padding: padding,
-                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                borderTopRightRadius: radius,
-                                borderBottomRightRadius: radius,
-                            }}
-                                onPress={this.pressMid}
-                            >
-                                <Text style={{ color: '#fff', fontWeight: 'bold' }} > {price}$ </Text>
-                            </TouchableOpacity>
-                        }
 
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', borderTopRightRadius: radius, borderBottomRightRadius: radius, }}>
+                            {
+                                price &&
+                                <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }} onPress={this.pressMid}>
+                                    <Text style={{ color: '#fff', fontWeight: 'bold' }} > {price}$ </Text>
+                                </TouchableOpacity>
+                            }
                             {
                                 addAndRemove ?
                                     <TouchableOpacity style={{ padding: padding, backgroundColor: 'rgba(0,0,0,0.1)' }}

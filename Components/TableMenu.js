@@ -25,7 +25,8 @@ export default class TableMenu extends Component {
             invoiceHoldLimitedTime: true,
             invoiceHoldUnlimited: false,
 
-            hold: false,
+            holdMenu: false,
+            holdBar: false,
 
             tableNumber: 0,
 
@@ -74,13 +75,13 @@ export default class TableMenu extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        for (const key in this.props)
-            if (key != 'selectedClient' && nextProps[key] != this.props[key])
-                return true;
+        // for (const key in this.props)
+        //     if (key != 'selectedClient' && nextProps[key] != this.props[key])
+        //         return true;
 
-        for (const key in this.state)
-            if (nextState[key] != this.state[key])
-                return true;
+        // for (const key in this.state)
+        //     if (nextState[key] != this.state[key])
+        //         return true;
         return false;
     }
 
@@ -294,8 +295,8 @@ export default class TableMenu extends Component {
                         product.product_id = product.id;
                         product.color = product.category_color;
                         product.product_name = product.tasting_name;
-                        product.unique_id = p.unique_id,
-                            product.replacements = [...p.replacements];
+                        product.unique_id = p.unique_id;
+                        product.replacements = [...p.replacements];
                     }
                 }
             }
@@ -418,7 +419,8 @@ export default class TableMenu extends Component {
     randerSchedule() {
         return (
             <View style={{ flex: 1, flexDirection: 'column', paddingVertical: 10 }}>
-                <Selectable title='Hold The Order' selected={this.state.hold} onSelect={(v) => this.toggleHoldOrder(v)} />
+                <Selectable title='Hold Menu' selected={this.state.holdMenu} onSelect={(v) => this.toggleHoldMenu(v)} />
+                <Selectable title='Hold Bar' selected={this.state.holdBar} onSelect={(v) => this.toggleHoldBar(v)} />
                 <View style={{ backgroundColor: '#dee2e6', height: 1, margin: 10 }} />
 
 
@@ -504,31 +506,47 @@ export default class TableMenu extends Component {
         );
     }
 
-    holdOrder() {
+    holdOrder(isBar = false) {
         if (this.props.id) {
             Api.hold({ order_id: this.props.id, status: "hold" })
-                .then(x => this.setState({ hold: true }))
-                .catch(x => { alert('Holde\n' + x.message); });
+                .then(x => this.changeHoldState(true, isBar))
+                .catch(x => { alert('Hold\n' + x.message); });
         } else {
-            this.setState({ hold: true });
+            this.changeHoldState(true, isBar);
         }
     }
 
-    unHoldOrder() {
+    unHoldOrder(isBar = false) {
         if (this.props.id) {
             Api.hold({ order_id: this.props.id, status: "active" })
-                .then(x => this.setState({ hold: false }))
+                .then(x => this.changeHoldState(false, isBar))
                 .catch(x => { alert('Unhold\n' + x.message); });
         } else {
-            this.setState({ hold: false });
+            this.changeHoldState(false, isBar);
         }
     }
 
-    toggleHoldOrder() {
-        if (this.state.hold) {
-            this.unHoldOrder();
+    changeHoldState(value, isBar = false) {
+        if (isBar == true) {
+            this.setState({ holdBar: value });
+        }
+        else {
+            this.setState({ holdMenu: value });
+        }
+    }
+
+    toggleHoldBar() {
+        if (this.state.holdBar) {
+            this.unHoldOrder(true);
         } else {
-            this.holdOrder();
+            this.holdOrder(true);
+        }
+    }
+    toggleHoldMenu() {
+        if (this.state.holdMenu) {
+            this.unHoldOrder(false);
+        } else {
+            this.holdOrder(false);
         }
     }
 
@@ -1038,7 +1056,8 @@ export default class TableMenu extends Component {
             return new Promise(() => { throw 'choose table number first' });
         }
 
-        let status = this.state.hold ? 'hold' : 'active';
+        let statusBar = this.state.holdBar ? 'hold' : 'active';
+        let status = this.state.holdMenu ? 'hold' : 'active';
 
         this.deleted_items = [];
         let order = {
@@ -1140,12 +1159,14 @@ export default class TableMenu extends Component {
             let service = this.state.services.find(x => x.service_number == s.service_number);
             s.products.forEach(p => {
                 let product = service.products.find(x => x.isTasting == true && x.product_id == p.product_id);
-                let choosenReplacements = product.replacements.filter(x => x.quantity > 0) || [];
-                choosenReplacements.forEach(r => {
-                    for (let i = 1; i <= r.quantity; i++) {
-                        replacements.push(JSON.parse('{"' + p.unique_id + '":' + r.id + '}'));
-                    }
-                });
+                if (product) {
+                    let choosenReplacements = product.replacements.filter(x => x.quantity > 0) || [];
+                    choosenReplacements.forEach(r => {
+                        for (let i = 1; i <= r.quantity; i++) {
+                            replacements.push(JSON.parse('{"' + p.unique_id + '":' + r.id + '}'));
+                        }
+                    });
+                }
             });
         });
         return replacements;
