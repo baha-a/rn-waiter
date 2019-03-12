@@ -74,26 +74,13 @@ export default class TableMenu extends Component {
         }
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        // for (const key in this.props)
-        //     if (key != 'selectedClient' && nextProps[key] != this.props[key])
-        //         return true;
-
-        // for (const key in this.state)
-        //     if (nextState[key] != this.state[key])
-        //         return true;
-        return false;
-    }
-
     componentWillUnmount() {
         TableMenu.addItemEvt = null;
         TableMenu.postOrderEvt = null;
     }
 
     componentDidMount() {
-
         TableMenu.postOrderEvt = () => this.postOrder();
-
         TableMenu.addItemEvt = (itemToAdd) => {
             let item = { ...itemToAdd };
             if (item.isTasting) {
@@ -145,6 +132,12 @@ export default class TableMenu extends Component {
         if (tast) {
             if (tast.quantity > 1) {
                 tast.quantity--;
+                let deleteAt = tast.client_number.findIndex(x => x == this.props.selectedClient);
+                if (deleteAt > 0) {
+                    tast.client_number.splice(deleteAt);
+                } else {
+                    tast.client_number.pop();
+                }
             }
             else {
                 if (tast.oldQuantity > 0) {
@@ -174,25 +167,7 @@ export default class TableMenu extends Component {
                 service = { service_number: s.service_number, products: [] };
                 services.push(service);
             }
-            s.products.forEach(pr => {
-                let p = { ...pr };
-
-                let found = service.products.find(x => x.isTasting && x.product_id == p.product_id);
-                if (found) {
-                    found.quantity++;
-                    found.client_number = [...found.client_number, this.props.selectedClient];
-                }
-                else {
-                    p.isTasting = true;
-                    p.color = item.color;
-                    p.quantity = 1;
-                    p.dish_number = TableMenu.dish_number++;
-                    p.tastingCategoryName = item.tasting_name;
-                    p.client_number = [this.props.selectedClient];
-
-                    service.products = [p, ...service.products];
-                }
-            });
+            s.products.forEach(pr => this.addItemOfTastingItemToServiceProducts(pr, service, item.color, item.tasting_name));
         });
 
 
@@ -200,10 +175,12 @@ export default class TableMenu extends Component {
         let tast = tasting_header.find(t => t.id == item.id);
         if (tast) {
             tast.quantity++;
+            tast.client_number = [...tast.client_number, this.props.selectedClient];
         }
         else {
-            tasting_header = [...tasting_header, { ...item, quantity: 1, oldQuantity: 0 }];
+            tasting_header = [...tasting_header, { ...item, client_number: [this.props.selectedClient], quantity: 1, oldQuantity: 0 }];
         }
+
 
         this.setState({
             services: services,
@@ -211,6 +188,24 @@ export default class TableMenu extends Component {
             selectedSubTab: 1,
             tasting_header: tasting_header
         });
+    }
+
+    addItemOfTastingItemToServiceProducts(pr, service, color, tasting_name) {
+        let p = { ...pr };
+
+        let found = service.products.find(x => x.isTasting && x.product_id == p.product_id);
+        if (found) {
+            found.quantity++;
+        }
+        else {
+            p.isTasting = true;
+            p.color = color;
+            p.quantity = 1;
+            p.dish_number = TableMenu.dish_number++;
+            p.tastingCategoryName = tasting_name;
+
+            service.products = [p, ...service.products];
+        }
     }
 
     handleAddNormalItem(item) {
@@ -225,9 +220,12 @@ export default class TableMenu extends Component {
             let services = this.state.services.slice();
             if (!services || services.length == 0)
                 services = [{ service_number: 1, products: [item] }];
-            else
-                services.find(y => y.service_number == this.state.selectedService).products.push(item);
-
+            else {
+                let srv = services.find(y => y.service_number == this.state.selectedService);
+                if (srv) {
+                    srv.products.push(item);
+                }
+            }
             this.setState({ services: services, selectedTab: 1, selectedSubTab: 1 });
         }
     }
@@ -241,19 +239,29 @@ export default class TableMenu extends Component {
                     x.services = [];
                 }
 
+                x.services = x.services.sort((a, b) => a.service_number - b.service_number);
                 x.services.forEach(s => s.products = this.fixListProducts(s.products));
 
                 let tasting_header = [];
                 if (x.tastings_services || x.tastings_header) {
                     let tastingItemsServices = await Api.getTasting();
+
                     if (x.tastings_services) {
-                        for (const ts of this.addMissingPropertiesToTastingItem(tastingItemsServices, x.tastings_services)) {
+                        for (const ts of x.tastings_services) {
                             let service = x.services.find(s => s.service_number == ts.service_number);
                             if (!service) {
-                                service = { service_number: ts.service_number, products: [] };
+                                service = {
+                                    service_number: ts.service_number,
+                                    service_status: ts.service_status,
+                                    call_date: ts.call_date,
+                                    products: []
+                                };
                                 x.services.push(service);
                             }
-                            service.products = [...service.products, ...this.fixListProducts(ts.products, true)];
+                            for (const p of ts.products) {
+                                this.addMissingPropertiesToTastingItem(p, ts.service_number, tastingItemsServices);
+                                this.addItemOfTastingItemToServiceProducts(p, service, ts.color, ts.tasting_name);
+                            }
                         }
                     }
 
@@ -282,26 +290,24 @@ export default class TableMenu extends Component {
             });
     }
 
-    addMissingPropertiesToTastingItem(rawTastingServicesFromApi, servicesWithtastingItemsFromOrder) {
-        let services = [...servicesWithtastingItemsFromOrder];
+    addMissingPropertiesToTastingItem(product, service_number, rawTastingServicesFromApi) {
         for (const t of rawTastingServicesFromApi) {
-            for (const s of t.services) {
-                let service = services.find(x => x.service_number == s.service_number)
-                if (!service)
-                    continue;
-                for (const p of s.products) {
-                    let product = service.products.find(x => x.id == p.product_id);
-                    if (product) {
-                        product.product_id = product.id;
-                        product.color = product.category_color;
-                        product.product_name = product.tasting_name;
-                        product.unique_id = p.unique_id;
-                        product.replacements = [...p.replacements];
-                    }
-                }
+            let service = t.services.find(x => x.service_number == service_number);
+            if (!service)
+                continue;
+
+            let raw = service.products.find(x => x.product_id == product.id);
+            if (raw) {
+                product.isTasting = true;
+                product.product_id = product.id;
+                product.product_name = product.tasting_name;
+                product.color = product.color || product.category_color;
+
+                product.unique_id = raw.unique_id;
+                product.replacements = [...raw.replacements];
+                break;
             }
         }
-        return services;
     }
 
     fixListProducts(list, isTasting = false) {
@@ -605,14 +611,14 @@ export default class TableMenu extends Component {
 
             if (oldItem) {
                 this.fillNewItemProperty(oldItem, item);
-                this.moveItemToSerivce(oldItem, item.service, oldService, services);
+                this.moveItemToSerivce(oldItem, item.service, oldService.service_number, services);
                 this.setState({ services: services });
             }
         }
     }
-    moveItemToSerivce(oldItem, newServiceNumber, oldService, servicesList) {
-        if (oldService.service_number != newServiceNumber) {
-            oldService.products = oldService.products.filter(x => x.dish_number != oldItem.dish_number);
+    moveItemToSerivce(oldItem, newServiceNumber, oldServiceNumber, servicesList) {
+        if (oldServiceNumber != newServiceNumber) {
+            servicesList.find(x => x.service_number == oldServiceNumber).products.filter(x => x.dish_number != oldItem.dish_number);
             servicesList.find(x => x.service_number == newServiceNumber).products.push(oldItem);
         }
     }
@@ -648,7 +654,7 @@ export default class TableMenu extends Component {
         let isFound = type == 'service' && this.isItemSelected(x.dish_number);
 
         let isServed = x.isServed > 0;
-        let served_date = isServed == false || x.served_date == null ? '' : ' - ' + helper.getTime(x.served_date);
+        let served_date = isServed == false || x.served_date == null ? '' : ' - ' + helper.getTime(x.served_date.date);
 
         return <ItemButton
             key={x.dish_number}
@@ -663,6 +669,7 @@ export default class TableMenu extends Component {
 
             quantity={x.quantity}
             color={x.color || x.category_color}
+            showCount
             onDelete={() => this.deleteItem(x.dish_number)}
             isSelected={isFound || isServed}
             onPressMid={this.onItemPressMid.bind(this, x, isFound, type)}
@@ -689,8 +696,9 @@ export default class TableMenu extends Component {
         }
     }
     onRecallItemPress(item, type, serviceNumber) {
+        const { uniques, unique_id, dish_number, ...otherItemProp } = item;
         let newItem = {
-            ...item,
+            ...otherItemProp,
             dish_number: Api.guid(),
             isServed: 0,
             served_date: null,
@@ -912,6 +920,7 @@ export default class TableMenu extends Component {
                                     this.state.tasting_header.map(t => <ItemButton key={t.id}
                                         quantity={t.quantity}
                                         showCount
+                                        clients={[...new Set(t.client_number || [])]}
                                         onAddOrRemove={(v, factor) => {
                                             if (factor == +1) {
                                                 this.handleAddTastingItem(t);
@@ -1065,6 +1074,7 @@ export default class TableMenu extends Component {
             status: status,
             type: 'postpaid',
             note: this.state.note,
+            discount: 0,
 
             bar: this.buildProducts(this.state.barItems),
 
@@ -1077,10 +1087,11 @@ export default class TableMenu extends Component {
                 })),
 
             tastings: this.buildTastingProduct(),
+            tasting_replacements: this.buildTastingReplacements(),
         }
         this.deleted_items = [...this.deleted_items, ...this.state.deleted_items];
         console.log('---------------- order --')
-        console.log({ deleted_items: [...this.deleted_items], order });
+        console.log({ deleted_tasting: [...this.deletedTastingId], deleted_items: [...this.deleted_items], order });
         console.log('------------------');
 
         //return new Promise(() => { throw 'mock api' });
@@ -1090,7 +1101,11 @@ export default class TableMenu extends Component {
             (order.tastings && order.tastings.length > 0)) {
 
             if (this.props.id)
-                return Api.editOrder(this.props.id, { deleted_items: [...this.deleted_items], ...order })
+                return Api.editOrder(this.props.id, {
+                    deleted_items: [...this.deleted_items],
+                    deleted_tasting: [...this.deletedTastingId],
+                    ...order
+                })
                     .then(x => alert('order successfully saved'));
             else
                 return Api.postOrder(order).then(x => alert('order successfully saved'));
@@ -1100,52 +1115,39 @@ export default class TableMenu extends Component {
         }
     }
 
+    deletedTastingId = [];
     buildTastingProduct() {
         let res = [];
+        this.deletedTastingId = [];
         this.state.deletedTastingHeader.forEach(x => {
             for (let i = 0; i < x.oldQuantity; i++) {
-                res.push({
-                    tasting_id: x.id,
-                    isDeleted: true,
-                });
+                this.deletedTastingId.push(x.id);
             }
         });
 
+        const repeater = (length, x, appendix = {}) => {
+			let clients = [...x.client_number];
+            for (let i = 0; i < length; i++) {
+                res.push({
+                    tasting_id: x.id,
+					client_number: clients.shift(),
+                    ...appendix
+                });
+            }
+        }
+
         this.state.tasting_header.forEach(x => {
             if (x.oldQuantity == x.quantity) {
-                for (let i = 0; i < x.quantity; i++) {
-                    res.push({
-                        tasting_id: x.id,
-                        replacements: this.buildReplacementOfTastingProduct(x),
-                    });
-                }
+                repeater(x.quantity, x);
             } else if (x.oldQuantity < x.quantity) {
-                for (let i = 0; i < x.oldQuantity; i++) {
-                    res.push({
-                        tasting_id: x.id,
-                        replacements: this.buildReplacementOfTastingProduct(x),
-                    });
-                }
-                for (let i = 0; i < (x.quantity - x.oldQuantity); i++) {
-                    res.push({
-                        tasting_id: x.id,
-                        isNew: true,
-                        replacements: this.buildReplacementOfTastingProduct(x),
-                    });
-                }
+                repeater(x.oldQuantity, x);
+                repeater(x.quantity - x.oldQuantity, x, { isNew: true });
             }
             else if (x.oldQuantity > x.quantity) {
-                for (let i = 0; i < x.quantity; i++) {
-                    res.push({
-                        tasting_id: x.id,
-                        replacements: this.buildReplacementOfTastingProduct(x),
-                    });
-                }
+                repeater(x.quantity, x);
+
                 for (let i = 0; i < (x.oldQuantity - x.quantity); i++) {
-                    res.push({
-                        tasting_id: x.id,
-                        isDeleted: true,
-                    });
+                    this.deletedTastingId.push(x.id);
                 }
             }
         });
@@ -1153,21 +1155,25 @@ export default class TableMenu extends Component {
         return res;
     }
 
-    buildReplacementOfTastingProduct(item) {
+    buildTastingReplacements() {
         let replacements = [];
-        item.services.forEach(s => {
-            let service = this.state.services.find(x => x.service_number == s.service_number);
-            s.products.forEach(p => {
-                let product = service.products.find(x => x.isTasting == true && x.product_id == p.product_id);
-                if (product) {
-                    let choosenReplacements = product.replacements.filter(x => x.quantity > 0) || [];
-                    choosenReplacements.forEach(r => {
-                        for (let i = 1; i <= r.quantity; i++) {
-                            replacements.push(JSON.parse('{"' + p.unique_id + '":' + r.id + '}'));
-                        }
-                    });
-                }
+        this.state.services.forEach(s => {
+            let replacements_list = [];
+            
+            s.products.filter(p => p.isTasting == true).forEach(pro => {
+                (pro.replacements.filter(x => x.quantity > 0) || []).forEach(rep => {
+                    for (let i = 1; i <= rep.quantity; i++) {
+                        replacements_list.push({
+                            orginal_product_id: pro.unique_id,
+                            replace_product_id: rep.product_id
+                        });
+                    }
+                });
             });
+
+            if (replacements_list.length > 0) {
+                replacements.push({ service_number: s.service_number, replacements_list });
+            }
         });
         return replacements;
     }
@@ -1211,7 +1217,7 @@ export default class TableMenu extends Component {
             product_id: product.id,
             client_number: [...product.client_number],
             note: product.note || '',
-            // discount: product.discount || 0,
+            discount: product.discount || 0,
             // isTasting: product.isTasting || false,
             product_customizes: product_customizes,
             product_optionals: product_optionals,
@@ -1225,7 +1231,6 @@ export default class TableMenu extends Component {
     }
 
     render() {
-
         if (this.state.ready == false) {
             return <Loader />;
         }

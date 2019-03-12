@@ -118,7 +118,7 @@ export default class Replacements extends Component {
                                 borderStyle: 'dotted',
                             } : {};
 
-                            let choosenReplacements = p.replacements.filter(r => r.quantity && r.quantity > 0)
+                            let choosenReplacements = p.replacements ? p.replacements.filter(r => r.quantity && r.quantity > 0)
                                 .map(r => <ItemButton
                                     key={p.product_id + '-' + r.id}
                                     color={'#66c4ff'}
@@ -126,11 +126,12 @@ export default class Replacements extends Component {
                                     quantity={r.quantity}
                                     showCount
                                     isSelected
-                                />);
+                                />)
+                                : [];
 
                             return [<View style={style} key={p.product_id}>
                                 <ItemButton
-                                    color={p.color}
+                                    color={p.color || p.category_color || '#666'}
                                     title={p.product_name}
                                     quantity={helper.getQuantityOfItemMinusReplacement(p)}
                                     showCount

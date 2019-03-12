@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Text, View, TouchableOpacity } from 'react-native';
 import { Icon } from 'native-base';
-import Api from '../api';
 import FAIcon from './FAIcon';
 
 export default class ItemButton extends Component {

@@ -12,6 +12,9 @@ export default class Navbar extends Component {
             <Touchable onPress={() => Actions.replace('order')} style={{ padding:10,}} background={Touchable.Ripple('#fff')}>
               <Text style={{ color: '#fff' }}> Order </Text>
             </Touchable>
+            <Touchable onPress={() => Actions.replace('PayInvoice')} style={{ padding:10,}} background={Touchable.Ripple('#fff')}>
+              <Text style={{ color: '#fff' }}> PayInvoice </Text>
+            </Touchable>
             <Touchable onPress={() => Actions.replace('bill')} style={{ padding:10,}} background={Touchable.Ripple('#fff')}>
               <Text style={{ color: '#fff' }}> Bill </Text>
             </Touchable>
